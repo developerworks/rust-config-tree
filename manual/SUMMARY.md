@@ -1,6 +1,7 @@
 # Summary
 
-- [English](en/introduction.md)
+- [English](en/README.md)
+  - [Introduction](en/introduction.md)
   - [Quick Start](en/quick-start.md)
   - [Configuration Schema](en/schema.md)
   - [Runtime Loading](en/runtime-loading.md)
@@ -11,7 +12,8 @@
   - [Tree API](en/tree-api.md)
   - [GitHub Pages](en/github-pages.md)
 
-- [中文](zh/introduction.md)
+- [中文](zh/README.md)
+  - [简介](zh/introduction.md)
   - [快速开始](zh/quick-start.md)
   - [配置结构](zh/schema.md)
   - [运行时加载](zh/runtime-loading.md)
