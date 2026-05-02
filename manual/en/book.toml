@@ -12,3 +12,4 @@ create-missing = false
 git-repository-url = "https://github.com/developerworks/rust-config-tree"
 edit-url-template = "https://github.com/developerworks/rust-config-tree/edit/main/manual/en/{path}"
 site-url = "/rust-config-tree/en/"
+additional-css = ["../theme/left-aligned.css"]
