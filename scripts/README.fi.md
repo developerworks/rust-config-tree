@@ -4,6 +4,10 @@
 
 Aja skriptit repositorion juuresta.
 
+`mdbook build` repositorion juuressa rakentaa oletuksena englanninkielisen
+oppaan. Kayta `scripts/publish-pages.sh`, kun rakennat kaikki GitHub Pagesin
+kieliversiot.
+
 ## `publish-pages.sh`
 
 Rakentaa kaikki kielikohtaiset mdBook-oppaat hakemistoon `target/mdbook`.

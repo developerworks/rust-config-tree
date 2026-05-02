@@ -4,6 +4,9 @@
 
 Run scripts from the repository root.
 
+`mdbook build` from the repository root builds the default English manual. Use
+`scripts/publish-pages.sh` to build every language for GitHub Pages.
+
 ## `publish-pages.sh`
 
 Builds all language-specific mdBook manuals into `target/mdbook`.

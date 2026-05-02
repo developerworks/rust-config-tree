@@ -4,9 +4,12 @@
 
 Kor skript fran repository-roten.
 
+`mdbook build` fran repository-roten bygger den engelska standardmanualen.
+Anvand `scripts/publish-pages.sh` for att bygga alla sprak for GitHub Pages.
+
 ## `publish-pages.sh`
 
-Bygger mdBook-manualerna till `target/mdbook`.
+Bygger alla sprakspecifika mdBook-manualer till `target/mdbook`.
 
 ```bash
 scripts/publish-pages.sh

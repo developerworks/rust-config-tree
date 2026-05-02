@@ -4,9 +4,13 @@
 
 Execute scripts a partir da raiz do repositorio.
 
+`mdbook build` a partir da raiz do repositorio constroi o manual padrao em
+ingles. Use `scripts/publish-pages.sh` para construir todos os idiomas do
+GitHub Pages.
+
 ## `publish-pages.sh`
 
-Constroi os manuais mdBook em `target/mdbook`.
+Constroi todos os manuais mdBook por idioma em `target/mdbook`.
 
 ```bash
 scripts/publish-pages.sh
@@ -80,4 +84,3 @@ Pule a espera pelo workflow Pages:
 ```bash
 scripts/release.sh --execute --no-wait-pages
 ```
-

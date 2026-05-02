@@ -4,6 +4,10 @@
 
 スクリプトはリポジトリ root から実行します。
 
+リポジトリ root で `mdbook build` を実行すると default English manual を build
+します。GitHub Pages 用にすべての言語を build する場合は
+`scripts/publish-pages.sh` を使います。
+
 ## `publish-pages.sh`
 
 すべての言語別 mdBook manual を `target/mdbook` に build します。

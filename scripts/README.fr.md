@@ -4,10 +4,13 @@
 
 Executez les scripts depuis la racine du depot.
 
+`mdbook build` depuis la racine du depot construit le manuel anglais par defaut.
+Utilisez `scripts/publish-pages.sh` pour construire toutes les langues de
+GitHub Pages.
+
 ## `publish-pages.sh`
 
-Construit les manuels mdBook en anglais, chinois et japonais dans
-`target/mdbook`.
+Construit tous les manuels mdBook par langue dans `target/mdbook`.
 
 ```bash
 scripts/publish-pages.sh
@@ -82,4 +85,3 @@ Ignorer l'attente du workflow Pages :
 ```bash
 scripts/release.sh --execute --no-wait-pages
 ```
-

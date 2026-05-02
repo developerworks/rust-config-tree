@@ -4,9 +4,12 @@
 
 Fuehre Skripte aus dem Repository-Root aus.
 
+`mdbook build` aus dem Repository-Root baut das englische Standardhandbuch.
+Fuer alle Sprachen der GitHub-Pages-Site verwende `scripts/publish-pages.sh`.
+
 ## `publish-pages.sh`
 
-Baut die mdBook-Handbuecher nach `target/mdbook`.
+Baut alle sprachspezifischen mdBook-Handbuecher nach `target/mdbook`.
 
 ```bash
 scripts/publish-pages.sh

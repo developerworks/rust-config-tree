@@ -4,9 +4,13 @@
 
 스크립트는 저장소 루트에서 실행하세요.
 
+저장소 루트에서 `mdbook build`를 실행하면 기본 영어 매뉴얼을 빌드합니다.
+GitHub Pages용 모든 언어 사이트를 빌드하려면 `scripts/publish-pages.sh`를
+사용하세요.
+
 ## `publish-pages.sh`
 
-영어, 중국어, 일본어, 한국어 mdBook 매뉴얼을 `target/mdbook`에 빌드합니다.
+모든 언어별 mdBook 매뉴얼을 `target/mdbook`에 빌드합니다.
 
 ```bash
 scripts/publish-pages.sh
