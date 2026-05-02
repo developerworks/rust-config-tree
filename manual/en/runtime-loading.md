@@ -91,6 +91,10 @@ The command-line syntax is not defined by `rust-config-tree`. A flag like
 value into a nested serialized provider. A dotted `--server.port` or `a.b.c`
 syntax only exists if the application implements it.
 
+This means CLI precedence applies only to keys present in the application's
+override provider. Use it for operational values that are frequently changed for
+a single run. Leave durable configuration in files.
+
 ```rust
 use figment::providers::Serialized;
 use serde::Serialize;

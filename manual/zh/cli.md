@@ -13,6 +13,7 @@
 
 配置覆盖参数仍属于依赖方应用自己的 CLI。参数名不需要匹配点分配置路径。
 例如应用可以解析 `--server-port`，再把它映射到嵌套配置 key `server.port`。
+只有应用映射进 `CliOverrides` 的 flag 才会影响配置值。
 
 将它 flatten 到应用命令枚举中：
 

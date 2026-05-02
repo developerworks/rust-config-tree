@@ -94,6 +94,10 @@ CLI flag names are chosen by the application. They are not automatically
 map them into a nested override structure. The nested serialized shape controls
 the config key that is overridden.
 
+Only values represented in the application's `CliOverrides` provider override
+configuration. This is useful for parameters that are changed frequently for one
+run without editing the config file. Stable values should stay in config files.
+
 ```rust
 use figment::providers::Serialized;
 use serde::Serialize;

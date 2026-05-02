@@ -15,6 +15,7 @@ loading path.
 Config override flags remain part of the consuming application's CLI. Their
 names do not need to match dotted config paths. For example, the application can
 parse `--server-port` and map it to the nested `server.port` config key.
+Only flags that the application maps into `CliOverrides` affect config values.
 
 Flatten it into an application command enum:
 

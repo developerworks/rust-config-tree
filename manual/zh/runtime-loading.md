@@ -86,6 +86,9 @@ command-line overrides
 解析出的值映射进嵌套 serialized provider，它就可以覆盖 `server.port`。
 `--server.port` 或 `a.b.c` 这种点分路径语法只有在应用自己实现时才存在。
 
+因此 CLI 优先级只作用于应用 override provider 中存在的 key。它适合临时、
+频繁调整的运行参数。长期稳定配置应留在配置文件里。
+
 ```rust
 use figment::providers::Serialized;
 use serde::Serialize;
