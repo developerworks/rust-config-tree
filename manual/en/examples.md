@@ -1,6 +1,6 @@
 # Examples
 
-[English](examples.html) | [中文](../zh/examples.html)
+[English](examples.html) | [中文](../zh/examples.html) | [日本語](../ja/examples.html) | [한국어](../ko/examples.html) | [Français](../fr/examples.html) | [Deutsch](../de/examples.html) | [Español](../es/examples.html) | [Português](../pt/examples.html) | [Svenska](../sv/examples.html) | [Suomi](../fi/examples.html) | [Nederlands](../nl/examples.html)
 
 The repository includes runnable examples for loading config trees, CLI
 overrides, built-in config commands, template generation, and the lower-level

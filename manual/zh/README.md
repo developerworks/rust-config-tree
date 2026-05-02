@@ -1,6 +1,6 @@
 # rust-config-tree 手册
 
-[English](../en/) | [中文](./)
+[English](../en/) | [中文](./) | [日本語](../ja/) | [한국어](../ko/) | [Français](../fr/) | [Deutsch](../de/) | [Español](../es/) | [Português](../pt/) | [Svenska](../sv/) | [Suomi](../fi/) | [Nederlands](../nl/)
 
 这是 `rust-config-tree` 的中文手册。
 

@@ -1,0 +1,140 @@
+# Integracao de CLI
+
+[English](../en/cli.html) | [中文](../zh/cli.html) | [日本語](../ja/cli.html) | [한국어](../ko/cli.html) | [Français](../fr/cli.html) | [Deutsch](../de/cli.html) | [Español](../es/cli.html) | [Português](cli.html) | [Svenska](../sv/cli.html) | [Suomi](../fi/cli.html) | [Nederlands](../nl/cli.html)
+
+`ConfigCommand` fornece subcomandos clap reutilizaveis:
+
+- `config-template`
+- `config-schema`
+- `config-validate`
+- `completions`
+- `install-completions`
+
+Esses subcomandos embutidos sao separados das flags de sobrescrita de
+configuracao especificas da aplicacao. Mescle flags de sobrescrita de
+configuracao como provedores Figment no caminho de carregamento em tempo de
+execucao.
+
+Flags de sobrescrita de configuracao continuam fazendo parte da CLI da
+aplicacao consumidora. Seus nomes nao precisam corresponder a caminhos de
+configuracao pontuados. Por exemplo, a aplicacao pode analisar `--server-port` e
+mapeia-lo para a chave aninhada `server.port`. Somente flags que a aplicacao
+mapeia para `CliOverrides` afetam valores de configuracao.
+
+Achate-o em um enum de comandos da aplicacao:
+
+1. Mantenha o tipo `Parser` proprio da aplicacao.
+2. Mantenha o enum `Subcommand` proprio da aplicacao.
+3. Adicione `#[command(flatten)] Config(ConfigCommand)` a esse enum.
+4. Clap expande as variantes achatadas de `ConfigCommand` para o mesmo nivel de
+   comando das variantes proprias da aplicacao.
+5. Faca match da variante `Config(command)` e passe-a para
+   `handle_config_command`.
+
+```rust
+use std::path::PathBuf;
+
+use clap::{Parser, Subcommand};
+use confique::Config;
+use schemars::JsonSchema;
+use rust_config_tree::{ConfigCommand, ConfigSchema, handle_config_command, load_config};
+
+#[derive(Debug, Config, JsonSchema)]
+struct AppConfig {
+    #[config(default = [])]
+    include: Vec<PathBuf>,
+}
+
+impl ConfigSchema for AppConfig {
+    fn include_paths(layer: &<Self as Config>::Layer) -> Vec<PathBuf> {
+        layer.include.clone().unwrap_or_default()
+    }
+}
+
+#[derive(Debug, Parser)]
+#[command(name = "demo")]
+struct Cli {
+    #[arg(long, default_value = "config.yaml")]
+    config: PathBuf,
+
+    #[command(subcommand)]
+    command: Command,
+}
+
+#[derive(Debug, Subcommand)]
+enum Command {
+    Run,
+
+    #[command(flatten)]
+    Config(ConfigCommand),
+}
+
+fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    let cli = Cli::parse();
+
+    match cli.command {
+        Command::Run => {
+            let config = load_config::<AppConfig>(&cli.config)?;
+            println!("{config:#?}");
+        }
+        Command::Config(command) => {
+            handle_config_command::<Cli, AppConfig>(command, &cli.config)?;
+        }
+    }
+
+    Ok(())
+}
+```
+
+## Modelos de configuracao
+
+```bash
+demo config-template --output config.example.yaml
+```
+
+Se nenhum caminho de saida for fornecido, o comando grava
+`config.example.yaml` no diretorio atual. Adicione
+`--schema schemas/myapp.schema.json` para vincular modelos TOML e YAML gerados a
+JSON Schemas gerados. Modelos YAML divididos vinculam o esquema de secao
+correspondente. O comando tambem grava o esquema raiz e esquemas de secao no
+caminho de esquema selecionado.
+
+```bash
+demo config-template --output config.example.toml --schema schemas/myapp.schema.json
+```
+
+Gere JSON Schemas raiz e de secao:
+
+```bash
+demo config-schema --output schemas/myapp.schema.json
+```
+
+Valide a arvore completa de configuracao em tempo de execucao:
+
+```bash
+demo config-validate
+```
+
+Esquemas de editor gerados evitam intencionalmente diagnosticos de campos
+obrigatorios para arquivos divididos. `config-validate` carrega includes, aplica
+padroes e executa a validacao final do `confique`. Ele imprime
+`Configuration is ok` quando a validacao tem sucesso.
+
+## Shell completions
+
+Imprima completions em stdout:
+
+```bash
+demo completions zsh
+```
+
+Instale completions:
+
+```bash
+demo install-completions zsh
+```
+
+O instalador suporta Bash, Elvish, Fish, PowerShell e Zsh. Ele grava o arquivo
+de completion sob o diretorio home do usuario e atualiza o arquivo de
+inicializacao do shell para shells que exigem isso.
+

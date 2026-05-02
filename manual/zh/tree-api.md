@@ -1,6 +1,6 @@
 # Tree API
 
-[English](../en/tree-api.html) | [中文](tree-api.html)
+[English](../en/tree-api.html) | [中文](tree-api.html) | [日本語](../ja/tree-api.html) | [한국어](../ko/tree-api.html) | [Français](../fr/tree-api.html) | [Deutsch](../de/tree-api.html) | [Español](../es/tree-api.html) | [Português](../pt/tree-api.html) | [Svenska](../sv/tree-api.html) | [Suomi](../fi/tree-api.html) | [Nederlands](../nl/tree-api.html)
 
 应用不使用 `confique`，或者需要直接访问遍历结果时，可以使用低层 tree API。
 

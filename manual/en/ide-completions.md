@@ -1,6 +1,6 @@
 # IDE Completions
 
-[English](ide-completions.html) | [中文](../zh/ide-completions.html)
+[English](ide-completions.html) | [中文](../zh/ide-completions.html) | [日本語](../ja/ide-completions.html) | [한국어](../ko/ide-completions.html) | [Français](../fr/ide-completions.html) | [Deutsch](../de/ide-completions.html) | [Español](../es/ide-completions.html) | [Português](../pt/ide-completions.html) | [Svenska](../sv/ide-completions.html) | [Suomi](../fi/ide-completions.html) | [Nederlands](../nl/ide-completions.html)
 
 Generated JSON Schemas can be used by TOML, YAML, JSON, and JSON5 config files.
 They are generated from the same Rust type used by `confique`:

@@ -1,6 +1,6 @@
 # Source Tracking
 
-[English](source-tracking.html) | [中文](../zh/source-tracking.html)
+[English](source-tracking.html) | [中文](../zh/source-tracking.html) | [日本語](../ja/source-tracking.html) | [한국어](../ko/source-tracking.html) | [Français](../fr/source-tracking.html) | [Deutsch](../de/source-tracking.html) | [Español](../es/source-tracking.html) | [Português](../pt/source-tracking.html) | [Svenska](../sv/source-tracking.html) | [Suomi](../fi/source-tracking.html) | [Nederlands](../nl/source-tracking.html)
 
 Use `load_config_with_figment` to keep the Figment graph used by runtime
 loading:

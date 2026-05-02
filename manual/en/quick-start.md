@@ -1,6 +1,6 @@
 # Quick Start
 
-[English](quick-start.html) | [中文](../zh/quick-start.html)
+[English](quick-start.html) | [中文](../zh/quick-start.html) | [日本語](../ja/quick-start.html) | [한국어](../ko/quick-start.html) | [Français](../fr/quick-start.html) | [Deutsch](../de/quick-start.html) | [Español](../es/quick-start.html) | [Português](../pt/quick-start.html) | [Svenska](../sv/quick-start.html) | [Suomi](../fi/quick-start.html) | [Nederlands](../nl/quick-start.html)
 
 Add the crate and the schema/runtime libraries used by your application:
 

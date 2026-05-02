@@ -1,6 +1,6 @@
 # 运行时加载
 
-[English](../en/runtime-loading.html) | [中文](runtime-loading.html)
+[English](../en/runtime-loading.html) | [中文](runtime-loading.html) | [日本語](../ja/runtime-loading.html) | [한국어](../ko/runtime-loading.html) | [Français](../fr/runtime-loading.html) | [Deutsch](../de/runtime-loading.html) | [Español](../es/runtime-loading.html) | [Português](../pt/runtime-loading.html) | [Svenska](../sv/runtime-loading.html) | [Suomi](../fi/runtime-loading.html) | [Nederlands](../nl/runtime-loading.html)
 
 运行时加载刻意拆分给 Figment 和 confique：
 

@@ -1,0 +1,137 @@
+# IDE-completions
+
+[English](../en/ide-completions.html) | [中文](../zh/ide-completions.html) | [日本語](../ja/ide-completions.html) | [한국어](../ko/ide-completions.html) | [Français](../fr/ide-completions.html) | [Deutsch](../de/ide-completions.html) | [Español](../es/ide-completions.html) | [Português](../pt/ide-completions.html) | [Svenska](../sv/ide-completions.html) | [Suomi](../fi/ide-completions.html) | [Nederlands](ide-completions.html)
+
+Gegenereerde JSON Schemas kunnen worden gebruikt door TOML-, YAML-, JSON- en
+JSON5-configuratiebestanden. Ze worden gegenereerd uit hetzelfde Rust-type dat
+door `confique` wordt gebruikt:
+
+```rust
+use confique::Config;
+use schemars::JsonSchema;
+
+#[derive(Debug, Config, JsonSchema)]
+struct AppConfig {
+    #[config(nested)]
+    server: ServerConfig,
+}
+```
+
+Genereer ze met:
+
+```rust
+use rust_config_tree::write_config_schemas;
+
+write_config_schemas::<AppConfig>("schemas/myapp.schema.json")?;
+# Ok::<(), Box<dyn std::error::Error + Send + Sync>>(())
+```
+
+Dit schrijft het rootschema en sectieschema's zoals
+`schemas/server.schema.json`. Gegenereerde schema's laten `required`-
+constraints weg, zodat completion werkt voor gedeeltelijke configuratiebestanden
+zonder diagnostics voor ontbrekende velden. Het rootschema laat geneste
+sectie-eigenschappen weg, zodat completion voor kindsecties alleen beschikbaar
+is in bestanden die het passende sectieschema koppelen.
+
+IDE-schema's valideren nog steeds aanwezige velden, inclusief type-, enum- en
+onbekende-eigenschapcontroles die door het gegenereerde schema worden
+ondersteund. Gebruik `config-validate` voor verplichte velden en uiteindelijke
+samengevoegde configuratievalidatie.
+
+## TOML
+
+TOML-bestanden moeten het schema koppelen met een `#:schema`-directive bovenaan
+het bestand:
+
+```toml
+#:schema ./schemas/myapp.schema.json
+
+[server]
+bind = "0.0.0.0"
+port = 3000
+```
+
+Gebruik geen rootveld `$schema = "..."` in TOML. Het wordt echte
+configuratiedata en kan runtime-deserialisatie beinvloeden.
+`write_config_templates_with_schema` voegt de `#:schema`-directive automatisch
+toe voor TOML-sjablonen.
+
+## YAML
+
+YAML-bestanden moeten de YAML Language Server-modeline gebruiken:
+
+```yaml
+# yaml-language-server: $schema=./schemas/myapp.schema.json
+
+server:
+  bind: 0.0.0.0
+  port: 3000
+```
+
+`write_config_templates_with_schema` voegt deze modeline automatisch toe voor
+YAML-sjablonen. Gesplitste YAML-sjablonen koppelen hun sectieschema, bijvoorbeeld
+`config/log.yaml` koppelt `../schemas/log.schema.json`.
+
+## JSON
+
+JSON kan geen comments bevatten, en `$schema` is een echte JSON-eigenschap.
+Houd runtimeconfiguratiebestanden schoon en koppel JSON-bestanden via
+editorinstellingen:
+
+```json
+{
+  "json.schemas": [
+    {
+      "fileMatch": [
+        "/config.json",
+        "/config.*.json",
+        "/deploy/*.json"
+      ],
+      "url": "./schemas/myapp.schema.json"
+    }
+  ]
+}
+```
+
+YAML kan ook via VS Code-instellingen worden gekoppeld:
+
+```json
+{
+  "yaml.schemas": {
+    "./schemas/myapp.schema.json": [
+      "config.yaml",
+      "config.*.yaml",
+      "deploy/*.yaml"
+    ]
+  }
+}
+```
+
+De uiteindelijke indeling is:
+
+```text
+schemas/myapp.schema.json:
+  Root file fields only
+
+schemas/server.schema.json:
+  Server section schema
+
+config.toml:
+  #:schema ./schemas/myapp.schema.json
+
+config.yaml:
+  # yaml-language-server: $schema=./schemas/myapp.schema.json
+
+config/server.yaml:
+  # yaml-language-server: $schema=../schemas/server.schema.json
+
+config.json:
+  No runtime $schema field; bind with editor settings
+```
+
+Referenties:
+
+- [Tombi JSON Schema](https://tombi-toml.github.io/tombi/docs/json-schema/)
+- [Taplo directives](https://taplo.tamasfe.dev/configuration/directives.html)
+- [YAML Language Server](https://github.com/redhat-developer/yaml-language-server)
+- [VS Code JSON](https://code.visualstudio.com/Docs/languages/json)

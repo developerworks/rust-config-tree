@@ -1,12 +1,12 @@
 # 脚本
 
-[English](README.md)
+[English](README.md) | [中文](README.zh.md) | [日本語](README.ja.md) | [한국어](README.ko.md) | [Français](README.fr.md) | [Deutsch](README.de.md) | [Español](README.es.md) | [Português](README.pt.md) | [Svenska](README.sv.md) | [Suomi](README.fi.md) | [Nederlands](README.nl.md)
 
 请在仓库根目录运行脚本。
 
 ## `publish-pages.sh`
 
-构建英文和中文 mdBook 手册，输出到 `target/mdbook`。
+构建所有语言的 mdBook 手册，输出到 `target/mdbook`。
 
 ```bash
 scripts/publish-pages.sh

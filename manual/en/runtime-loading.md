@@ -1,6 +1,6 @@
 # Runtime Loading
 
-[English](runtime-loading.html) | [中文](../zh/runtime-loading.html)
+[English](runtime-loading.html) | [中文](../zh/runtime-loading.html) | [日本語](../ja/runtime-loading.html) | [한국어](../ko/runtime-loading.html) | [Français](../fr/runtime-loading.html) | [Deutsch](../de/runtime-loading.html) | [Español](../es/runtime-loading.html) | [Português](../pt/runtime-loading.html) | [Svenska](../sv/runtime-loading.html) | [Suomi](../fi/runtime-loading.html) | [Nederlands](../nl/runtime-loading.html)
 
 Runtime loading is intentionally split between Figment and confique:
 

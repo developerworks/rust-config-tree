@@ -1,0 +1,15 @@
+[book]
+title = "rust-config-tree käyttöopas"
+authors = ["developerworks"]
+description = "Suomenkielinen rust-config-tree käyttöopas."
+language = "fi"
+src = "."
+
+[build]
+create-missing = false
+
+[output.html]
+git-repository-url = "https://github.com/developerworks/rust-config-tree"
+edit-url-template = "https://github.com/developerworks/rust-config-tree/edit/main/manual/fi/{path}"
+site-url = "/rust-config-tree/fi/"
+additional-css = ["../theme/left-aligned.css"]

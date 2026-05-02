@@ -1,6 +1,6 @@
 # 来源追踪
 
-[English](../en/source-tracking.html) | [中文](source-tracking.html)
+[English](../en/source-tracking.html) | [中文](source-tracking.html) | [日本語](../ja/source-tracking.html) | [한국어](../ko/source-tracking.html) | [Français](../fr/source-tracking.html) | [Deutsch](../de/source-tracking.html) | [Español](../es/source-tracking.html) | [Português](../pt/source-tracking.html) | [Svenska](../sv/source-tracking.html) | [Suomi](../fi/source-tracking.html) | [Nederlands](../nl/source-tracking.html)
 
 使用 `load_config_with_figment` 保留运行时加载使用的 Figment graph：
 

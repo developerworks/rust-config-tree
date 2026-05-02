@@ -1,6 +1,6 @@
 # 简介
 
-[English](../en/introduction.html) | [中文](introduction.html)
+[English](../en/introduction.html) | [中文](introduction.html) | [日本語](../ja/introduction.html) | [한국어](../ko/introduction.html) | [Français](../fr/introduction.html) | [Deutsch](../de/introduction.html) | [Español](../es/introduction.html) | [Português](../pt/introduction.html) | [Svenska](../sv/introduction.html) | [Suomi](../fi/introduction.html) | [Nederlands](../nl/introduction.html)
 
 `rust-config-tree` 为使用分层配置文件的 Rust 应用提供可复用的配置树加载
 能力和 CLI 辅助能力。

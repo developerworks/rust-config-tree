@@ -1,6 +1,6 @@
 # 环境变量
 
-[English](../en/environment.html) | [中文](environment.html)
+[English](../en/environment.html) | [中文](environment.html) | [日本語](../ja/environment.html) | [한국어](../ko/environment.html) | [Français](../fr/environment.html) | [Deutsch](../de/environment.html) | [Español](../es/environment.html) | [Português](../pt/environment.html) | [Svenska](../sv/environment.html) | [Suomi](../fi/environment.html) | [Nederlands](../nl/environment.html)
 
 环境变量名在 schema 中通过 `confique` 声明：
 

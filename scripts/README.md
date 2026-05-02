@@ -1,12 +1,12 @@
 # Scripts
 
-[中文](README.zh.md)
+[English](README.md) | [中文](README.zh.md) | [日本語](README.ja.md) | [한국어](README.ko.md) | [Français](README.fr.md) | [Deutsch](README.de.md) | [Español](README.es.md) | [Português](README.pt.md) | [Svenska](README.sv.md) | [Suomi](README.fi.md) | [Nederlands](README.nl.md)
 
 Run scripts from the repository root.
 
 ## `publish-pages.sh`
 
-Builds the English and Chinese mdBook manuals into `target/mdbook`.
+Builds all language-specific mdBook manuals into `target/mdbook`.
 
 ```bash
 scripts/publish-pages.sh

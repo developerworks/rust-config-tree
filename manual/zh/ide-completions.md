@@ -1,6 +1,6 @@
 # IDE 补全
 
-[English](../en/ide-completions.html) | [中文](ide-completions.html)
+[English](../en/ide-completions.html) | [中文](ide-completions.html) | [日本語](../ja/ide-completions.html) | [한국어](../ko/ide-completions.html) | [Français](../fr/ide-completions.html) | [Deutsch](../de/ide-completions.html) | [Español](../es/ide-completions.html) | [Português](../pt/ide-completions.html) | [Svenska](../sv/ide-completions.html) | [Suomi](../fi/ide-completions.html) | [Nederlands](../nl/ide-completions.html)
 
 生成的 JSON Schema 可以给 TOML、YAML、JSON 和 JSON5 配置文件使用。schema
 从 `confique` 使用的同一个 Rust 类型生成：

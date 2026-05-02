@@ -1,6 +1,6 @@
 # Template Generation
 
-[English](templates.html) | [中文](../zh/templates.html)
+[English](templates.html) | [中文](../zh/templates.html) | [日本語](../ja/templates.html) | [한국어](../ko/templates.html) | [Français](../fr/templates.html) | [Deutsch](../de/templates.html) | [Español](../es/templates.html) | [Português](../pt/templates.html) | [Svenska](../sv/templates.html) | [Suomi](../fi/templates.html) | [Nederlands](../nl/templates.html)
 
 Templates are generated from the same `confique` schema used at runtime.
 `confique` renders the actual template content, including doc comments,

@@ -1,12 +1,12 @@
 # GitHub Pages
 
-[English](github-pages.html) | [中文](../zh/github-pages.html)
+[English](github-pages.html) | [中文](../zh/github-pages.html) | [日本語](../ja/github-pages.html) | [한국어](../ko/github-pages.html) | [Français](../fr/github-pages.html) | [Deutsch](../de/github-pages.html) | [Español](../es/github-pages.html) | [Português](../pt/github-pages.html) | [Svenska](../sv/github-pages.html) | [Suomi](../fi/github-pages.html) | [Nederlands](../nl/github-pages.html)
 
 This repository publishes the manual with mdBook and GitHub Pages.
 
-The English and Chinese manuals are independent mdBook projects. Each language
-has its own `SUMMARY.md`, so the left sidebar only contains pages for the
-current language:
+Each language manual is an independent mdBook project. Each language has its
+own `SUMMARY.md`, so the left sidebar only contains pages for the current
+language:
 
 ```text
 manual/
@@ -22,6 +22,20 @@ manual/
     introduction.md
     quick-start.md
     ...
+  ja/
+    book.toml
+    SUMMARY.md
+    introduction.md
+    quick-start.md
+    ...
+  ko/
+  fr/
+  de/
+  es/
+  pt/
+  sv/
+  fi/
+  nl/
 ```
 
 Build locally with:

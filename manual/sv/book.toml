@@ -1,0 +1,15 @@
+[book]
+title = "rust-config-tree handbok"
+authors = ["developerworks"]
+description = "Svensk handbok foer rust-config-tree."
+language = "sv"
+src = "."
+
+[build]
+create-missing = false
+
+[output.html]
+git-repository-url = "https://github.com/developerworks/rust-config-tree"
+edit-url-template = "https://github.com/developerworks/rust-config-tree/edit/main/manual/sv/{path}"
+site-url = "/rust-config-tree/sv/"
+additional-css = ["../theme/left-aligned.css"]

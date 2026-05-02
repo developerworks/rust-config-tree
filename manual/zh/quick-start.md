@@ -1,6 +1,6 @@
 # 快速开始
 
-[English](../en/quick-start.html) | [中文](quick-start.html)
+[English](../en/quick-start.html) | [中文](quick-start.html) | [日本語](../ja/quick-start.html) | [한국어](../ko/quick-start.html) | [Français](../fr/quick-start.html) | [Deutsch](../de/quick-start.html) | [Español](../es/quick-start.html) | [Português](../pt/quick-start.html) | [Svenska](../sv/quick-start.html) | [Suomi](../fi/quick-start.html) | [Nederlands](../nl/quick-start.html)
 
 添加 crate 以及应用所需的 schema 和运行时库：
 

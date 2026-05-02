@@ -1,6 +1,6 @@
 # Introduction
 
-[English](introduction.html) | [中文](../zh/introduction.html)
+[English](introduction.html) | [中文](../zh/introduction.html) | [日本語](../ja/introduction.html) | [한국어](../ko/introduction.html) | [Français](../fr/introduction.html) | [Deutsch](../de/introduction.html) | [Español](../es/introduction.html) | [Português](../pt/introduction.html) | [Svenska](../sv/introduction.html) | [Suomi](../fi/introduction.html) | [Nederlands](../nl/introduction.html)
 
 `rust-config-tree` provides reusable configuration-tree loading and CLI helpers
 for Rust applications that use layered config files.

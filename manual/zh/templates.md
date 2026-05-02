@@ -1,6 +1,6 @@
 # 模板生成
 
-[English](../en/templates.html) | [中文](templates.html)
+[English](../en/templates.html) | [中文](templates.html) | [日本語](../ja/templates.html) | [한국어](../ko/templates.html) | [Français](../fr/templates.html) | [Deutsch](../de/templates.html) | [Español](../es/templates.html) | [Português](../pt/templates.html) | [Svenska](../sv/templates.html) | [Suomi](../fi/templates.html) | [Nederlands](../nl/templates.html)
 
 模板由运行时使用的同一个 `confique` schema 生成。`confique` 负责渲染实际
 模板内容，包括文档注释、默认值、必填字段和声明的环境变量名。

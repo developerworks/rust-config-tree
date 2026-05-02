@@ -1,6 +1,6 @@
 # Environment Variables
 
-[English](environment.html) | [中文](../zh/environment.html)
+[English](environment.html) | [中文](../zh/environment.html) | [日本語](../ja/environment.html) | [한국어](../ko/environment.html) | [Français](../fr/environment.html) | [Deutsch](../de/environment.html) | [Español](../es/environment.html) | [Português](../pt/environment.html) | [Svenska](../sv/environment.html) | [Suomi](../fi/environment.html) | [Nederlands](../nl/environment.html)
 
 Environment variable names are declared in the schema with `confique`:
 

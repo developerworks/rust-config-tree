@@ -14,6 +14,15 @@ mkdir -p "${OUT_DIR}"
 
 mdbook build -d "${OUT_DIR}/en" "${ROOT_DIR}/manual/en"
 mdbook build -d "${OUT_DIR}/zh" "${ROOT_DIR}/manual/zh"
+mdbook build -d "${OUT_DIR}/ja" "${ROOT_DIR}/manual/ja"
+mdbook build -d "${OUT_DIR}/ko" "${ROOT_DIR}/manual/ko"
+mdbook build -d "${OUT_DIR}/fr" "${ROOT_DIR}/manual/fr"
+mdbook build -d "${OUT_DIR}/de" "${ROOT_DIR}/manual/de"
+mdbook build -d "${OUT_DIR}/es" "${ROOT_DIR}/manual/es"
+mdbook build -d "${OUT_DIR}/pt" "${ROOT_DIR}/manual/pt"
+mdbook build -d "${OUT_DIR}/sv" "${ROOT_DIR}/manual/sv"
+mdbook build -d "${OUT_DIR}/fi" "${ROOT_DIR}/manual/fi"
+mdbook build -d "${OUT_DIR}/nl" "${ROOT_DIR}/manual/nl"
 
 cat >"${OUT_DIR}/index.html" <<'HTML'
 <!doctype html>
@@ -75,6 +84,15 @@ cat >"${OUT_DIR}/index.html" <<'HTML'
       <nav aria-label="Manual language">
         <a href="./en/">English</a>
         <a href="./zh/">中文</a>
+        <a href="./ja/">日本語</a>
+        <a href="./ko/">한국어</a>
+        <a href="./fr/">Français</a>
+        <a href="./de/">Deutsch</a>
+        <a href="./es/">Español</a>
+        <a href="./pt/">Português</a>
+        <a href="./sv/">Svenska</a>
+        <a href="./fi/">Suomi</a>
+        <a href="./nl/">Nederlands</a>
       </nav>
     </main>
   </body>

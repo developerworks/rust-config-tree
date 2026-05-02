@@ -1,0 +1,15 @@
+[book]
+title = "rust-config-tree handleiding"
+authors = ["developerworks"]
+description = "Nederlandse handleiding voor rust-config-tree."
+language = "nl"
+src = "."
+
+[build]
+create-missing = false
+
+[output.html]
+git-repository-url = "https://github.com/developerworks/rust-config-tree"
+edit-url-template = "https://github.com/developerworks/rust-config-tree/edit/main/manual/nl/{path}"
+site-url = "/rust-config-tree/nl/"
+additional-css = ["../theme/left-aligned.css"]

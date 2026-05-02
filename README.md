@@ -1,13 +1,13 @@
 # rust-config-tree
 
-[English](README.md) | [中文](README.zh.md)
+[English](README.md) | [中文](README.zh.md) | [日本語](README.ja.md) | [한국어](README.ko.md) | [Français](README.fr.md) | [Deutsch](README.de.md) | [Español](README.es.md) | [Português](README.pt.md) | [Svenska](README.sv.md) | [Suomi](README.fi.md) | [Nederlands](README.nl.md)
 
 `rust-config-tree` provides configuration-tree loading and CLI helpers for Rust
 applications that use layered config files.
 
-Project manual: <https://developerworks.github.io/rust-config-tree/>. English
-and Chinese manuals are published as independent mdBook sites with language
-switch links.
+Project manual: <https://developerworks.github.io/rust-config-tree/>.
+Language-specific manuals are published as independent mdBook sites with
+language switch links.
 
 It handles:
 

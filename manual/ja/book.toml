@@ -1,0 +1,16 @@
+[book]
+title = "rust-config-tree マニュアル"
+authors = ["developerworks"]
+description = "rust-config-tree の日本語マニュアル。"
+language = "ja"
+src = "."
+
+[build]
+create-missing = false
+
+[output.html]
+git-repository-url = "https://github.com/developerworks/rust-config-tree"
+edit-url-template = "https://github.com/developerworks/rust-config-tree/edit/main/manual/ja/{path}"
+site-url = "/rust-config-tree/ja/"
+additional-css = ["../theme/left-aligned.css"]
+

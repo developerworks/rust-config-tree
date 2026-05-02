@@ -1,0 +1,15 @@
+[book]
+title = "rust-config-tree 매뉴얼"
+authors = ["developerworks"]
+description = "rust-config-tree 한국어 매뉴얼."
+language = "ko"
+src = "."
+
+[build]
+create-missing = false
+
+[output.html]
+git-repository-url = "https://github.com/developerworks/rust-config-tree"
+edit-url-template = "https://github.com/developerworks/rust-config-tree/edit/main/manual/ko/{path}"
+site-url = "/rust-config-tree/ko/"
+additional-css = ["../theme/left-aligned.css"]

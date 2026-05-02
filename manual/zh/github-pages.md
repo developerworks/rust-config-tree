@@ -1,11 +1,11 @@
 # GitHub Pages
 
-[English](../en/github-pages.html) | [中文](github-pages.html)
+[English](../en/github-pages.html) | [中文](github-pages.html) | [日本語](../ja/github-pages.html) | [한국어](../ko/github-pages.html) | [Français](../fr/github-pages.html) | [Deutsch](../de/github-pages.html) | [Español](../es/github-pages.html) | [Português](../pt/github-pages.html) | [Svenska](../sv/github-pages.html) | [Suomi](../fi/github-pages.html) | [Nederlands](../nl/github-pages.html)
 
 本仓库使用 mdBook 和 GitHub Pages 发布手册。
 
-英文手册和中文手册是两个独立的 mdBook 项目。每种语言都有自己的
-`SUMMARY.md`，因此左侧目录只显示当前语言的页面：
+每种语言的手册都是独立的 mdBook 项目。每种语言都有自己的 `SUMMARY.md`，
+因此左侧目录只显示当前语言的页面：
 
 ```text
 manual/
@@ -21,6 +21,20 @@ manual/
     introduction.md
     quick-start.md
     ...
+  ja/
+    book.toml
+    SUMMARY.md
+    introduction.md
+    quick-start.md
+    ...
+  ko/
+  fr/
+  de/
+  es/
+  pt/
+  sv/
+  fi/
+  nl/
 ```
 
 本地构建：

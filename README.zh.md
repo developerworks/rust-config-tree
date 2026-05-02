@@ -1,12 +1,12 @@
 # rust-config-tree
 
-[English](README.md) | [中文](README.zh.md)
+[English](README.md) | [中文](README.zh.md) | [日本語](README.ja.md) | [한국어](README.ko.md) | [Français](README.fr.md) | [Deutsch](README.de.md) | [Español](README.es.md) | [Português](README.pt.md) | [Svenska](README.sv.md) | [Suomi](README.fi.md) | [Nederlands](README.nl.md)
 
 `rust-config-tree` 为使用分层配置文件的 Rust 应用提供配置树加载能力和 CLI
 辅助能力。
 
-项目手册：<https://developerworks.github.io/rust-config-tree/>。英文手册和
-中文手册作为独立的 mdBook 站点发布，并提供语言切换链接。
+项目手册：<https://developerworks.github.io/rust-config-tree/>。不同语言的手册
+作为独立的 mdBook 站点发布，并提供语言切换链接。
 
 它提供：
 

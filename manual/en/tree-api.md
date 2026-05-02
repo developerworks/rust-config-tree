@@ -1,6 +1,6 @@
 # Tree API
 
-[English](tree-api.html) | [中文](../zh/tree-api.html)
+[English](tree-api.html) | [中文](../zh/tree-api.html) | [日本語](../ja/tree-api.html) | [한국어](../ko/tree-api.html) | [Français](../fr/tree-api.html) | [Deutsch](../de/tree-api.html) | [Español](../es/tree-api.html) | [Português](../pt/tree-api.html) | [Svenska](../sv/tree-api.html) | [Suomi](../fi/tree-api.html) | [Nederlands](../nl/tree-api.html)
 
 Use the lower-level tree API when the application does not use `confique`, or
 when it needs direct access to traversal results.

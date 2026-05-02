@@ -1,6 +1,6 @@
 # CLI Integration
 
-[English](cli.html) | [中文](../zh/cli.html)
+[English](cli.html) | [中文](../zh/cli.html) | [日本語](../ja/cli.html) | [한국어](../ko/cli.html) | [Français](../fr/cli.html) | [Deutsch](../de/cli.html) | [Español](../es/cli.html) | [Português](../pt/cli.html) | [Svenska](../sv/cli.html) | [Suomi](../fi/cli.html) | [Nederlands](../nl/cli.html)
 
 `ConfigCommand` provides reusable clap subcommands:
 
