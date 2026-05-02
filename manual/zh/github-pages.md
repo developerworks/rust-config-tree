@@ -66,7 +66,8 @@ scripts/release.sh --execute --message "Release 0.1.3"
 scripts/publish-crate.sh
 ```
 
-默认模式会运行检查和 `cargo publish --dry-run`。检查通过后发布到 crates.io：
+默认模式会运行检查和 `cargo publish --dry-run`。如果当前版本已经存在于
+crates.io，脚本会自动 bump patch 版本。检查通过后发布到 crates.io：
 
 ```bash
 scripts/publish-crate.sh --execute

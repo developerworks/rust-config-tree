@@ -1,5 +1,7 @@
 # Scripts
 
+[中文](README.zh.md)
+
 Run scripts from the repository root.
 
 ## `publish-pages.sh`
@@ -16,9 +18,18 @@ pushed to `main`.
 ## `publish-crate.sh`
 
 Runs crate release checks and performs a `cargo publish --dry-run` by default.
+If `package.version` already exists on crates.io, the script bumps the patch
+version automatically.
 
 ```bash
 scripts/publish-crate.sh
+```
+
+Bump a different version component when the current version already exists:
+
+```bash
+scripts/publish-crate.sh --bump minor
+scripts/publish-crate.sh --bump major
 ```
 
 Publish to crates.io:
@@ -27,7 +38,15 @@ Publish to crates.io:
 scripts/publish-crate.sh --execute
 ```
 
-The script requires a clean git working tree before publishing.
+The script requires a clean git working tree before publishing. Use `--no-bump`
+to fail instead of auto-bumping an existing version.
+
+Publish steps are retried for transient crates.io/index network failures. Tune
+retry behavior with environment variables:
+
+```bash
+PUBLISH_ATTEMPTS=8 PUBLISH_RETRY_DELAY=15 scripts/publish-crate.sh
+```
 
 ## `release.sh`
 
@@ -50,6 +69,9 @@ Execute the full release:
 ```bash
 scripts/release.sh --execute --message "Release 0.1.3"
 ```
+
+The full release script prepares the crate version before committing, so the
+version bump is included in the release commit.
 
 Skip waiting for the Pages workflow:
 

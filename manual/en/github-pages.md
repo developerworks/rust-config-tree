@@ -68,7 +68,8 @@ scripts/publish-crate.sh
 ```
 
 The default mode runs checks and `cargo publish --dry-run`. To publish to
-crates.io after the checks pass:
+crates.io after the checks pass. If the current version already exists on
+crates.io, the script bumps the patch version automatically:
 
 ```bash
 scripts/publish-crate.sh --execute

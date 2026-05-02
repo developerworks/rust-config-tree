@@ -71,13 +71,14 @@ if [[ "${BRANCH}" != "main" ]]; then
 fi
 
 scripts/publish-pages.sh
+scripts/publish-crate.sh --prepare-only --allow-dirty
 cargo fmt --check
 cargo clippy --all-targets --all-features -- -D warnings
 cargo test
 git diff --check
 
 if ((DRY_RUN)); then
-  cargo publish --dry-run --allow-dirty
+  scripts/publish-crate.sh --dry-run --allow-dirty --no-bump
   echo "release dry-run passed"
   echo "no commit, push, Pages deploy, or crate publish was performed"
   exit 0
@@ -115,4 +116,4 @@ if ((WAIT_PAGES)); then
   fi
 fi
 
-scripts/publish-crate.sh --execute
+scripts/publish-crate.sh --execute --no-bump
