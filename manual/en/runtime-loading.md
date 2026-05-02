@@ -46,9 +46,14 @@ The high-level loader performs these steps:
 3. Load each config file as a partial layer to discover includes.
 4. Build a Figment graph from the discovered config files.
 5. Merge the `ConfiqueEnvProvider` with higher priority than files.
-6. Extract a `confique` layer from Figment.
-7. Apply `confique` code defaults.
-8. Validate and construct the final schema.
+6. Optionally merge application-specific CLI overrides.
+7. Extract a `confique` layer from Figment.
+8. Apply `confique` code defaults.
+9. Validate and construct the final schema.
+
+`load_config` and `load_config_with_figment` perform steps 1-5 and 7-9.
+Step 6 is application-specific because this crate cannot infer how a CLI flag
+maps to a schema field.
 
 ## File Formats
 
@@ -70,3 +75,42 @@ priority.
 
 Environment variables have higher priority than all config files. `confique`
 defaults are only used for values that are not supplied by runtime providers.
+
+When CLI overrides are merged after `build_config_figment`, the full precedence
+is:
+
+```text
+command-line overrides
+  > environment variables
+    > config files
+      > confique code defaults
+```
+
+```rust
+use figment::providers::Serialized;
+use serde::Serialize;
+use rust_config_tree::{build_config_figment, load_config_from_figment};
+
+#[derive(Debug, Serialize)]
+struct CliOverrides {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    server: Option<CliServerOverrides>,
+}
+
+#[derive(Debug, Serialize)]
+struct CliServerOverrides {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    port: Option<u16>,
+}
+
+let cli_overrides = CliOverrides {
+    server: Some(CliServerOverrides { port: Some(9000) }),
+};
+
+let figment = build_config_figment::<AppConfig>("config.yaml")?
+    .merge(Serialized::defaults(cli_overrides));
+
+let config = load_config_from_figment::<AppConfig>(&figment)?;
+# let _ = config;
+# Ok::<(), Box<dyn std::error::Error + Send + Sync>>(())
+```

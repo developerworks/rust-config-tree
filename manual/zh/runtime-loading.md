@@ -45,9 +45,14 @@ let (config, figment) = load_config_with_figment::<AppConfig>("config.yaml")?;
 3. 将每个配置文件加载成部分 layer，用于发现 include。
 4. 从发现的配置文件构建 Figment graph。
 5. 以高于文件的优先级合并 `ConfiqueEnvProvider`。
-6. 从 Figment 提取 `confique` layer。
-7. 应用 `confique` 代码默认值。
-8. 校验并构造最终 schema。
+6. 可选地合并应用自己的 CLI override。
+7. 从 Figment 提取 `confique` layer。
+8. 应用 `confique` 代码默认值。
+9. 校验并构造最终 schema。
+
+`load_config` 和 `load_config_with_figment` 执行第 1-5 步和第 7-9 步。
+第 6 步属于应用语义，因为这个 crate 无法推断某个 CLI flag 应该映射到
+哪个 schema 字段。
 
 ## 文件格式
 
@@ -67,3 +72,41 @@ let (config, figment) = load_config_with_figment::<AppConfig>("config.yaml")?;
 
 环境变量优先级高于所有配置文件。`confique` 默认值只用于运行时 provider
 没有提供的值。
+
+当 CLI override 在 `build_config_figment` 之后合并时，完整优先级为：
+
+```text
+command-line overrides
+  > environment variables
+    > config files
+      > confique code defaults
+```
+
+```rust
+use figment::providers::Serialized;
+use serde::Serialize;
+use rust_config_tree::{build_config_figment, load_config_from_figment};
+
+#[derive(Debug, Serialize)]
+struct CliOverrides {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    server: Option<CliServerOverrides>,
+}
+
+#[derive(Debug, Serialize)]
+struct CliServerOverrides {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    port: Option<u16>,
+}
+
+let cli_overrides = CliOverrides {
+    server: Some(CliServerOverrides { port: Some(9000) }),
+};
+
+let figment = build_config_figment::<AppConfig>("config.yaml")?
+    .merge(Serialized::defaults(cli_overrides));
+
+let config = load_config_from_figment::<AppConfig>(&figment)?;
+# let _ = config;
+# Ok::<(), Box<dyn std::error::Error + Send + Sync>>(())
+```

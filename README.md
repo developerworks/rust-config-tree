@@ -34,6 +34,7 @@ implementing `ConfigSchema` to expose the schema's include field.
 rust-config-tree = "0.1"
 confique = { version = "0.4", features = ["yaml", "toml", "json5"] }
 figment = { version = "0.10", features = ["yaml", "env"] }
+serde = { version = "1", features = ["derive"] }
 clap = { version = "4", features = ["derive"] }
 ```
 
@@ -112,6 +113,43 @@ responsible for schema metadata, defaults, validation, and template generation.
 Environment variable names are read from `#[config(env = "...")]`; the loader
 does not use `Env::split("_")` or `Env::split("__")`, so a variable such as
 `APP_DATABASE_POOL_SIZE` can map to a field named `database.pool_size`.
+
+`load_config` does not read command-line arguments because CLI flags are
+application-specific. Add CLI overrides by merging a provider after
+`build_config_figment`, then validate with `load_config_from_figment`:
+
+```rust
+use figment::providers::Serialized;
+use serde::Serialize;
+use rust_config_tree::{build_config_figment, load_config_from_figment};
+
+#[derive(Debug, Serialize)]
+struct CliOverrides {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    mode: Option<String>,
+}
+
+fn load_with_cli_overrides() -> Result<AppConfig, Box<dyn std::error::Error + Send + Sync>> {
+    let cli_overrides = CliOverrides {
+        mode: Some("shadow".to_owned()),
+    };
+
+    let figment = build_config_figment::<AppConfig>("config.yaml")?
+        .merge(Serialized::defaults(cli_overrides));
+
+    let config = load_config_from_figment::<AppConfig>(&figment)?;
+    Ok(config)
+}
+```
+
+With CLI overrides merged this way, runtime precedence is:
+
+```text
+command-line overrides
+  > environment variables
+    > config files
+      > confique code defaults
+```
 
 Use `load_config_with_figment` when the caller needs source metadata:
 

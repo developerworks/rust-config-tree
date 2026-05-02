@@ -8,6 +8,9 @@
 - `completions`
 - `install-completions`
 
+这些内置子命令不同于应用自己的配置覆盖参数。配置覆盖参数应在运行时加载
+路径里作为 Figment provider 合并。
+
 将它 flatten 到应用命令枚举中：
 
 ```rust

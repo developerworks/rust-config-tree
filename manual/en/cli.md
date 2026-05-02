@@ -8,6 +8,10 @@
 - `completions`
 - `install-completions`
 
+These built-in subcommands are separate from application-specific config
+override flags. Merge config override flags as Figment providers in the runtime
+loading path.
+
 Flatten it into an application command enum:
 
 ```rust
