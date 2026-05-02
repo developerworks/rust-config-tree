@@ -1,15 +1,24 @@
-//! Recursive include tree utilities for layered configuration files.
+//! Configuration-tree loading and CLI helpers for layered config files.
 //!
-//! This crate is intentionally format-agnostic. The caller provides the loader
-//! that reads one config file and returns both its parsed value and the include
-//! paths declared by that file.
+//! The high-level API loads `confique` schemas directly, while the lower-level
+//! tree traversal helpers remain available for custom loaders.
 
+mod cli;
+mod config;
 mod error;
 mod path;
 mod template;
 mod tree;
 
-pub use error::{BoxError, ConfigTreeError, Result};
+pub use cli::{
+    ConfigCommand, handle_config_command, install_shell_completion, print_shell_completion,
+    upsert_managed_block,
+};
+pub use config::{
+    ConfigFormat, ConfigResult, ConfigSchema, ConfigTemplateTarget, load_config, template_for_path,
+    template_targets_for_paths, write_config_templates,
+};
+pub use error::{BoxError, ConfigError, ConfigTreeError, Result};
 pub use path::{absolutize_lexical, normalize_lexical, resolve_include_path};
 pub use template::{TemplateTarget, collect_template_targets, select_template_source};
 pub use tree::{

@@ -61,3 +61,48 @@ impl Error for ConfigTreeError {
         }
     }
 }
+
+#[derive(Debug)]
+pub enum ConfigError {
+    Tree(ConfigTreeError),
+    Config(confique::Error),
+    Io(io::Error),
+}
+
+impl fmt::Display for ConfigError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Tree(err) => err.fmt(f),
+            Self::Config(err) => err.fmt(f),
+            Self::Io(err) => err.fmt(f),
+        }
+    }
+}
+
+impl Error for ConfigError {
+    fn source(&self) -> Option<&(dyn Error + 'static)> {
+        match self {
+            Self::Tree(err) => Some(err),
+            Self::Config(err) => Some(err),
+            Self::Io(err) => Some(err),
+        }
+    }
+}
+
+impl From<ConfigTreeError> for ConfigError {
+    fn from(err: ConfigTreeError) -> Self {
+        Self::Tree(err)
+    }
+}
+
+impl From<confique::Error> for ConfigError {
+    fn from(err: confique::Error) -> Self {
+        Self::Config(err)
+    }
+}
+
+impl From<io::Error> for ConfigError {
+    fn from(err: io::Error) -> Self {
+        Self::Io(err)
+    }
+}
