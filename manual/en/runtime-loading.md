@@ -86,6 +86,11 @@ command-line overrides
       > confique code defaults
 ```
 
+The command-line syntax is not defined by `rust-config-tree`. A flag like
+`--server-port` can override `server.port` if the application maps that parsed
+value into a nested serialized provider. A dotted `--server.port` or `a.b.c`
+syntax only exists if the application implements it.
+
 ```rust
 use figment::providers::Serialized;
 use serde::Serialize;

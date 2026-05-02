@@ -89,6 +89,11 @@ Command-line arguments are application-specific, so `load_config` does not read
 them automatically. Merge CLI overrides after `build_config_figment` when the
 application has config override flags:
 
+CLI flag names are chosen by the application. They are not automatically
+`a.b.c` config paths. Prefer normal clap flags such as `--server-port`, then
+map them into a nested override structure. The nested serialized shape controls
+the config key that is overridden.
+
 ```rust
 use figment::providers::Serialized;
 use serde::Serialize;

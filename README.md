@@ -120,6 +120,11 @@ does not use `Env::split("_")` or `Env::split("__")`, so a variable such as
 application-specific. Add CLI overrides by merging a provider after
 `build_config_figment`, then validate with `load_config_from_figment`:
 
+CLI flag names are not derived from config paths. Use normal application flags
+such as `--server-port` or `--database-url`; do not rely on `--server.port` or
+`a.b.c` unless the application deliberately implements that parser. The nested
+serialized override shape decides which config key is overridden.
+
 ```rust
 use figment::providers::Serialized;
 use serde::Serialize;
@@ -131,9 +136,9 @@ struct CliOverrides {
     mode: Option<String>,
 }
 
-fn load_with_cli_overrides() -> Result<AppConfig, Box<dyn std::error::Error + Send + Sync>> {
+fn load_with_cli_overrides(cli_mode: Option<String>) -> Result<AppConfig, Box<dyn std::error::Error + Send + Sync>> {
     let cli_overrides = CliOverrides {
-        mode: Some("shadow".to_owned()),
+        mode: cli_mode,
     };
 
     let figment = build_config_figment::<AppConfig>("config.yaml")?
@@ -264,6 +269,11 @@ The consuming application keeps its own `Parser` type and its own command enum.
    application's own commands.
 4. Match that variant and call `handle_config_command::<Cli, AppConfig>`.
 
+Application-specific config override flags stay on the application's own parser.
+For example, `--server-port` can map to `server.port` by building a nested
+`CliOverrides { server: Some(CliServerOverrides { port }) }` value and merging
+it with `Serialized::defaults`.
+
 ```rust
 use std::path::PathBuf;
 
@@ -290,6 +300,8 @@ impl ConfigSchema for AppConfig {
 struct Cli {
     #[arg(long, default_value = "config.yaml")]
     config: PathBuf,
+    #[arg(long)]
+    server_port: Option<u16>,
     #[command(subcommand)]
     command: Command,
 }
@@ -489,6 +501,11 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 覆盖配置时，在 `build_config_figment` 之后合并 provider，再通过
 `load_config_from_figment` 校验：
 
+CLI flag 名称不会从配置路径自动生成。通常使用应用自己的参数名，比如
+`--server-port` 或 `--database-url`；不要依赖 `--server.port` 或 `a.b.c`，
+除非应用自己实现了这种 parser。真正决定覆盖哪个配置 key 的，是序列化到
+Figment 的嵌套 override 结构。
+
 ```rust
 use figment::providers::Serialized;
 use serde::Serialize;
@@ -500,9 +517,9 @@ struct CliOverrides {
     mode: Option<String>,
 }
 
-fn load_with_cli_overrides() -> Result<AppConfig, Box<dyn std::error::Error + Send + Sync>> {
+fn load_with_cli_overrides(cli_mode: Option<String>) -> Result<AppConfig, Box<dyn std::error::Error + Send + Sync>> {
     let cli_overrides = CliOverrides {
-        mode: Some("shadow".to_owned()),
+        mode: cli_mode,
     };
 
     let figment = build_config_figment::<AppConfig>("config.yaml")?
@@ -567,6 +584,10 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 4. 在 `match` 中处理这个 variant，并调用
    `handle_config_command::<Cli, AppConfig>`。
 
+应用自己的配置覆盖参数仍放在应用自己的 parser 上。例如 `--server-port`
+可以通过构造 `CliOverrides { server: Some(CliServerOverrides { port }) }`
+映射到 `server.port`，再用 `Serialized::defaults` 合并。
+
 ```rust
 use std::path::PathBuf;
 
@@ -593,6 +614,8 @@ impl ConfigSchema for AppConfig {
 struct Cli {
     #[arg(long, default_value = "config.yaml")]
     config: PathBuf,
+    #[arg(long)]
+    server_port: Option<u16>,
     #[command(subcommand)]
     command: Command,
 }

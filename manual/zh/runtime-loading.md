@@ -82,6 +82,10 @@ command-line overrides
       > confique code defaults
 ```
 
+命令行语法不是由 `rust-config-tree` 定义的。只要应用把 `--server-port`
+解析出的值映射进嵌套 serialized provider，它就可以覆盖 `server.port`。
+`--server.port` 或 `a.b.c` 这种点分路径语法只有在应用自己实现时才存在。
+
 ```rust
 use figment::providers::Serialized;
 use serde::Serialize;

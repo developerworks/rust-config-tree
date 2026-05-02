@@ -87,6 +87,10 @@ environment variables
 命令行参数属于应用自己的 CLI 语义，所以 `load_config` 不会自动读取。应用
 有配置覆盖参数时，在 `build_config_figment` 之后合并 CLI override：
 
+CLI flag 名称由应用自己决定，不会自动使用 `a.b.c` 配置路径。推荐使用
+正常的 clap 参数名，比如 `--server-port`，再映射成嵌套 override 结构。
+真正决定覆盖哪个配置 key 的，是序列化后的嵌套结构。
+
 ```rust
 use figment::providers::Serialized;
 use serde::Serialize;

@@ -12,6 +12,10 @@ These built-in subcommands are separate from application-specific config
 override flags. Merge config override flags as Figment providers in the runtime
 loading path.
 
+Config override flags remain part of the consuming application's CLI. Their
+names do not need to match dotted config paths. For example, the application can
+parse `--server-port` and map it to the nested `server.port` config key.
+
 Flatten it into an application command enum:
 
 1. Keep the application's own `Parser` type.
