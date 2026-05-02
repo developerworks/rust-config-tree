@@ -14,6 +14,13 @@ loading path.
 
 Flatten it into an application command enum:
 
+1. Keep the application's own `Parser` type.
+2. Keep the application's own `Subcommand` enum.
+3. Add `#[command(flatten)] Config(ConfigCommand)` to that enum.
+4. Clap expands the flattened `ConfigCommand` variants into the same command
+   level as the application's own variants.
+5. Match the `Config(command)` variant and pass it to `handle_config_command`.
+
 ```rust
 use std::path::PathBuf;
 

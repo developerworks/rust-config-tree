@@ -13,6 +13,13 @@
 
 将它 flatten 到应用命令枚举中：
 
+1. 保留应用自己的 `Parser` 类型。
+2. 保留应用自己的 `Subcommand` enum。
+3. 在这个 enum 里添加 `#[command(flatten)] Config(ConfigCommand)`。
+4. Clap 会把 flattened `ConfigCommand` variants 展开到应用自己的同一层命令。
+5. 在 `match` 里处理 `Config(command)` variant，并交给
+   `handle_config_command`。
+
 ```rust
 use std::path::PathBuf;
 
