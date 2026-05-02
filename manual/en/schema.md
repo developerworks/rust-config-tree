@@ -1,0 +1,98 @@
+# Configuration Schema
+
+[English](schema.md) | [中文](../zh/schema.md)
+
+Application schemas are normal `confique` config types. The root schema must
+implement `ConfigSchema` so `rust-config-tree` can discover recursive includes
+from the intermediate `confique` layer.
+
+```rust
+use std::path::PathBuf;
+
+use confique::Config;
+use rust_config_tree::ConfigSchema;
+
+#[derive(Debug, Config)]
+struct AppConfig {
+    #[config(default = [])]
+    include: Vec<PathBuf>,
+
+    #[config(nested)]
+    database: DatabaseConfig,
+}
+
+#[derive(Debug, Config)]
+struct DatabaseConfig {
+    #[config(env = "APP_DATABASE_URL")]
+    url: String,
+
+    #[config(default = 16)]
+    #[config(env = "APP_DATABASE_POOL_SIZE")]
+    pool_size: u32,
+}
+
+impl ConfigSchema for AppConfig {
+    fn include_paths(layer: &<Self as Config>::Layer) -> Vec<PathBuf> {
+        layer.include.clone().unwrap_or_default()
+    }
+}
+```
+
+## Include Field
+
+The include field can have any name. `rust-config-tree` only knows about it
+through `ConfigSchema::include_paths`.
+
+The field should normally have an empty default:
+
+```rust
+#[config(default = [])]
+include: Vec<PathBuf>,
+```
+
+The loader receives a partially loaded layer for each file. That lets it
+discover child config files before the final schema is merged and validated.
+
+## Nested Sections
+
+Use `#[config(nested)]` for structured sections. Nested sections are important
+for both runtime loading and template splitting:
+
+```rust
+#[derive(Debug, Config)]
+struct AppConfig {
+    #[config(nested)]
+    server: ServerConfig,
+}
+```
+
+The natural YAML shape is:
+
+```yaml
+server:
+  bind: 127.0.0.1
+  port: 8080
+```
+
+## Template Section Overrides
+
+When a template source has no includes, the crate can derive child template
+files from nested schema sections. The default top-level path is
+`config/<section>.yaml`.
+
+Override that path with `template_path_for_section`:
+
+```rust
+impl ConfigSchema for AppConfig {
+    fn include_paths(layer: &<Self as Config>::Layer) -> Vec<PathBuf> {
+        layer.include.clone().unwrap_or_default()
+    }
+
+    fn template_path_for_section(section_path: &[&str]) -> Option<PathBuf> {
+        match section_path {
+            ["database"] => Some(PathBuf::from("examples/database.yaml")),
+            _ => None,
+        }
+    }
+}
+```

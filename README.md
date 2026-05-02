@@ -3,13 +3,19 @@
 `rust-config-tree` provides configuration-tree loading and CLI helpers for Rust
 applications that use layered config files.
 
+Project manual: <https://developerworks.github.io/rust-config-tree/>. The
+manual includes synchronized English and Chinese chapters.
+
 It handles:
 
-- loading a `confique` schema into a directly usable config object
+- loading a `confique` schema into a directly usable config object through
+  Figment runtime providers
 - `config-template`, `completions`, and `install-completions` command handlers
 - config template generation for YAML, TOML, JSON, and JSON5
 - recursive include traversal
 - `.env` loading before environment values are merged
+- source tracking through Figment metadata
+- TRACE-level source tracking logs through `tracing`
 - relative include paths resolved from the file declaring them
 - lexical path normalization
 - include cycle detection
@@ -26,6 +32,7 @@ implementing `ConfigSchema` to expose the schema's include field.
 [dependencies]
 rust-config-tree = "0.1"
 confique = { version = "0.4", features = ["yaml", "toml", "json5"] }
+figment = { version = "0.10", features = ["yaml", "env"] }
 clap = { version = "4", features = ["derive"] }
 ```
 
@@ -106,9 +113,50 @@ let config = load_config::<AppConfig>("config.yaml")?;
 ```
 
 `load_config` loads the first `.env` file found by walking upward from the root
-config file's directory before asking `confique` to read environment variables.
-Values already present in the process environment are preserved and take
-precedence over `.env` values.
+config file's directory before asking Figment to read schema-declared
+environment variables. Values already present in the process environment are
+preserved and take precedence over `.env` values.
+
+Runtime config loading is performed through Figment. `confique` remains
+responsible for schema metadata, defaults, validation, and template generation.
+Environment variable names are read from `#[config(env = "...")]`; the loader
+does not use `Env::split("_")` or `Env::split("__")`, so a variable such as
+`APP_DATABASE_POOL_SIZE` can map to a field named `database.pool_size`.
+
+Use `load_config_with_figment` when the caller needs source metadata:
+
+```rust
+use rust_config_tree::load_config_with_figment;
+
+# use std::path::PathBuf;
+# use confique::Config;
+# use rust_config_tree::ConfigSchema;
+# #[derive(Debug, Config)]
+# struct AppConfig {
+#     #[config(default = [])]
+#     include: Vec<PathBuf>,
+#     #[config(default = "paper")]
+#     #[config(env = "APP_MODE")]
+#     mode: String,
+# }
+# impl ConfigSchema for AppConfig {
+#     fn include_paths(layer: &<Self as Config>::Layer) -> Vec<PathBuf> {
+#         layer.include.clone().unwrap_or_default()
+#     }
+# }
+let (config, figment) = load_config_with_figment::<AppConfig>("config.yaml")?;
+if let Some(metadata) = figment.find_metadata("mode") {
+    let source = metadata.interpolate(&figment::Profile::Default, &["mode"]);
+    println!("mode came from {source}");
+}
+# let _ = config;
+# Ok::<(), Box<dyn std::error::Error + Send + Sync>>(())
+```
+
+The loader also emits config source tracking with `tracing::trace!`. Those
+events are produced only when TRACE is enabled by the application's tracing
+subscriber. If tracing is initialized after config loading, call
+`trace_config_sources::<AppConfig>(&figment)` after installing the subscriber.
 
 ## Template Generation
 

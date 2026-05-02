@@ -6,6 +6,7 @@ use std::{
 };
 
 use confique::Config;
+use figment::Profile;
 
 use super::*;
 
@@ -44,6 +45,28 @@ struct DotenvConfig {
 }
 
 impl ConfigSchema for DotenvConfig {
+    fn include_paths(layer: &<Self as Config>::Layer) -> Vec<PathBuf> {
+        layer.include.clone().unwrap_or_default()
+    }
+}
+
+#[derive(Debug, Config)]
+#[allow(dead_code)]
+struct EnvMappedConfig {
+    #[config(default = [])]
+    include: Vec<PathBuf>,
+    #[config(nested)]
+    database: EnvMappedDatabaseConfig,
+}
+
+#[derive(Debug, Config)]
+#[allow(dead_code)]
+struct EnvMappedDatabaseConfig {
+    #[config(env = "APP_DATABASE_POOL_SIZE", default = 16)]
+    pool_size: u32,
+}
+
+impl ConfigSchema for EnvMappedConfig {
     fn include_paths(layer: &<Self as Config>::Layer) -> Vec<PathBuf> {
         layer.include.clone().unwrap_or_default()
     }
@@ -166,6 +189,38 @@ fn load_config_preserves_environment_over_dotenv() {
 
     unsafe {
         std::env::remove_var("RUST_CONFIG_TREE_DOTENV_MODE");
+    }
+    let _ = fs::remove_dir_all(root);
+}
+
+#[test]
+fn load_config_maps_confique_env_names_without_splitting_underscores() {
+    let _guard = DOTENV_TEST_LOCK.lock().unwrap();
+    unsafe {
+        std::env::set_var("APP_DATABASE_POOL_SIZE", "64");
+    }
+
+    let root = temp_dir_path("confique-env-provider");
+    fs::create_dir_all(&root).unwrap();
+    fs::write(
+        root.join("config.yaml"),
+        concat!("database:\n", "  pool_size: 32\n",),
+    )
+    .unwrap();
+
+    let (config, figment) =
+        load_config_with_figment::<EnvMappedConfig>(root.join("config.yaml")).unwrap();
+
+    assert_eq!(config.database.pool_size, 64);
+
+    let metadata = figment.find_metadata("database.pool_size").unwrap();
+    assert_eq!(
+        metadata.interpolate(&Profile::Default, &["database", "pool_size"]),
+        "APP_DATABASE_POOL_SIZE",
+    );
+
+    unsafe {
+        std::env::remove_var("APP_DATABASE_POOL_SIZE");
     }
     let _ = fs::remove_dir_all(root);
 }

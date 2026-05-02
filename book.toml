@@ -1,0 +1,15 @@
+[book]
+title = "rust-config-tree Manual"
+authors = ["developerworks"]
+description = "Project manual for rust-config-tree."
+language = "en"
+src = "manual"
+
+[build]
+build-dir = "target/mdbook"
+create-missing = false
+
+[output.html]
+git-repository-url = "https://github.com/developerworks/rust-config-tree"
+edit-url-template = "https://github.com/developerworks/rust-config-tree/edit/main/{path}"
+site-url = "/rust-config-tree/"

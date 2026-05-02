@@ -2,7 +2,7 @@
 //!
 //! The lower-level API reports [`ConfigTreeError`]. The high-level `confique`
 //! integration wraps those traversal failures together with dotenv loading,
-//! config parsing, and IO errors in [`ConfigError`].
+//! Figment extraction, config parsing, and IO errors in [`ConfigError`].
 
 use std::{
     error::Error,
@@ -117,6 +117,8 @@ pub enum ConfigError {
     Tree(ConfigTreeError),
     /// Loading an existing `.env` file failed.
     Dotenv(dotenvy::Error),
+    /// Figment failed to load or deserialize runtime config data.
+    Figment(figment::Error),
     /// `confique` failed to load or merge config data.
     Config(confique::Error),
     /// File system or shell completion IO failed.
@@ -128,6 +130,7 @@ impl fmt::Display for ConfigError {
         match self {
             Self::Tree(err) => err.fmt(f),
             Self::Dotenv(err) => err.fmt(f),
+            Self::Figment(err) => err.fmt(f),
             Self::Config(err) => err.fmt(f),
             Self::Io(err) => err.fmt(f),
         }
@@ -139,6 +142,7 @@ impl Error for ConfigError {
         match self {
             Self::Tree(err) => Some(err),
             Self::Dotenv(err) => Some(err),
+            Self::Figment(err) => Some(err),
             Self::Config(err) => Some(err),
             Self::Io(err) => Some(err),
         }
@@ -154,6 +158,12 @@ impl From<ConfigTreeError> for ConfigError {
 impl From<dotenvy::Error> for ConfigError {
     fn from(err: dotenvy::Error) -> Self {
         Self::Dotenv(err)
+    }
+}
+
+impl From<figment::Error> for ConfigError {
+    fn from(err: figment::Error) -> Self {
+        Self::Figment(err)
     }
 }
 

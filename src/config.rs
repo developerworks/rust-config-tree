@@ -1,22 +1,31 @@
 //! High-level `confique` integration and config-template rendering.
 //!
-//! This module loads `.env` values, loads recursive config trees into a final
-//! `confique` schema, and renders example templates that mirror the same
-//! include tree. YAML templates can also be split across nested schema sections.
+//! This module loads `.env` values, builds a Figment runtime source graph,
+//! extracts it into a `confique` schema for defaults and validation, and
+//! renders example templates that mirror the same include tree. YAML templates
+//! can also be split across nested schema sections.
 
 use std::{
+    collections::HashMap,
     ffi::OsStr,
     fs,
     path::{Path, PathBuf},
+    sync::Arc,
 };
 
 use confique::{
-    Config, File, FileFormat,
+    Config, FileFormat, Layer,
     meta::{Expr, FieldKind, LeafKind, MapKey, Meta},
 };
+use figment::{
+    Figment, Metadata, Profile, Provider, Source,
+    providers::{Env, Format, Json, Toml, Yaml},
+    value::{Dict, Map, Uncased},
+};
+use tracing::trace;
 
 use crate::{
-    ConfigError, ConfigSource, ConfigTreeOptions, IncludeOrder, absolutize_lexical,
+    ConfigError, ConfigSource, ConfigTree, ConfigTreeOptions, IncludeOrder, absolutize_lexical,
     collect_template_targets, normalize_lexical, select_template_source,
 };
 
@@ -122,14 +131,81 @@ pub struct ConfigTemplateTarget {
     pub content: String,
 }
 
+/// Figment provider that maps environment variables declared in `confique`
+/// schema metadata onto their exact field paths.
+///
+/// This provider reads `#[config(env = "...")]` from [`Config::META`] and
+/// avoids Figment's delimiter-based environment key splitting. Environment
+/// variables such as `APP_DATABASE_POOL_SIZE` can therefore map to a Rust field
+/// named `database.pool_size` without treating the single underscores as nested
+/// separators.
+#[derive(Clone)]
+pub struct ConfiqueEnvProvider {
+    env: Env,
+    path_to_env: Arc<HashMap<String, String>>,
+}
+
+impl ConfiqueEnvProvider {
+    /// Creates an environment provider for a `confique` schema.
+    ///
+    /// # Type Parameters
+    ///
+    /// - `S`: Config schema whose metadata declares environment variable names.
+    ///
+    /// # Returns
+    ///
+    /// Returns a provider that emits only environment variables declared by `S`.
+    pub fn new<S>() -> Self
+    where
+        S: Config,
+    {
+        let mut env_to_path = HashMap::<String, String>::new();
+        let mut path_to_env = HashMap::<String, String>::new();
+
+        collect_env_mapping(&S::META, "", &mut env_to_path, &mut path_to_env);
+
+        let env_to_path = Arc::new(env_to_path);
+        let path_to_env = Arc::new(path_to_env);
+        let map_for_filter = Arc::clone(&env_to_path);
+
+        let env = Env::raw().filter_map(move |env_key| {
+            let lookup_key = env_key.as_str().to_ascii_uppercase();
+
+            map_for_filter
+                .get(&lookup_key)
+                .cloned()
+                .map(Uncased::from_owned)
+        });
+
+        Self { env, path_to_env }
+    }
+}
+
+impl Provider for ConfiqueEnvProvider {
+    fn metadata(&self) -> Metadata {
+        let path_to_env = Arc::clone(&self.path_to_env);
+
+        Metadata::named("environment variable").interpolater(move |_profile, keys| {
+            let path = keys.join(".");
+
+            path_to_env.get(&path).cloned().unwrap_or(path)
+        })
+    }
+
+    fn data(&self) -> Result<Map<Profile, Dict>, figment::Error> {
+        self.env.data()
+    }
+}
+
 /// Loads a complete `confique` schema from a root config path.
 ///
 /// The loader follows recursive include paths exposed by [`ConfigSchema`],
 /// resolves relative include paths from the declaring file, detects include
 /// cycles, loads the first `.env` file found from the root config directory
-/// upward, and then asks `confique` to merge the collected layers with
-/// environment values. Existing process environment variables take precedence
-/// over values loaded from `.env`.
+/// upward, builds a [`Figment`] from config files and schema-declared
+/// environment variables, and then asks `confique` to apply defaults and
+/// validation. Existing process environment variables take precedence over
+/// values loaded from `.env`.
 ///
 /// # Type Parameters
 ///
@@ -148,26 +224,96 @@ pub fn load_config<S>(path: impl AsRef<Path>) -> ConfigResult<S>
 where
     S: ConfigSchema,
 {
+    let (config, _) = load_config_with_figment::<S>(path)?;
+    Ok(config)
+}
+
+/// Loads a config schema and returns the Figment graph used for runtime loading.
+///
+/// The returned [`Figment`] can be inspected with [`Figment::find_metadata`] to
+/// determine which provider supplied a runtime value.
+///
+/// # Type Parameters
+///
+/// - `S`: Config schema type that derives [`Config`] and implements
+///   [`ConfigSchema`].
+///
+/// # Arguments
+///
+/// - `path`: Root config file path.
+///
+/// # Returns
+///
+/// Returns the merged config schema and its runtime Figment source graph.
+pub fn load_config_with_figment<S>(path: impl AsRef<Path>) -> ConfigResult<(S, Figment)>
+where
+    S: ConfigSchema,
+{
+    let figment = build_config_figment::<S>(path)?;
+    let config = load_config_from_figment::<S>(&figment)?;
+
+    Ok((config, figment))
+}
+
+/// Builds the Figment runtime source graph for a config tree.
+///
+/// Config files are merged in include order, then environment variables
+/// declared by [`ConfiqueEnvProvider`] are merged with higher priority.
+///
+/// # Type Parameters
+///
+/// - `S`: Config schema type used to discover includes and environment names.
+///
+/// # Arguments
+///
+/// - `path`: Root config file path.
+///
+/// # Returns
+///
+/// Returns a Figment source graph with file and environment providers.
+pub fn build_config_figment<S>(path: impl AsRef<Path>) -> ConfigResult<Figment>
+where
+    S: ConfigSchema,
+{
     let path = path.as_ref();
     load_dotenv_for_path(path)?;
 
-    let mut builder = S::builder().env();
-    let tree = ConfigTreeOptions::default()
-        .include_order(IncludeOrder::Reverse)
-        .load(
-            path,
-            |path| -> ConfigResult<ConfigSource<<S as Config>::Layer>> {
-                let layer = load_layer::<S>(path)?;
-                let include_paths = S::include_paths(&layer);
-                Ok(ConfigSource::new(layer, include_paths))
-            },
-        )?;
+    let tree = load_layer_tree::<S>(path)?;
+    let mut figment = Figment::new();
 
-    for layer in tree.into_values() {
-        builder = builder.preloaded(layer);
+    for node in tree.nodes().iter().rev() {
+        figment = merge_file_provider(figment, node.path());
     }
 
-    Ok(builder.load()?)
+    Ok(figment.merge(ConfiqueEnvProvider::new::<S>()))
+}
+
+/// Extracts and validates a config schema from a Figment source graph.
+///
+/// Figment supplies runtime values. `confique` supplies code defaults and final
+/// validation.
+///
+/// # Type Parameters
+///
+/// - `S`: Config schema type to extract and validate.
+///
+/// # Arguments
+///
+/// - `figment`: Runtime source graph.
+///
+/// # Returns
+///
+/// Returns the final config schema.
+pub fn load_config_from_figment<S>(figment: &Figment) -> ConfigResult<S>
+where
+    S: ConfigSchema,
+{
+    let runtime_layer: <S as Config>::Layer = figment.extract()?;
+    let config = S::from_layer(runtime_layer.with_fallback(S::Layer::default_values()))?;
+
+    trace_config_sources::<S>(figment);
+
+    Ok(config)
 }
 
 /// Loads one config layer from disk using the format inferred from the path.
@@ -188,7 +334,35 @@ pub fn load_layer<S>(path: &Path) -> ConfigResult<<S as Config>::Layer>
 where
     S: ConfigSchema,
 {
-    Ok(File::with_format(path, ConfigFormat::from_path(path).as_file_format()).load()?)
+    Ok(figment_for_file(path).extract()?)
+}
+
+fn load_layer_tree<S>(path: &Path) -> ConfigResult<ConfigTree<<S as Config>::Layer>>
+where
+    S: ConfigSchema,
+{
+    Ok(ConfigTreeOptions::default()
+        .include_order(IncludeOrder::Reverse)
+        .load(
+            path,
+            |path| -> ConfigResult<ConfigSource<<S as Config>::Layer>> {
+                let layer = load_layer::<S>(path)?;
+                let include_paths = S::include_paths(&layer);
+                Ok(ConfigSource::new(layer, include_paths))
+            },
+        )?)
+}
+
+fn merge_file_provider(figment: Figment, path: &Path) -> Figment {
+    match ConfigFormat::from_path(path) {
+        ConfigFormat::Yaml => figment.merge(Yaml::file_exact(path)),
+        ConfigFormat::Toml => figment.merge(Toml::file_exact(path)),
+        ConfigFormat::Json => figment.merge(Json::file_exact(path)),
+    }
+}
+
+fn figment_for_file(path: &Path) -> Figment {
+    merge_file_provider(Figment::new(), path)
 }
 
 /// Renders the default template for one path.
@@ -414,6 +588,32 @@ where
         .collect()
 }
 
+fn collect_env_mapping(
+    meta: &'static Meta,
+    prefix: &str,
+    env_to_path: &mut HashMap<String, String>,
+    path_to_env: &mut HashMap<String, String>,
+) {
+    for field in meta.fields {
+        let path = if prefix.is_empty() {
+            field.name.to_owned()
+        } else {
+            format!("{prefix}.{}", field.name)
+        };
+
+        match field.kind {
+            FieldKind::Leaf { env: Some(env), .. } => {
+                env_to_path.insert(env.to_ascii_uppercase(), path.clone());
+                path_to_env.insert(path, env.to_owned());
+            }
+            FieldKind::Leaf { env: None, .. } => {}
+            FieldKind::Nested { meta } => {
+                collect_env_mapping(meta, &path, env_to_path, path_to_env);
+            }
+        }
+    }
+}
+
 fn load_dotenv_for_path(path: &Path) -> ConfigResult<()> {
     let path = absolutize_lexical(path)?;
     let mut current_dir = path.parent();
@@ -517,6 +717,82 @@ fn immediate_child_section_paths(
             FieldKind::Leaf { .. } => None,
         })
         .collect()
+}
+
+/// Emits Figment source metadata for every leaf field at TRACE level.
+///
+/// This function returns immediately unless `tracing` has TRACE enabled. Callers
+/// can invoke it after initializing their tracing subscriber from the loaded log
+/// configuration.
+///
+/// # Type Parameters
+///
+/// - `S`: Config schema whose metadata declares the field paths to trace.
+///
+/// # Arguments
+///
+/// - `figment`: Runtime source graph used to load the config.
+///
+/// # Returns
+///
+/// This function only emits tracing events and returns no value.
+pub fn trace_config_sources<S>(figment: &Figment)
+where
+    S: ConfigSchema,
+{
+    if !tracing::enabled!(tracing::Level::TRACE) {
+        return;
+    }
+
+    for path in leaf_config_paths(&S::META) {
+        let source = config_source_for_path(figment, &path);
+        trace!(target: "rust_config_tree::config", config_key = %path, source = %source, "config source");
+    }
+}
+
+fn config_source_for_path(figment: &Figment, path: &str) -> String {
+    match figment.find_metadata(path) {
+        Some(metadata) => render_metadata(metadata, path),
+        None => "confique default or unset optional field".to_owned(),
+    }
+}
+
+fn render_metadata(metadata: &Metadata, path: &str) -> String {
+    match &metadata.source {
+        Some(Source::File(path)) => format!("{} `{}`", metadata.name, path.display()),
+        Some(Source::Custom(value)) => format!("{} `{value}`", metadata.name),
+        Some(Source::Code(location)) => {
+            format!("{} {}:{}", metadata.name, location.file(), location.line())
+        }
+        Some(_) => metadata.name.to_string(),
+        None => {
+            let parts = path.split('.').collect::<Vec<_>>();
+            let native = metadata.interpolate(&Profile::Default, &parts);
+
+            format!("{} `{native}`", metadata.name)
+        }
+    }
+}
+
+fn leaf_config_paths(meta: &'static Meta) -> Vec<String> {
+    let mut paths = Vec::new();
+    collect_leaf_config_paths(meta, "", &mut paths);
+    paths
+}
+
+fn collect_leaf_config_paths(meta: &'static Meta, prefix: &str, paths: &mut Vec<String>) {
+    for field in meta.fields {
+        let path = if prefix.is_empty() {
+            field.name.to_owned()
+        } else {
+            format!("{prefix}.{}", field.name)
+        };
+
+        match field.kind {
+            FieldKind::Leaf { .. } => paths.push(path),
+            FieldKind::Nested { meta } => collect_leaf_config_paths(meta, &path, paths),
+        }
+    }
 }
 
 fn infer_section_path_from_path<S>(path: &Path) -> Option<Vec<&'static str>>
