@@ -324,7 +324,7 @@ schema。未提供 output path 时，root schema 写入
 
 `config-validate` 会加载完整 runtime config tree，并执行 `confique` 默认值和
 校验。编辑拆分文件时用 editor schema 获得不误报的补全；必填项和最终配置
-校验交给这个命令。
+校验交给这个命令。校验成功时会输出 `Configuration is ok`。
 
 `completions <shell>` 将 completions 输出到 stdout。
 

@@ -4,4 +4,5 @@
 
 This is the English manual for `rust-config-tree`.
 
-Start with [Introduction](introduction.md) or [Quick Start](quick-start.md).
+Start with [Introduction](introduction.md), [Quick Start](quick-start.md), or
+the runnable [Examples](examples.md).

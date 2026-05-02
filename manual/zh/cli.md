@@ -110,6 +110,7 @@ demo config-validate
 
 生成的 editor schema 会刻意避免在拆分文件里触发必填字段诊断。
 `config-validate` 会加载 includes、应用默认值，并执行最终 `confique` 校验。
+校验成功时会输出 `Configuration is ok`。
 
 ## Shell Completions
 

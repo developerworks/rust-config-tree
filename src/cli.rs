@@ -103,6 +103,7 @@ where
         ConfigCommand::JsonSchema { output } => write_config_schemas::<S>(output),
         ConfigCommand::ConfigValidate => {
             load_config::<S>(config_path)?;
+            println!("Configuration is ok");
             Ok(())
         }
         ConfigCommand::Completions { shell } => {

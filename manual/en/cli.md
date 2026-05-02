@@ -113,7 +113,8 @@ demo config-validate
 
 Generated editor schemas intentionally avoid required-field diagnostics for
 split files. `config-validate` loads includes, applies defaults, and runs final
-`confique` validation.
+`confique` validation. It prints `Configuration is ok` when validation
+succeeds.
 
 ## Shell Completions
 

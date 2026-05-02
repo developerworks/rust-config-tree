@@ -10,5 +10,6 @@
 - [模板生成](templates.md)
 - [IDE 补全](ide-completions.md)
 - [CLI 集成](cli.md)
+- [示例](examples.md)
 - [Tree API](tree-api.md)
 - [GitHub Pages](github-pages.md)

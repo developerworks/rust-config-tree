@@ -399,7 +399,7 @@ section schemas. If no output path is provided, the root schema is written to
 `config-validate` loads the full runtime config tree and runs `confique`
 defaults and validation. Use editor schemas for non-noisy completion while
 editing split files; use this command for required fields and final config
-validation.
+validation. It prints `Configuration is ok` when validation succeeds.
 
 `completions <shell>` prints completions to stdout.
 

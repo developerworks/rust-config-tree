@@ -10,5 +10,6 @@
 - [Template Generation](templates.md)
 - [IDE Completions](ide-completions.md)
 - [CLI Integration](cli.md)
+- [Examples](examples.md)
 - [Tree API](tree-api.md)
 - [GitHub Pages](github-pages.md)

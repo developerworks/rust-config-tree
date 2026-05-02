@@ -52,3 +52,26 @@ The published URL is:
 ```text
 https://developerworks.github.io/rust-config-tree/
 ```
+
+## Crate Release
+
+For the complete commit, push, Pages deploy, and crate publish flow:
+
+```bash
+scripts/release.sh --execute --message "Release 0.1.3"
+```
+
+Use the crate release helper from the repository root:
+
+```bash
+scripts/publish-crate.sh
+```
+
+The default mode runs checks and `cargo publish --dry-run`. To publish to
+crates.io after the checks pass:
+
+```bash
+scripts/publish-crate.sh --execute
+```
+
+Script usage is summarized in `scripts/README.md`.

@@ -51,3 +51,25 @@ target/mdbook
 ```text
 https://developerworks.github.io/rust-config-tree/
 ```
+
+## Crate 发布
+
+完整的提交、推送、Pages 部署和 crate 发布流程：
+
+```bash
+scripts/release.sh --execute --message "Release 0.1.3"
+```
+
+在仓库根目录使用 crate 发布辅助脚本：
+
+```bash
+scripts/publish-crate.sh
+```
+
+默认模式会运行检查和 `cargo publish --dry-run`。检查通过后发布到 crates.io：
+
+```bash
+scripts/publish-crate.sh --execute
+```
+
+脚本用法汇总在 `scripts/README.md`。
