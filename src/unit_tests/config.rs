@@ -1,12 +1,15 @@
 use std::{
     fs,
     path::PathBuf,
+    sync::Mutex,
     time::{SystemTime, UNIX_EPOCH},
 };
 
 use confique::Config;
 
 use super::*;
+
+static DOTENV_TEST_LOCK: Mutex<()> = Mutex::new(());
 
 #[derive(Debug, Config)]
 #[allow(dead_code)]
@@ -26,6 +29,21 @@ struct TestServerConfig {
 }
 
 impl ConfigSchema for TestConfig {
+    fn include_paths(layer: &<Self as Config>::Layer) -> Vec<PathBuf> {
+        layer.include.clone().unwrap_or_default()
+    }
+}
+
+#[derive(Debug, Config)]
+#[allow(dead_code)]
+struct DotenvConfig {
+    #[config(default = [])]
+    include: Vec<PathBuf>,
+    #[config(env = "RUST_CONFIG_TREE_DOTENV_MODE", default = "paper")]
+    mode: String,
+}
+
+impl ConfigSchema for DotenvConfig {
     fn include_paths(layer: &<Self as Config>::Layer) -> Vec<PathBuf> {
         layer.include.clone().unwrap_or_default()
     }
@@ -105,6 +123,50 @@ fn load_config_returns_accessible_config_object() {
     assert_eq!(config.mode, "shadow");
     assert_eq!(config.server.port, 7777);
 
+    let _ = fs::remove_dir_all(root);
+}
+
+#[test]
+fn load_config_loads_dotenv_from_config_ancestors() {
+    let _guard = DOTENV_TEST_LOCK.lock().unwrap();
+    unsafe {
+        std::env::remove_var("RUST_CONFIG_TREE_DOTENV_MODE");
+    }
+
+    let root = temp_dir_path("load-dotenv");
+    fs::create_dir_all(root.join("config")).unwrap();
+    fs::write(root.join(".env"), "RUST_CONFIG_TREE_DOTENV_MODE=shadow\n").unwrap();
+    fs::write(root.join("config").join("app.yaml"), "").unwrap();
+
+    let config = load_config::<DotenvConfig>(root.join("config").join("app.yaml")).unwrap();
+
+    assert_eq!(config.mode, "shadow");
+
+    unsafe {
+        std::env::remove_var("RUST_CONFIG_TREE_DOTENV_MODE");
+    }
+    let _ = fs::remove_dir_all(root);
+}
+
+#[test]
+fn load_config_preserves_environment_over_dotenv() {
+    let _guard = DOTENV_TEST_LOCK.lock().unwrap();
+    unsafe {
+        std::env::set_var("RUST_CONFIG_TREE_DOTENV_MODE", "process");
+    }
+
+    let root = temp_dir_path("preserve-env-over-dotenv");
+    fs::create_dir_all(root.join("config")).unwrap();
+    fs::write(root.join(".env"), "RUST_CONFIG_TREE_DOTENV_MODE=dotenv\n").unwrap();
+    fs::write(root.join("config").join("app.yaml"), "").unwrap();
+
+    let config = load_config::<DotenvConfig>(root.join("config").join("app.yaml")).unwrap();
+
+    assert_eq!(config.mode, "process");
+
+    unsafe {
+        std::env::remove_var("RUST_CONFIG_TREE_DOTENV_MODE");
+    }
     let _ = fs::remove_dir_all(root);
 }
 

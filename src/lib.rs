@@ -7,7 +7,7 @@
 //!
 //! Use [`ConfigSchema`] with a `confique::Config` type when your schema owns an
 //! include field. Use [`load_config`] to load the root config, all recursive
-//! includes, and environment values into the final schema. Use
+//! includes, `.env` values, and environment values into the final schema. Use
 //! [`write_config_templates`] or [`ConfigCommand`] to generate example template
 //! files that mirror the same include tree.
 

@@ -1,8 +1,8 @@
 //! Error types shared by the tree loader and high-level config API.
 //!
 //! The lower-level API reports [`ConfigTreeError`]. The high-level `confique`
-//! integration wraps those traversal failures together with config parsing and
-//! IO errors in [`ConfigError`].
+//! integration wraps those traversal failures together with dotenv loading,
+//! config parsing, and IO errors in [`ConfigError`].
 
 use std::{
     error::Error,
@@ -115,6 +115,8 @@ impl Error for ConfigTreeError {
 pub enum ConfigError {
     /// Tree traversal failed.
     Tree(ConfigTreeError),
+    /// Loading an existing `.env` file failed.
+    Dotenv(dotenvy::Error),
     /// `confique` failed to load or merge config data.
     Config(confique::Error),
     /// File system or shell completion IO failed.
@@ -125,6 +127,7 @@ impl fmt::Display for ConfigError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Tree(err) => err.fmt(f),
+            Self::Dotenv(err) => err.fmt(f),
             Self::Config(err) => err.fmt(f),
             Self::Io(err) => err.fmt(f),
         }
@@ -135,6 +138,7 @@ impl Error for ConfigError {
     fn source(&self) -> Option<&(dyn Error + 'static)> {
         match self {
             Self::Tree(err) => Some(err),
+            Self::Dotenv(err) => Some(err),
             Self::Config(err) => Some(err),
             Self::Io(err) => Some(err),
         }
@@ -144,6 +148,12 @@ impl Error for ConfigError {
 impl From<ConfigTreeError> for ConfigError {
     fn from(err: ConfigTreeError) -> Self {
         Self::Tree(err)
+    }
+}
+
+impl From<dotenvy::Error> for ConfigError {
+    fn from(err: dotenvy::Error) -> Self {
+        Self::Dotenv(err)
     }
 }
 

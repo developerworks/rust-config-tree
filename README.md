@@ -9,6 +9,7 @@ It handles:
 - `config-template`, `completions`, and `install-completions` command handlers
 - config template generation for YAML, TOML, JSON, and JSON5
 - recursive include traversal
+- `.env` loading before environment values are merged
 - relative include paths resolved from the file declaring them
 - lexical path normalization
 - include cycle detection
@@ -103,6 +104,11 @@ use rust_config_tree::load_config;
 let config = load_config::<AppConfig>("config.yaml")?;
 # Ok::<(), Box<dyn std::error::Error + Send + Sync>>(())
 ```
+
+`load_config` loads the first `.env` file found by walking upward from the root
+config file's directory before asking `confique` to read environment variables.
+Values already present in the process environment are preserved and take
+precedence over `.env` values.
 
 ## Template Generation
 

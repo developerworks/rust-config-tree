@@ -1,8 +1,8 @@
 //! High-level `confique` integration and config-template rendering.
 //!
-//! This module loads recursive config trees into a final `confique` schema and
-//! renders example templates that mirror the same include tree. YAML templates
-//! can also be split across nested schema sections.
+//! This module loads `.env` values, loads recursive config trees into a final
+//! `confique` schema, and renders example templates that mirror the same
+//! include tree. YAML templates can also be split across nested schema sections.
 
 use std::{
     ffi::OsStr,
@@ -126,8 +126,10 @@ pub struct ConfigTemplateTarget {
 ///
 /// The loader follows recursive include paths exposed by [`ConfigSchema`],
 /// resolves relative include paths from the declaring file, detects include
-/// cycles, and then asks `confique` to merge the collected layers with
-/// environment values.
+/// cycles, loads the first `.env` file found from the root config directory
+/// upward, and then asks `confique` to merge the collected layers with
+/// environment values. Existing process environment variables take precedence
+/// over values loaded from `.env`.
 ///
 /// # Type Parameters
 ///
@@ -141,11 +143,14 @@ pub struct ConfigTemplateTarget {
 /// # Returns
 ///
 /// Returns the merged config schema after loading the root file, recursive
-/// includes, and environment values.
+/// includes, `.env` values, and environment values.
 pub fn load_config<S>(path: impl AsRef<Path>) -> ConfigResult<S>
 where
     S: ConfigSchema,
 {
+    let path = path.as_ref();
+    load_dotenv_for_path(path)?;
+
     let mut builder = S::builder().env();
     let tree = ConfigTreeOptions::default()
         .include_order(IncludeOrder::Reverse)
@@ -407,6 +412,22 @@ where
             path_relative_to(&child_path, source_base_dir)
         })
         .collect()
+}
+
+fn load_dotenv_for_path(path: &Path) -> ConfigResult<()> {
+    let path = absolutize_lexical(path)?;
+    let mut current_dir = path.parent();
+
+    while let Some(dir) = current_dir {
+        let dotenv_path = dir.join(".env");
+        if dotenv_path.try_exists()? {
+            dotenvy::from_path(&dotenv_path)?;
+            break;
+        }
+        current_dir = dir.parent();
+    }
+
+    Ok(())
 }
 
 fn section_path_for_target<S>(root_base_dir: &Path, target_path: &Path) -> Option<Vec<&'static str>>
