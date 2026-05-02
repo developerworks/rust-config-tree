@@ -1,6 +1,6 @@
 # CLI 集成
 
-[English](../en/cli.md) | [中文](cli.md)
+[English](../en/cli.html) | [中文](cli.html)
 
 `ConfigCommand` 提供可复用的 clap 子命令：
 

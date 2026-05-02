@@ -1,6 +1,6 @@
 # Tree API
 
-[English](../en/tree-api.md) | [中文](tree-api.md)
+[English](../en/tree-api.html) | [中文](tree-api.html)
 
 应用不使用 `confique`，或者需要直接访问遍历结果时，可以使用低层 tree API。
 

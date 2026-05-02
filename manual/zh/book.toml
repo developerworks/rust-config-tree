@@ -1,0 +1,14 @@
+[book]
+title = "rust-config-tree 手册"
+authors = ["developerworks"]
+description = "中文 rust-config-tree 项目手册。"
+language = "zh-CN"
+src = "."
+
+[build]
+create-missing = false
+
+[output.html]
+git-repository-url = "https://github.com/developerworks/rust-config-tree"
+edit-url-template = "https://github.com/developerworks/rust-config-tree/edit/main/manual/zh/{path}"
+site-url = "/rust-config-tree/zh/"

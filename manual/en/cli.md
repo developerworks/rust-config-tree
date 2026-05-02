@@ -1,6 +1,6 @@
 # CLI Integration
 
-[English](cli.md) | [中文](../zh/cli.md)
+[English](cli.html) | [中文](../zh/cli.html)
 
 `ConfigCommand` provides reusable clap subcommands:
 

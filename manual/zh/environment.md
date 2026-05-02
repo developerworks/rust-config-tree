@@ -1,6 +1,6 @@
 # 环境变量
 
-[English](../en/environment.md) | [中文](environment.md)
+[English](../en/environment.html) | [中文](environment.html)
 
 环境变量名在 schema 中通过 `confique` 声明：
 

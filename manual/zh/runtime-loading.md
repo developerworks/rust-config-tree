@@ -1,6 +1,6 @@
 # 运行时加载
 
-[English](../en/runtime-loading.md) | [中文](runtime-loading.md)
+[English](../en/runtime-loading.html) | [中文](runtime-loading.html)
 
 运行时加载刻意拆分给 Figment 和 confique：
 

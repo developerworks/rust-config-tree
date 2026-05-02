@@ -1,20 +1,24 @@
 # GitHub Pages
 
-[English](github-pages.md) | [中文](../zh/github-pages.md)
+[English](github-pages.html) | [中文](../zh/github-pages.html)
 
 This repository publishes the manual with mdBook and GitHub Pages.
 
-The mdBook source lives in `manual/`, configured by `book.toml`:
+The English and Chinese manuals are independent mdBook projects. Each language
+has its own `SUMMARY.md`, so the left sidebar only contains pages for the
+current language:
 
 ```text
-book.toml
 manual/
-  SUMMARY.md
   en/
+    book.toml
+    SUMMARY.md
     introduction.md
     quick-start.md
     ...
   zh/
+    book.toml
+    SUMMARY.md
     introduction.md
     quick-start.md
     ...
@@ -23,7 +27,7 @@ manual/
 Build locally with:
 
 ```bash
-mdbook build
+scripts/publish-pages.sh
 ```
 
 The generated site is written to:
@@ -39,7 +43,7 @@ manual dispatch. It:
 
 1. Checks out the repository.
 2. Installs mdBook.
-3. Builds the manual.
+3. Runs `scripts/publish-pages.sh`.
 4. Uploads `target/mdbook` as the Pages artifact.
 5. Deploys the artifact to GitHub Pages.
 

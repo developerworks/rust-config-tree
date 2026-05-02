@@ -1,6 +1,6 @@
 # rust-config-tree Manual
 
-[English](README.md) | [中文](../zh/README.md)
+[English](./) | [中文](../zh/)
 
 This is the English manual for `rust-config-tree`.
 

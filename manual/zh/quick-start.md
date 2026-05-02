@@ -1,6 +1,6 @@
 # 快速开始
 
-[English](../en/quick-start.md) | [中文](quick-start.md)
+[English](../en/quick-start.html) | [中文](quick-start.html)
 
 添加 crate 以及应用所需的 schema 和运行时库：
 

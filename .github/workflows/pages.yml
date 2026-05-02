@@ -31,7 +31,7 @@ jobs:
         run: cargo install mdbook --locked
 
       - name: Build manual
-        run: mdbook build
+        run: scripts/publish-pages.sh
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v5

@@ -1,6 +1,6 @@
 # 简介
 
-[English](../en/introduction.md) | [中文](introduction.md)
+[English](../en/introduction.html) | [中文](introduction.html)
 
 `rust-config-tree` 为使用分层配置文件的 Rust 应用提供可复用的配置树加载
 能力和 CLI 辅助能力。

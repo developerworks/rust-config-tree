@@ -1,6 +1,6 @@
 # Template Generation
 
-[English](templates.md) | [中文](../zh/templates.md)
+[English](templates.html) | [中文](../zh/templates.html)
 
 Templates are generated from the same `confique` schema used at runtime.
 `confique` renders the actual template content, including doc comments,

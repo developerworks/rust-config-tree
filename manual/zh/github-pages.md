@@ -1,20 +1,23 @@
 # GitHub Pages
 
-[English](../en/github-pages.md) | [中文](github-pages.md)
+[English](../en/github-pages.html) | [中文](github-pages.html)
 
 本仓库使用 mdBook 和 GitHub Pages 发布手册。
 
-mdBook source 位于 `manual/`，由 `book.toml` 配置：
+英文手册和中文手册是两个独立的 mdBook 项目。每种语言都有自己的
+`SUMMARY.md`，因此左侧目录只显示当前语言的页面：
 
 ```text
-book.toml
 manual/
-  SUMMARY.md
   en/
+    book.toml
+    SUMMARY.md
     introduction.md
     quick-start.md
     ...
   zh/
+    book.toml
+    SUMMARY.md
     introduction.md
     quick-start.md
     ...
@@ -23,7 +26,7 @@ manual/
 本地构建：
 
 ```bash
-mdbook build
+scripts/publish-pages.sh
 ```
 
 生成站点写入：
@@ -39,7 +42,7 @@ target/mdbook
 
 1. Checkout 仓库。
 2. 安装 mdBook。
-3. 构建手册。
+3. 运行 `scripts/publish-pages.sh`。
 4. 将 `target/mdbook` 上传为 Pages artifact。
 5. 将 artifact 部署到 GitHub Pages。
 

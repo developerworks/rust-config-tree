@@ -1,6 +1,6 @@
 # Introduction
 
-[English](introduction.md) | [中文](../zh/introduction.md)
+[English](introduction.html) | [中文](../zh/introduction.html)
 
 `rust-config-tree` provides reusable configuration-tree loading and CLI helpers
 for Rust applications that use layered config files.

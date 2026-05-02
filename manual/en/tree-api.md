@@ -1,6 +1,6 @@
 # Tree API
 
-[English](tree-api.md) | [中文](../zh/tree-api.md)
+[English](tree-api.html) | [中文](../zh/tree-api.html)
 
 Use the lower-level tree API when the application does not use `confique`, or
 when it needs direct access to traversal results.

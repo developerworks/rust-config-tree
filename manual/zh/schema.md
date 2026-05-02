@@ -1,6 +1,6 @@
 # 配置结构
 
-[English](../en/schema.md) | [中文](schema.md)
+[English](../en/schema.html) | [中文](schema.html)
 
 应用 schema 是普通的 `confique` config 类型。root schema 必须实现
 `ConfigSchema`，这样 `rust-config-tree` 才能从中间 `confique` layer 发现

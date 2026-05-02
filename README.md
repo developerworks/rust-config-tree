@@ -3,8 +3,9 @@
 `rust-config-tree` provides configuration-tree loading and CLI helpers for Rust
 applications that use layered config files.
 
-Project manual: <https://developerworks.github.io/rust-config-tree/>. The
-manual includes synchronized English and Chinese chapters.
+Project manual: <https://developerworks.github.io/rust-config-tree/>. English
+and Chinese manuals are published as independent mdBook sites with language
+switch links.
 
 It handles:
 
@@ -93,23 +94,12 @@ Load the final schema with `load_config`:
 ```rust
 use rust_config_tree::load_config;
 
-# use std::path::PathBuf;
-# use confique::Config;
-# use rust_config_tree::ConfigSchema;
-# #[derive(Debug, Config)]
-# struct AppConfig {
-#     #[config(default = [])]
-#     include: Vec<PathBuf>,
-#     #[config(default = "paper")]
-#     mode: String,
-# }
-# impl ConfigSchema for AppConfig {
-#     fn include_paths(layer: &<Self as Config>::Layer) -> Vec<PathBuf> {
-#         layer.include.clone().unwrap_or_default()
-#     }
-# }
-let config = load_config::<AppConfig>("config.yaml")?;
-# Ok::<(), Box<dyn std::error::Error + Send + Sync>>(())
+fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    let config = load_config::<AppConfig>("config.yaml")?;
+    println!("{config:#?}");
+
+    Ok(())
+}
 ```
 
 `load_config` loads the first `.env` file found by walking upward from the root
@@ -128,29 +118,18 @@ Use `load_config_with_figment` when the caller needs source metadata:
 ```rust
 use rust_config_tree::load_config_with_figment;
 
-# use std::path::PathBuf;
-# use confique::Config;
-# use rust_config_tree::ConfigSchema;
-# #[derive(Debug, Config)]
-# struct AppConfig {
-#     #[config(default = [])]
-#     include: Vec<PathBuf>,
-#     #[config(default = "paper")]
-#     #[config(env = "APP_MODE")]
-#     mode: String,
-# }
-# impl ConfigSchema for AppConfig {
-#     fn include_paths(layer: &<Self as Config>::Layer) -> Vec<PathBuf> {
-#         layer.include.clone().unwrap_or_default()
-#     }
-# }
-let (config, figment) = load_config_with_figment::<AppConfig>("config.yaml")?;
-if let Some(metadata) = figment.find_metadata("mode") {
-    let source = metadata.interpolate(&figment::Profile::Default, &["mode"]);
-    println!("mode came from {source}");
+fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    let (config, figment) = load_config_with_figment::<AppConfig>("config.yaml")?;
+
+    if let Some(metadata) = figment.find_metadata("mode") {
+        let source = metadata.interpolate(&figment::Profile::Default, &["mode"]);
+        println!("mode came from {source}");
+    }
+
+    println!("{config:#?}");
+
+    Ok(())
 }
-# let _ = config;
-# Ok::<(), Box<dyn std::error::Error + Send + Sync>>(())
 ```
 
 The loader also emits config source tracking with `tracing::trace!`. Those
@@ -174,21 +153,11 @@ reachable from its include tree:
 ```rust
 use rust_config_tree::write_config_templates;
 
-# use std::path::PathBuf;
-# use confique::Config;
-# use rust_config_tree::ConfigSchema;
-# #[derive(Debug, Config)]
-# struct AppConfig {
-#     #[config(default = [])]
-#     include: Vec<PathBuf>,
-# }
-# impl ConfigSchema for AppConfig {
-#     fn include_paths(layer: &<Self as Config>::Layer) -> Vec<PathBuf> {
-#         layer.include.clone().unwrap_or_default()
-#     }
-# }
-write_config_templates::<AppConfig>("config.yaml", "config.example.yaml")?;
-# Ok::<(), Box<dyn std::error::Error + Send + Sync>>(())
+fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    write_config_templates::<AppConfig>("config.yaml", "config.example.yaml")?;
+
+    Ok(())
+}
 ```
 
 Template generation chooses its source tree in this order:
@@ -214,21 +183,11 @@ Override `template_path_for_section` when a section should be generated at a
 different path:
 
 ```rust
-# use std::path::PathBuf;
-# use confique::Config;
-# use rust_config_tree::ConfigSchema;
-# #[derive(Debug, Config)]
-# struct AppConfig {
-#     #[config(default = [])]
-#     include: Vec<PathBuf>,
-#     #[config(nested)]
-#     server: ServerConfig,
-# }
-# #[derive(Debug, Config)]
-# struct ServerConfig {
-#     #[config(default = 8080)]
-#     port: u16,
-# }
+use std::path::PathBuf;
+
+use confique::Config;
+use rust_config_tree::ConfigSchema;
+
 impl ConfigSchema for AppConfig {
     fn include_paths(layer: &<Self as Config>::Layer) -> Vec<PathBuf> {
         layer.include.clone().unwrap_or_default()
@@ -339,11 +298,15 @@ fn load_source(path: &Path) -> io::Result<ConfigSource<String>> {
     Ok(ConfigSource::new(content, includes))
 }
 
-let tree = load_config_tree("config.yaml", load_source)?;
-for node in tree.nodes() {
-    println!("{}", node.path().display());
+fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    let tree = load_config_tree("config.yaml", load_source)?;
+
+    for node in tree.nodes() {
+        println!("{}", node.path().display());
+    }
+
+    Ok(())
 }
-# Ok::<(), Box<dyn std::error::Error + Send + Sync>>(())
 ```
 
 The tree API normalizes paths lexically, rejects empty include paths, detects

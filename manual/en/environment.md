@@ -1,6 +1,6 @@
 # Environment Variables
 
-[English](environment.md) | [中文](../zh/environment.md)
+[English](environment.html) | [中文](../zh/environment.html)
 
 Environment variable names are declared in the schema with `confique`:
 

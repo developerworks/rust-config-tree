@@ -1,6 +1,6 @@
 # rust-config-tree 手册
 
-[English](../en/README.md) | [中文](README.md)
+[English](../en/) | [中文](./)
 
 这是 `rust-config-tree` 的中文手册。
 

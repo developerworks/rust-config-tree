@@ -1,6 +1,6 @@
 # Configuration Schema
 
-[English](schema.md) | [中文](../zh/schema.md)
+[English](schema.html) | [中文](../zh/schema.html)
 
 Application schemas are normal `confique` config types. The root schema must
 implement `ConfigSchema` so `rust-config-tree` can discover recursive includes

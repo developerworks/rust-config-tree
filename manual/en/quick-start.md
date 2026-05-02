@@ -1,6 +1,6 @@
 # Quick Start
 
-[English](quick-start.md) | [中文](../zh/quick-start.md)
+[English](quick-start.html) | [中文](../zh/quick-start.html)
 
 Add the crate and the schema/runtime libraries used by your application:
 

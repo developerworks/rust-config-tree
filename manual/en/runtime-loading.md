@@ -1,6 +1,6 @@
 # Runtime Loading
 
-[English](runtime-loading.md) | [中文](../zh/runtime-loading.md)
+[English](runtime-loading.html) | [中文](../zh/runtime-loading.html)
 
 Runtime loading is intentionally split between Figment and confique:
 
