@@ -8,7 +8,7 @@ tree API.
 
 Read the repository examples index:
 
-- [examples/README.md](../../examples/README.md)
+- [examples/README.md](https://github.com/developerworks/rust-config-tree/blob/main/examples/README.md)
 
 Run examples from the repository root:
 

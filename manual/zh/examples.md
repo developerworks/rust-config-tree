@@ -7,7 +7,7 @@
 
 阅读仓库 examples 索引：
 
-- [examples/README.md](../../examples/README.md)
+- [examples/README.md](https://github.com/developerworks/rust-config-tree/blob/main/examples/README.md)
 
 在仓库根目录运行示例：
 
