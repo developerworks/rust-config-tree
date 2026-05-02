@@ -14,12 +14,66 @@ write_config_templates::<AppConfig>("config.yaml", "config.example.yaml")?;
 # Ok::<(), Box<dyn std::error::Error + Send + Sync>>(())
 ```
 
+生成一份 Draft 7 JSON Schema，供 TOML、YAML 和 JSON 编辑器支持共用：
+
+```rust
+use rust_config_tree::write_config_schema;
+
+write_config_schema::<AppConfig>("schemas/myapp.schema.json")?;
+# Ok::<(), Box<dyn std::error::Error + Send + Sync>>(())
+```
+
+生成 TOML 和 YAML 模板时绑定这份 schema：
+
+```rust
+use rust_config_tree::write_config_templates_with_schema;
+
+write_config_templates_with_schema::<AppConfig>(
+    "config.toml",
+    "config.example.toml",
+    "schemas/myapp.schema.json",
+)?;
+# Ok::<(), Box<dyn std::error::Error + Send + Sync>>(())
+```
+
+TOML 模板会得到 `#:schema` directive。YAML 模板会得到 YAML Language
+Server modeline。JSON 和 JSON5 模板保持不变，避免运行时配置里出现
+`$schema` 字段。JSON 文件应通过 VS Code `json.schemas` 等编辑器设置绑定。
+
 输出格式由输出路径推断：
 
 - `.yaml` 和 `.yml` 生成 YAML。
 - `.toml` 生成 TOML。
 - `.json` 和 `.json5` 生成 JSON5-compatible 模板。
 - 未知或缺失扩展名生成 YAML。
+
+## Schema 绑定
+
+当 schema path 是 `schemas/myapp.schema.json` 时，生成的模板会使用：
+
+```toml
+#:schema ./schemas/myapp.schema.json
+```
+
+```yaml
+# yaml-language-server: $schema=./schemas/myapp.schema.json
+```
+
+JSON 不写 `$schema`，通过编辑器设置绑定：
+
+```json
+{
+  "json.schemas": [
+    {
+      "fileMatch": [
+        "/config.json",
+        "/config.*.json"
+      ],
+      "url": "./schemas/myapp.schema.json"
+    }
+  ]
+}
+```
 
 ## 模板 Source 选择
 

@@ -11,10 +11,14 @@ use std::{
 
 use clap::{CommandFactory, Subcommand};
 use clap_complete::aot::{Shell, generate, generate_to};
+use schemars::JsonSchema;
 
 use crate::{
     ConfigResult, ConfigSchema,
-    config::{resolve_config_template_output, write_config_templates},
+    config::{
+        resolve_config_template_output, write_config_schema, write_config_templates,
+        write_config_templates_with_schema,
+    },
 };
 
 /// Built-in clap subcommands for config templates and shell completions.
@@ -27,6 +31,18 @@ pub enum ConfigCommand {
         /// Template output path. Defaults to `config.example.yaml`.
         #[arg(long)]
         output: Option<PathBuf>,
+
+        /// JSON Schema path to bind from TOML/YAML templates.
+        #[arg(long)]
+        schema: Option<PathBuf>,
+    },
+
+    /// Generate a JSON Schema for editor completion and validation.
+    #[command(name = "config-schema")]
+    JsonSchema {
+        /// Schema output path. Defaults to `schemas/config.schema.json`.
+        #[arg(long, default_value = "schemas/config.schema.json")]
+        output: PathBuf,
     },
 
     /// Generate shell completions.
@@ -47,12 +63,13 @@ pub enum ConfigCommand {
 /// Handles a built-in config subcommand for a consumer CLI.
 ///
 /// `C` is the clap parser type used to generate completion metadata. `S` is the
-/// application config schema used for template generation.
+/// application config schema used for template and JSON Schema generation.
 ///
 /// # Type Parameters
 ///
 /// - `C`: The consumer CLI parser type that implements [`CommandFactory`].
-/// - `S`: The consumer config schema used when rendering config templates.
+/// - `S`: The consumer config schema used when rendering config templates and
+///   JSON Schema files.
 ///
 /// # Arguments
 ///
@@ -66,13 +83,19 @@ pub enum ConfigCommand {
 pub fn handle_config_command<C, S>(command: ConfigCommand, config_path: &Path) -> ConfigResult<()>
 where
     C: CommandFactory,
-    S: ConfigSchema,
+    S: ConfigSchema + JsonSchema,
 {
     match command {
-        ConfigCommand::ConfigTemplate { output } => {
+        ConfigCommand::ConfigTemplate { output, schema } => {
             let output = resolve_config_template_output(output)?;
-            write_config_templates::<S>(config_path, output)
+            match schema {
+                Some(schema) => {
+                    write_config_templates_with_schema::<S>(config_path, output, schema)
+                }
+                None => write_config_templates::<S>(config_path, output),
+            }
         }
+        ConfigCommand::JsonSchema { output } => write_config_schema::<S>(output),
         ConfigCommand::Completions { shell } => {
             print_shell_completion::<C>(shell);
             Ok(())

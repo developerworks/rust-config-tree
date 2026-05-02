@@ -1,14 +1,16 @@
 //! High-level `confique` integration and config-template rendering.
 //!
 //! This module loads `.env` values, builds a Figment runtime source graph,
-//! extracts it into a `confique` schema for defaults and validation, and
-//! renders example templates that mirror the same include tree. YAML templates
-//! can also be split across nested schema sections.
+//! extracts it into a `confique` schema for defaults and validation, renders
+//! example templates that mirror the same include tree, and writes JSON Schema
+//! files that editors can use for completion and validation. YAML templates can
+//! also be split across nested schema sections.
 
 use std::{
     collections::HashMap,
     ffi::OsStr,
     fs,
+    path::Component,
     path::{Path, PathBuf},
     sync::Arc,
 };
@@ -22,6 +24,7 @@ use figment::{
     providers::{Env, Format, Json, Toml, Yaml},
     value::{Dict, Map, Uncased},
 };
+use schemars::{JsonSchema, generate::SchemaSettings};
 use tracing::trace;
 
 use crate::{
@@ -365,6 +368,36 @@ fn figment_for_file(path: &Path) -> Figment {
     merge_file_provider(Figment::new(), path)
 }
 
+/// Writes a Draft 7 JSON Schema for a config type.
+///
+/// The same generated schema can be referenced from TOML, YAML, and JSON
+/// configuration files. TOML and YAML templates can bind it with editor
+/// directives. JSON files should usually be bound through editor settings
+/// rather than a runtime `$schema` field.
+///
+/// # Type Parameters
+///
+/// - `S`: Config schema type that derives [`JsonSchema`].
+///
+/// # Arguments
+///
+/// - `output_path`: Destination path for the generated JSON Schema.
+///
+/// # Returns
+///
+/// Returns `Ok(())` after the schema file has been written.
+pub fn write_config_schema<S>(output_path: impl AsRef<Path>) -> ConfigResult<()>
+where
+    S: JsonSchema,
+{
+    let generator = SchemaSettings::draft07().into_generator();
+    let schema = generator.into_root_schema_for::<S>();
+    let mut json = serde_json::to_string_pretty(&schema)?;
+    ensure_single_trailing_newline(&mut json);
+
+    write_template(output_path.as_ref(), &json)
+}
+
 /// Renders the default template for one path.
 ///
 /// The template format is inferred from the path extension.
@@ -468,6 +501,47 @@ where
         .collect()
 }
 
+/// Collects template targets and binds TOML/YAML templates to a JSON Schema.
+///
+/// TOML targets receive a `#:schema` directive. YAML targets receive a YAML
+/// Language Server modeline. JSON and JSON5 targets are left unchanged so the
+/// runtime configuration is not polluted with a `$schema` field.
+///
+/// # Type Parameters
+///
+/// - `S`: Config schema type used to discover includes and render templates.
+///
+/// # Arguments
+///
+/// - `config_path`: Root config path preferred as the template source when it
+///   exists.
+/// - `output_path`: Root output path for generated templates.
+/// - `schema_path`: JSON Schema path to reference from TOML/YAML templates.
+///
+/// # Returns
+///
+/// Returns all generated template targets in traversal order.
+pub fn template_targets_for_paths_with_schema<S>(
+    config_path: impl AsRef<Path>,
+    output_path: impl AsRef<Path>,
+    schema_path: impl AsRef<Path>,
+) -> ConfigResult<Vec<ConfigTemplateTarget>>
+where
+    S: ConfigSchema,
+{
+    template_targets_for_paths::<S>(config_path, output_path)?
+        .into_iter()
+        .map(|mut target| {
+            target.content = template_with_schema_directive(
+                &target.path,
+                schema_path.as_ref(),
+                &target.content,
+            )?;
+            Ok(target)
+        })
+        .collect()
+}
+
 /// Writes all generated config templates for a config tree.
 ///
 /// Parent directories are created before each target is written.
@@ -493,6 +567,43 @@ where
     S: ConfigSchema,
 {
     for target in template_targets_for_paths::<S>(config_path, output_path)? {
+        write_template(&target.path, &target.content)?;
+    }
+
+    Ok(())
+}
+
+/// Writes all generated config templates with editor schema bindings.
+///
+/// TOML targets receive `#:schema <path>`, YAML targets receive
+/// `# yaml-language-server: $schema=<path>`, and JSON targets are left
+/// unchanged. The schema path is rendered relative to each template file.
+///
+/// # Type Parameters
+///
+/// - `S`: Config schema type used to discover includes and render templates.
+///
+/// # Arguments
+///
+/// - `config_path`: Root config path preferred as the template source when it
+///   exists.
+/// - `output_path`: Root output path for generated templates.
+/// - `schema_path`: JSON Schema path to reference from TOML/YAML templates.
+///
+/// # Returns
+///
+/// Returns `Ok(())` after all template files have been written.
+pub fn write_config_templates_with_schema<S>(
+    config_path: impl AsRef<Path>,
+    output_path: impl AsRef<Path>,
+    schema_path: impl AsRef<Path>,
+) -> ConfigResult<()>
+where
+    S: ConfigSchema,
+{
+    for target in
+        template_targets_for_paths_with_schema::<S>(config_path, output_path, schema_path)?
+    {
         write_template(&target.path, &target.content)?;
     }
 
@@ -562,6 +673,76 @@ fn load_include_paths_only(path: &Path) -> ConfigResult<Vec<PathBuf>> {
         Ok(paths) => Ok(paths),
         Err(error) if error.missing() => Ok(Vec::new()),
         Err(error) => Err(error.into()),
+    }
+}
+
+fn template_with_schema_directive(
+    template_path: &Path,
+    schema_path: &Path,
+    content: &str,
+) -> ConfigResult<String> {
+    let schema_ref = schema_reference_for_path(template_path, schema_path)?;
+    let directive = match ConfigFormat::from_path(template_path) {
+        ConfigFormat::Yaml => Some(format!("# yaml-language-server: $schema={schema_ref}")),
+        ConfigFormat::Toml => Some(format!("#:schema {schema_ref}")),
+        ConfigFormat::Json => None,
+    };
+
+    let Some(directive) = directive else {
+        return Ok(content.to_owned());
+    };
+
+    Ok(format!("{directive}\n\n{content}"))
+}
+
+fn schema_reference_for_path(template_path: &Path, schema_path: &Path) -> ConfigResult<String> {
+    let template_path = absolutize_lexical(template_path)?;
+    let schema_path = absolutize_lexical(schema_path)?;
+    let template_dir = template_path.parent().unwrap_or_else(|| Path::new("."));
+    let relative_path = relative_path_from(&schema_path, template_dir);
+    Ok(render_schema_reference(&relative_path))
+}
+
+fn relative_path_from(path: &Path, base: &Path) -> PathBuf {
+    let path_components = path.components().collect::<Vec<_>>();
+    let base_components = base.components().collect::<Vec<_>>();
+
+    let mut common_len = 0;
+    while common_len < path_components.len()
+        && common_len < base_components.len()
+        && path_components[common_len] == base_components[common_len]
+    {
+        common_len += 1;
+    }
+
+    if common_len == 0 {
+        return path.to_path_buf();
+    }
+
+    let mut relative = PathBuf::new();
+    for component in &base_components[common_len..] {
+        if matches!(component, Component::Normal(_)) {
+            relative.push("..");
+        }
+    }
+
+    for component in &path_components[common_len..] {
+        relative.push(component.as_os_str());
+    }
+
+    if relative.as_os_str().is_empty() {
+        PathBuf::from(".")
+    } else {
+        relative
+    }
+}
+
+fn render_schema_reference(path: &Path) -> String {
+    let value = path.to_string_lossy().replace('\\', "/");
+    if path.is_absolute() || value.starts_with("../") || value.starts_with("./") {
+        value
+    } else {
+        format!("./{value}")
     }
 }
 

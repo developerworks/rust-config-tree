@@ -5,9 +5,10 @@ use std::{
 };
 
 use confique::Config;
-use rust_config_tree::{ConfigSchema, write_config_templates};
+use rust_config_tree::{ConfigSchema, write_config_schema, write_config_templates_with_schema};
+use schemars::JsonSchema;
 
-#[derive(Debug, Config)]
+#[derive(Debug, Config, JsonSchema)]
 #[allow(dead_code)]
 struct AppConfig {
     #[config(default = [])]
@@ -23,7 +24,7 @@ struct AppConfig {
     log: LogConfig,
 }
 
-#[derive(Debug, Config)]
+#[derive(Debug, Config, JsonSchema)]
 #[allow(dead_code)]
 struct ServerConfig {
     /// HTTP bind address.
@@ -37,7 +38,7 @@ struct ServerConfig {
     port: u16,
 }
 
-#[derive(Debug, Config)]
+#[derive(Debug, Config, JsonSchema)]
 #[allow(dead_code)]
 struct DatabaseConfig {
     /// Database URL.
@@ -50,7 +51,7 @@ struct DatabaseConfig {
     pool_size: u32,
 }
 
-#[derive(Debug, Config)]
+#[derive(Debug, Config, JsonSchema)]
 #[allow(dead_code)]
 struct LogConfig {
     /// Log level.
@@ -68,11 +69,22 @@ impl ConfigSchema for AppConfig {
 fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let dir = temp_example_dir("generate-templates")?;
     let config_path = dir.join("config.yaml");
-    let output_path = dir.join("config.example.yaml");
+    let schema_path = dir.join("schemas").join("myapp.schema.json");
 
-    write_config_templates::<AppConfig>(&config_path, &output_path)?;
+    write_config_schema::<AppConfig>(&schema_path)?;
+    for file_name in [
+        "config.example.toml",
+        "config.example.yaml",
+        "config.example.json",
+    ] {
+        write_config_templates_with_schema::<AppConfig>(
+            &config_path,
+            dir.join(file_name),
+            &schema_path,
+        )?;
+    }
 
-    println!("template root: {}", output_path.display());
+    println!("schema: {}", schema_path.display());
     for path in generated_files(&dir)? {
         println!("{}", path.display());
     }

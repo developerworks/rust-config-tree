@@ -37,9 +37,11 @@ resolved from the file that declared them. The final config is still a normal
 - Schema-declared environment variables without delimiter splitting.
 - Figment metadata for runtime source tracking.
 - TRACE-level source tracking events through `tracing`.
+- Draft 7 JSON Schema generation for editor completion and validation.
 - YAML, TOML, JSON, and JSON5 template generation.
+- TOML `#:schema` and YAML Language Server schema modelines for generated templates.
 - Automatic YAML template splitting for nested sections.
-- Built-in clap subcommands for config templates and shell completions.
+- Built-in clap subcommands for config templates, JSON Schema, and shell completions.
 - A lower-level tree API for callers that do not use `confique`.
 
 ## Public Entry Points
@@ -51,6 +53,7 @@ Use these APIs for most applications:
   Figment graph used for source tracking.
 - `write_config_templates::<S>(config_path, output_path)` writes the root
   template and recursively discovered child templates.
+- `write_config_schema::<S>(output_path)` writes a Draft 7 JSON Schema.
 - `handle_config_command::<Cli, S>(command, config_path)` handles built-in clap
   config commands.
 

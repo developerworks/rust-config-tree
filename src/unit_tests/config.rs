@@ -7,12 +7,13 @@ use std::{
 
 use confique::Config;
 use figment::Profile;
+use schemars::JsonSchema;
 
 use super::*;
 
 static DOTENV_TEST_LOCK: Mutex<()> = Mutex::new(());
 
-#[derive(Debug, Config)]
+#[derive(Debug, Config, JsonSchema)]
 #[allow(dead_code)]
 struct TestConfig {
     #[config(default = [])]
@@ -23,7 +24,7 @@ struct TestConfig {
     server: TestServerConfig,
 }
 
-#[derive(Debug, Config)]
+#[derive(Debug, Config, JsonSchema)]
 struct TestServerConfig {
     #[config(default = 8080)]
     port: u16,
@@ -72,7 +73,7 @@ impl ConfigSchema for EnvMappedConfig {
     }
 }
 
-#[derive(Debug, Config)]
+#[derive(Debug, Config, JsonSchema)]
 #[allow(dead_code)]
 struct RenderedTemplateConfig {
     #[config(default = [])]
@@ -85,14 +86,14 @@ struct RenderedTemplateConfig {
     outer: RenderedOuterConfig,
 }
 
-#[derive(Debug, Config)]
+#[derive(Debug, Config, JsonSchema)]
 #[allow(dead_code)]
 struct RenderedBranchConfig {
     #[config(default = 42)]
     leaf: u16,
 }
 
-#[derive(Debug, Config)]
+#[derive(Debug, Config, JsonSchema)]
 #[allow(dead_code)]
 struct RenderedOuterConfig {
     #[config(default = true)]
@@ -101,7 +102,7 @@ struct RenderedOuterConfig {
     inner: RenderedInnerConfig,
 }
 
-#[derive(Debug, Config)]
+#[derive(Debug, Config, JsonSchema)]
 #[allow(dead_code)]
 struct RenderedInnerConfig {
     #[config(default = "value")]
@@ -275,6 +276,76 @@ fn write_config_templates_creates_parent_directories() {
             .join("server.yaml")
             .exists()
     );
+
+    let _ = fs::remove_dir_all(root);
+}
+
+#[test]
+fn write_config_schema_writes_draft7_json_schema() {
+    let root = temp_dir_path("write-schema");
+    fs::create_dir_all(&root).unwrap();
+    let schema_path = root.join("schemas").join("myapp.schema.json");
+
+    write_config_schema::<TestConfig>(&schema_path).unwrap();
+
+    let schema = fs::read_to_string(&schema_path).unwrap();
+    assert!(schema.contains("http://json-schema.org/draft-07/schema#"));
+    assert!(schema.contains("\"server\""));
+    assert!(schema.ends_with('\n'));
+
+    let _ = fs::remove_dir_all(root);
+}
+
+#[test]
+fn template_targets_with_schema_add_toml_and_yaml_directives() {
+    let root = temp_dir_path("template-schema-directives");
+    fs::create_dir_all(&root).unwrap();
+    let output_path = root.join("config.example.toml");
+    let schema_path = root.join("schemas").join("myapp.schema.json");
+
+    let targets = template_targets_for_paths_with_schema::<TestConfig>(
+        root.join("config.toml"),
+        &output_path,
+        &schema_path,
+    )
+    .unwrap();
+
+    assert_eq!(targets.len(), 2);
+    assert_eq!(targets[0].path, output_path);
+    assert!(
+        targets[0]
+            .content
+            .starts_with("#:schema ./schemas/myapp.schema.json\n\n")
+    );
+    assert!(!targets[0].content.contains("$schema"));
+
+    assert_eq!(targets[1].path, root.join("config").join("server.yaml"));
+    assert!(
+        targets[1]
+            .content
+            .starts_with("# yaml-language-server: $schema=../schemas/myapp.schema.json\n\n")
+    );
+
+    let _ = fs::remove_dir_all(root);
+}
+
+#[test]
+fn schema_binding_keeps_json_templates_unmodified() {
+    let root = temp_dir_path("json-template-schema-binding");
+    fs::create_dir_all(&root).unwrap();
+    let output_path = root.join("config.example.json");
+    let schema_path = root.join("schemas").join("myapp.schema.json");
+
+    let targets = template_targets_for_paths_with_schema::<TestConfig>(
+        root.join("config.json"),
+        &output_path,
+        &schema_path,
+    )
+    .unwrap();
+
+    assert_eq!(targets[0].path, output_path);
+    assert!(!targets[0].content.contains("$schema"));
+    assert!(!targets[0].content.contains("yaml-language-server"));
 
     let _ = fs::remove_dir_all(root);
 }

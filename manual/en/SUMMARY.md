@@ -8,6 +8,7 @@
 - [Environment Variables](environment.md)
 - [Source Tracking](source-tracking.md)
 - [Template Generation](templates.md)
+- [IDE Completions](ide-completions.md)
 - [CLI Integration](cli.md)
 - [Tree API](tree-api.md)
 - [GitHub Pages](github-pages.md)

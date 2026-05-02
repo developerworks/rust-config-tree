@@ -35,9 +35,11 @@ log:
 - 基于 schema 声明的环境变量，不使用分隔符拆分。
 - 通过 Figment metadata 追踪运行时来源。
 - 通过 `tracing` 输出 TRACE 级别的来源追踪事件。
+- 生成 Draft 7 JSON Schema，供编辑器补全和校验使用。
 - 生成 YAML、TOML、JSON 和 JSON5 配置模板。
+- 为生成的 TOML 模板写入 `#:schema`，为 YAML 模板写入 YAML Language Server modeline。
 - 按嵌套 section 自动拆分 YAML 模板。
-- 内置 config template 和 shell completion 的 clap 子命令。
+- 内置 config template、JSON Schema 和 shell completion 的 clap 子命令。
 - 面向非 `confique` 调用方的低层 tree API。
 
 ## 主要入口
@@ -49,6 +51,7 @@ log:
   的 Figment graph。
 - `write_config_templates::<S>(config_path, output_path)` 写入 root 模板和
   递归发现的子模板。
+- `write_config_schema::<S>(output_path)` 写入 Draft 7 JSON Schema。
 - `handle_config_command::<Cli, S>(command, config_path)` 处理内置 clap 配置
   命令。
 

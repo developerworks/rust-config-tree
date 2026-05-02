@@ -8,6 +8,7 @@
 - [环境变量](environment.md)
 - [来源追踪](source-tracking.md)
 - [模板生成](templates.md)
+- [IDE 补全](ide-completions.md)
 - [CLI 集成](cli.md)
 - [Tree API](tree-api.md)
 - [GitHub Pages](github-pages.md)

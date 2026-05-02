@@ -5,6 +5,7 @@
 `ConfigCommand` 提供可复用的 clap 子命令：
 
 - `config-template`
+- `config-schema`
 - `completions`
 - `install-completions`
 
@@ -29,9 +30,10 @@ use std::path::PathBuf;
 
 use clap::{Parser, Subcommand};
 use confique::Config;
+use schemars::JsonSchema;
 use rust_config_tree::{ConfigCommand, ConfigSchema, handle_config_command, load_config};
 
-#[derive(Debug, Config)]
+#[derive(Debug, Config, JsonSchema)]
 struct AppConfig {
     #[config(default = [])]
     include: Vec<PathBuf>,
@@ -84,7 +86,19 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 demo config-template --output config.example.yaml
 ```
 
-如果未提供 output path，命令会在当前目录写入 `config.example.yaml`。
+如果未提供 output path，命令会在当前目录写入 `config.example.yaml`。添加
+`--schema schemas/myapp.schema.json` 后，生成的 TOML 和 YAML 模板会绑定
+JSON Schema。
+
+```bash
+demo config-template --output config.example.toml --schema schemas/myapp.schema.json
+```
+
+生成共用 JSON Schema：
+
+```bash
+demo config-schema --output schemas/myapp.schema.json
+```
 
 ## Shell Completions
 

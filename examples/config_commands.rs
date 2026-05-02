@@ -7,6 +7,7 @@ use std::{
 use clap::{Parser, Subcommand};
 use confique::Config;
 use rust_config_tree::{ConfigCommand, ConfigSchema, handle_config_command, load_config};
+use schemars::JsonSchema;
 
 #[derive(Debug, Parser)]
 #[command(name = "config-commands")]
@@ -26,7 +27,7 @@ enum Command {
     Config(ConfigCommand),
 }
 
-#[derive(Debug, Config)]
+#[derive(Debug, Config, JsonSchema)]
 struct AppConfig {
     #[config(default = [])]
     include: Vec<PathBuf>,
@@ -38,7 +39,7 @@ struct AppConfig {
     server: ServerConfig,
 }
 
-#[derive(Debug, Config)]
+#[derive(Debug, Config, JsonSchema)]
 struct ServerConfig {
     #[config(default = "127.0.0.1")]
     bind: String,

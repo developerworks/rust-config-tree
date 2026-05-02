@@ -7,6 +7,7 @@ use std::{
 use clap::{Parser, Subcommand};
 use clap_complete::aot::Shell;
 use confique::Config;
+use schemars::JsonSchema;
 
 use super::*;
 use crate::ConfigSchema;
@@ -25,7 +26,7 @@ enum DemoCommand {
     Config(ConfigCommand),
 }
 
-#[derive(Debug, Config)]
+#[derive(Debug, Config, JsonSchema)]
 #[allow(dead_code)]
 struct TestConfig {
     #[config(default = [])]
@@ -43,8 +44,46 @@ fn config_command_can_be_flattened_into_a_consumer_cli() {
     let cli = DemoCli::parse_from(["demo", "config-template", "--output", "config.yaml"]);
 
     match cli.command {
-        DemoCommand::Config(ConfigCommand::ConfigTemplate { output }) => {
+        DemoCommand::Config(ConfigCommand::ConfigTemplate { output, schema }) => {
             assert_eq!(output, Some(PathBuf::from("config.yaml")));
+            assert_eq!(schema, None);
+        }
+        command => panic!("unexpected command: {command:?}"),
+    }
+}
+
+#[test]
+fn config_template_command_accepts_schema_path() {
+    let cli = DemoCli::parse_from([
+        "demo",
+        "config-template",
+        "--output",
+        "config.example.toml",
+        "--schema",
+        "schemas/myapp.schema.json",
+    ]);
+
+    match cli.command {
+        DemoCommand::Config(ConfigCommand::ConfigTemplate { output, schema }) => {
+            assert_eq!(output, Some(PathBuf::from("config.example.toml")));
+            assert_eq!(schema, Some(PathBuf::from("schemas/myapp.schema.json")));
+        }
+        command => panic!("unexpected command: {command:?}"),
+    }
+}
+
+#[test]
+fn config_schema_command_is_flattened_into_consumer_cli() {
+    let cli = DemoCli::parse_from([
+        "demo",
+        "config-schema",
+        "--output",
+        "schemas/myapp.schema.json",
+    ]);
+
+    match cli.command {
+        DemoCommand::Config(ConfigCommand::JsonSchema { output }) => {
+            assert_eq!(output, PathBuf::from("schemas/myapp.schema.json"));
         }
         command => panic!("unexpected command: {command:?}"),
     }
@@ -66,6 +105,7 @@ fn handle_config_command_writes_templates_for_consumer_schema() {
     handle_config_command::<DemoCli, TestConfig>(
         ConfigCommand::ConfigTemplate {
             output: Some(output_path.clone()),
+            schema: None,
         },
         &config_path,
     )
@@ -78,6 +118,26 @@ fn handle_config_command_writes_templates_for_consumer_schema() {
             .join("server.yaml")
             .exists()
     );
+
+    let _ = fs::remove_dir_all(root);
+}
+
+#[test]
+fn handle_config_command_writes_json_schema_for_consumer_schema() {
+    let root = temp_dir_path("handle-config-schema");
+    fs::create_dir_all(root.join("schemas")).unwrap();
+    let schema_path = root.join("schemas").join("myapp.schema.json");
+
+    handle_config_command::<DemoCli, TestConfig>(
+        ConfigCommand::JsonSchema {
+            output: schema_path.clone(),
+        },
+        PathBuf::from("config.yaml").as_path(),
+    )
+    .unwrap();
+
+    let schema = fs::read_to_string(&schema_path).unwrap();
+    assert!(schema.contains("http://json-schema.org/draft-07/schema#"));
 
     let _ = fs::remove_dir_all(root);
 }

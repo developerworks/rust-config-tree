@@ -2,7 +2,8 @@
 //!
 //! The lower-level API reports [`ConfigTreeError`]. The high-level `confique`
 //! integration wraps those traversal failures together with dotenv loading,
-//! Figment extraction, config parsing, and IO errors in [`ConfigError`].
+//! Figment extraction, config parsing, schema serialization, and IO errors in
+//! [`ConfigError`].
 
 use std::{
     error::Error,
@@ -121,6 +122,8 @@ pub enum ConfigError {
     Figment(figment::Error),
     /// `confique` failed to load or merge config data.
     Config(confique::Error),
+    /// JSON schema serialization failed.
+    Json(serde_json::Error),
     /// File system or shell completion IO failed.
     Io(io::Error),
 }
@@ -132,6 +135,7 @@ impl fmt::Display for ConfigError {
             Self::Dotenv(err) => err.fmt(f),
             Self::Figment(err) => err.fmt(f),
             Self::Config(err) => err.fmt(f),
+            Self::Json(err) => err.fmt(f),
             Self::Io(err) => err.fmt(f),
         }
     }
@@ -144,6 +148,7 @@ impl Error for ConfigError {
             Self::Dotenv(err) => Some(err),
             Self::Figment(err) => Some(err),
             Self::Config(err) => Some(err),
+            Self::Json(err) => Some(err),
             Self::Io(err) => Some(err),
         }
     }
@@ -170,6 +175,12 @@ impl From<figment::Error> for ConfigError {
 impl From<confique::Error> for ConfigError {
     fn from(err: confique::Error) -> Self {
         Self::Config(err)
+    }
+}
+
+impl From<serde_json::Error> for ConfigError {
+    fn from(err: serde_json::Error) -> Self {
+        Self::Json(err)
     }
 }
 

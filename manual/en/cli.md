@@ -5,6 +5,7 @@
 `ConfigCommand` provides reusable clap subcommands:
 
 - `config-template`
+- `config-schema`
 - `completions`
 - `install-completions`
 
@@ -31,9 +32,10 @@ use std::path::PathBuf;
 
 use clap::{Parser, Subcommand};
 use confique::Config;
+use schemars::JsonSchema;
 use rust_config_tree::{ConfigCommand, ConfigSchema, handle_config_command, load_config};
 
-#[derive(Debug, Config)]
+#[derive(Debug, Config, JsonSchema)]
 struct AppConfig {
     #[config(default = [])]
     include: Vec<PathBuf>,
@@ -87,7 +89,18 @@ demo config-template --output config.example.yaml
 ```
 
 If no output path is provided, the command writes `config.example.yaml` in the
-current directory.
+current directory. Add `--schema schemas/myapp.schema.json` to bind generated
+TOML and YAML templates to the JSON Schema.
+
+```bash
+demo config-template --output config.example.toml --schema schemas/myapp.schema.json
+```
+
+Generate the shared JSON Schema:
+
+```bash
+demo config-schema --output schemas/myapp.schema.json
+```
 
 ## Shell Completions
 

@@ -13,7 +13,9 @@
 - 通过 Figment runtime provider 将 `confique` schema 加载成可直接使用的
   config 对象
 - `config-template`、`completions` 和 `install-completions` 命令处理
+- 生成 Draft 7 JSON Schema，供编辑器补全和校验使用
 - YAML、TOML、JSON 和 JSON5 配置模板生成
+- 为 TOML 和 YAML 模板生成 schema directive，不写入运行时字段
 - 递归 include 遍历
 - 合并环境变量前加载 `.env`
 - 通过 Figment metadata 追踪配置来源
@@ -35,6 +37,7 @@
 rust-config-tree = "0.1"
 confique = { version = "0.4", features = ["yaml", "toml", "json5"] }
 figment = { version = "0.10", features = ["yaml", "env"] }
+schemars = { version = "1", features = ["derive"] }
 serde = { version = "1", features = ["derive"] }
 clap = { version = "4", features = ["derive"] }
 ```
@@ -168,6 +171,19 @@ command-line overrides
 - `.json` 和 `.json5` 生成 JSON5-compatible 模板
 - 未知或缺失扩展名生成 YAML
 
+使用 `write_config_schema` 生成一份 Draft 7 JSON Schema，TOML、YAML 和
+JSON 配置文件可以共用它：
+
+```rust
+use rust_config_tree::write_config_schema;
+
+fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    write_config_schema::<AppConfig>("schemas/myapp.schema.json")?;
+
+    Ok(())
+}
+```
+
 使用 `write_config_templates` 创建 root 模板和 include tree 中的子模板：
 
 ```rust
@@ -179,6 +195,28 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     Ok(())
 }
 ```
+
+如果生成的 TOML 和 YAML 模板需要绑定 schema，用
+`write_config_templates_with_schema`：
+
+```rust
+use rust_config_tree::write_config_templates_with_schema;
+
+fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    write_config_templates_with_schema::<AppConfig>(
+        "config.toml",
+        "config.example.toml",
+        "schemas/myapp.schema.json",
+    )?;
+
+    Ok(())
+}
+```
+
+TOML 目标会写入 `#:schema ./schemas/myapp.schema.json`。YAML 目标会写入
+`# yaml-language-server: $schema=./schemas/myapp.schema.json`。JSON 和 JSON5
+目标不会写 `$schema` 字段；这类文件应通过 VS Code `json.schemas` 等编辑器
+设置绑定。
 
 模板生成按这个顺序选择 source tree：
 
@@ -192,6 +230,7 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 `rust-config-tree` 只提供可复用的 `ConfigCommand` 子命令：
 
 - `config-template`
+- `config-schema`
 - `completions`
 - `install-completions`
 
@@ -213,9 +252,10 @@ use std::path::PathBuf;
 
 use clap::{Parser, Subcommand};
 use confique::Config;
+use schemars::JsonSchema;
 use rust_config_tree::{ConfigCommand, ConfigSchema, handle_config_command, load_config};
 
-#[derive(Debug, Config)]
+#[derive(Debug, Config, JsonSchema)]
 struct AppConfig {
     #[config(default = [])]
     include: Vec<PathBuf>,
@@ -264,7 +304,11 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 ```
 
 `config-template --output <path>` 将模板写入指定路径。未提供 output path 时，
-写入当前目录下的 `config.example.yaml`。
+写入当前目录下的 `config.example.yaml`。添加 `--schema <path>` 后，TOML 和
+YAML 模板会绑定生成的 JSON Schema，但不会加入运行时 `$schema` 字段。
+
+`config-schema --output <path>` 写入 Draft 7 JSON Schema。未提供 output path
+时，写入 `schemas/config.schema.json`。
 
 `completions <shell>` 将 completions 输出到 stdout。
 

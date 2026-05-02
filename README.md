@@ -14,7 +14,9 @@ It handles:
 - loading a `confique` schema into a directly usable config object through
   Figment runtime providers
 - `config-template`, `completions`, and `install-completions` command handlers
+- Draft 7 JSON Schema generation for editor completion and validation
 - config template generation for YAML, TOML, JSON, and JSON5
+- schema directives for TOML and YAML templates without adding runtime fields
 - recursive include traversal
 - `.env` loading before environment values are merged
 - source tracking through Figment metadata
@@ -36,6 +38,7 @@ implementing `ConfigSchema` to expose the schema's include field.
 rust-config-tree = "0.1"
 confique = { version = "0.4", features = ["yaml", "toml", "json5"] }
 figment = { version = "0.10", features = ["yaml", "env"] }
+schemars = { version = "1", features = ["derive"] }
 serde = { version = "1", features = ["derive"] }
 clap = { version = "4", features = ["derive"] }
 ```
@@ -198,6 +201,19 @@ output format is inferred from the output path:
 - `.json` and `.json5` generate JSON5-compatible templates
 - unknown or missing extensions generate YAML
 
+Use `write_config_schema` to create one Draft 7 JSON Schema that can be shared
+by TOML, YAML, and JSON configuration files:
+
+```rust
+use rust_config_tree::write_config_schema;
+
+fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    write_config_schema::<AppConfig>("schemas/myapp.schema.json")?;
+
+    Ok(())
+}
+```
+
 Use `write_config_templates` to create a root template and every template file
 reachable from its include tree:
 
@@ -210,6 +226,28 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     Ok(())
 }
 ```
+
+Use `write_config_templates_with_schema` when generated TOML and YAML templates
+should bind that schema for IDE completion and validation:
+
+```rust
+use rust_config_tree::write_config_templates_with_schema;
+
+fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    write_config_templates_with_schema::<AppConfig>(
+        "config.toml",
+        "config.example.toml",
+        "schemas/myapp.schema.json",
+    )?;
+
+    Ok(())
+}
+```
+
+TOML targets receive `#:schema ./schemas/myapp.schema.json`. YAML targets
+receive `# yaml-language-server: $schema=./schemas/myapp.schema.json`. JSON and
+JSON5 targets intentionally do not receive a `$schema` field; bind them with
+editor settings such as VS Code `json.schemas`.
 
 Template generation chooses its source tree in this order:
 
@@ -262,6 +300,7 @@ sections. Nested children are placed under their parent file stem, for example
 Flatten `ConfigCommand` into your existing clap command enum to add:
 
 - `config-template`
+- `config-schema`
 - `completions`
 - `install-completions`
 
@@ -285,9 +324,10 @@ use std::path::PathBuf;
 
 use clap::{Parser, Subcommand};
 use confique::Config;
+use schemars::JsonSchema;
 use rust_config_tree::{ConfigCommand, ConfigSchema, handle_config_command, load_config};
 
-#[derive(Debug, Config)]
+#[derive(Debug, Config, JsonSchema)]
 struct AppConfig {
     #[config(default = [])]
     include: Vec<PathBuf>,
@@ -337,7 +377,11 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 
 `config-template --output <path>` writes templates to the selected path. If no
 output path is provided, it writes `config.example.yaml` in the current
-directory.
+directory. Add `--schema <path>` to bind TOML and YAML templates to a generated
+JSON Schema without adding a runtime `$schema` field.
+
+`config-schema --output <path>` writes a Draft 7 JSON Schema. If no output path
+is provided, it writes `schemas/config.schema.json`.
 
 `completions <shell>` prints completions to stdout.
 
