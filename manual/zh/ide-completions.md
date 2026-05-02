@@ -2,8 +2,8 @@
 
 [English](../en/ide-completions.html) | [中文](ide-completions.html)
 
-一份生成的 JSON Schema 可以同时给 TOML、YAML、JSON 和 JSON5 配置文件使用。
-schema 从 `confique` 使用的同一个 Rust 类型生成：
+生成的 JSON Schema 可以给 TOML、YAML、JSON 和 JSON5 配置文件使用。schema
+从 `confique` 使用的同一个 Rust 类型生成：
 
 ```rust
 use confique::Config;
@@ -19,11 +19,20 @@ struct AppConfig {
 生成方式：
 
 ```rust
-use rust_config_tree::write_config_schema;
+use rust_config_tree::write_config_schemas;
 
-write_config_schema::<AppConfig>("schemas/myapp.schema.json")?;
+write_config_schemas::<AppConfig>("schemas/myapp.schema.json")?;
 # Ok::<(), Box<dyn std::error::Error + Send + Sync>>(())
 ```
+
+这会写入 root schema 和 `schemas/server.schema.json` 这类 section schema。
+生成的 schema 会移除 `required` 约束，局部配置文件仍有补全，但不会出现缺字段
+诊断。
+root schema 会省略嵌套 section 属性，所以 child section 的补全只会出现在
+绑定对应 section schema 的文件里。
+
+IDE schema 仍会校验已经出现的字段，包括生成 schema 支持的类型、枚举和未知
+属性检查。必填字段和最终合并配置的校验使用 `config-validate`。
 
 ## TOML
 
@@ -54,6 +63,8 @@ server:
 ```
 
 `write_config_templates_with_schema` 会为 YAML 模板自动添加这个 modeline。
+拆分出的 YAML 模板会绑定对应 section schema，例如 `config/log.yaml`
+绑定 `../schemas/log.schema.json`。
 
 ## JSON
 
@@ -93,13 +104,19 @@ YAML 也可以通过 VS Code settings 绑定：
 
 ```text
 schemas/myapp.schema.json:
-  TOML、YAML、JSON 和 JSON5 共用一份 schema
+  只包含 root 文件字段
+
+schemas/server.schema.json:
+  server section schema
 
 config.toml:
   #:schema ./schemas/myapp.schema.json
 
 config.yaml:
   # yaml-language-server: $schema=./schemas/myapp.schema.json
+
+config/server.yaml:
+  # yaml-language-server: $schema=../schemas/server.schema.json
 
 config.json:
   不写运行时 $schema 字段，通过编辑器设置绑定

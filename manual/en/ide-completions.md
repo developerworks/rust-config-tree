@@ -2,8 +2,8 @@
 
 [English](ide-completions.html) | [中文](../zh/ide-completions.html)
 
-One generated JSON Schema can be shared by TOML, YAML, JSON, and JSON5 config
-files. The schema is generated from the same Rust type used by `confique`:
+Generated JSON Schemas can be used by TOML, YAML, JSON, and JSON5 config files.
+They are generated from the same Rust type used by `confique`:
 
 ```rust
 use confique::Config;
@@ -16,14 +16,24 @@ struct AppConfig {
 }
 ```
 
-Generate it with:
+Generate them with:
 
 ```rust
-use rust_config_tree::write_config_schema;
+use rust_config_tree::write_config_schemas;
 
-write_config_schema::<AppConfig>("schemas/myapp.schema.json")?;
+write_config_schemas::<AppConfig>("schemas/myapp.schema.json")?;
 # Ok::<(), Box<dyn std::error::Error + Send + Sync>>(())
 ```
+
+This writes the root schema and section schemas such as
+`schemas/server.schema.json`. Generated schemas omit `required` constraints so
+completion works for partial config files without missing-field diagnostics.
+The root schema omits nested section properties, so child section completion is
+available only in files that bind the matching section schema.
+
+IDE schemas still validate present fields, including type, enum, and unknown
+property checks supported by the generated schema. Use `config-validate` for
+required fields and final merged config validation.
 
 ## TOML
 
@@ -54,7 +64,8 @@ server:
 ```
 
 `write_config_templates_with_schema` adds this modeline automatically for YAML
-templates.
+templates. Split YAML templates bind their section schema, for example
+`config/log.yaml` binds `../schemas/log.schema.json`.
 
 ## JSON
 
@@ -94,13 +105,19 @@ The final layout is:
 
 ```text
 schemas/myapp.schema.json:
-  One schema shared by TOML, YAML, JSON, and JSON5
+  Root file fields only
+
+schemas/server.schema.json:
+  Server section schema
 
 config.toml:
   #:schema ./schemas/myapp.schema.json
 
 config.yaml:
   # yaml-language-server: $schema=./schemas/myapp.schema.json
+
+config/server.yaml:
+  # yaml-language-server: $schema=../schemas/server.schema.json
 
 config.json:
   No runtime $schema field; bind with editor settings

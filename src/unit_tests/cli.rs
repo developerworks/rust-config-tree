@@ -39,6 +39,20 @@ impl ConfigSchema for TestConfig {
     }
 }
 
+#[derive(Debug, Config, JsonSchema)]
+#[allow(dead_code)]
+struct RequiredConfig {
+    #[config(default = [])]
+    include: Vec<PathBuf>,
+    required_value: String,
+}
+
+impl ConfigSchema for RequiredConfig {
+    fn include_paths(layer: &<Self as Config>::Layer) -> Vec<PathBuf> {
+        layer.include.clone().unwrap_or_default()
+    }
+}
+
 #[test]
 fn config_command_can_be_flattened_into_a_consumer_cli() {
     let cli = DemoCli::parse_from(["demo", "config-template", "--output", "config.yaml"]);
@@ -46,7 +60,7 @@ fn config_command_can_be_flattened_into_a_consumer_cli() {
     match cli.command {
         DemoCommand::Config(ConfigCommand::ConfigTemplate { output, schema }) => {
             assert_eq!(output, Some(PathBuf::from("config.yaml")));
-            assert_eq!(schema, None);
+            assert_eq!(schema, Some(PathBuf::from("schemas/config.schema.json")));
         }
         command => panic!("unexpected command: {command:?}"),
     }
@@ -90,6 +104,16 @@ fn config_schema_command_is_flattened_into_consumer_cli() {
 }
 
 #[test]
+fn config_validate_command_is_flattened_into_consumer_cli() {
+    let cli = DemoCli::parse_from(["demo", "config-validate"]);
+
+    match cli.command {
+        DemoCommand::Config(ConfigCommand::ConfigValidate) => {}
+        command => panic!("unexpected command: {command:?}"),
+    }
+}
+
+#[test]
 fn handle_config_command_writes_templates_for_consumer_schema() {
     let root = temp_dir_path("handle-config-template");
     fs::create_dir_all(root.join("config")).unwrap();
@@ -105,13 +129,19 @@ fn handle_config_command_writes_templates_for_consumer_schema() {
     handle_config_command::<DemoCli, TestConfig>(
         ConfigCommand::ConfigTemplate {
             output: Some(output_path.clone()),
-            schema: None,
+            schema: Some(root.join("schemas").join("config.schema.json")),
         },
         &config_path,
     )
     .unwrap();
 
+    assert!(root.join("schemas").join("config.schema.json").exists());
     assert!(output_path.exists());
+    assert!(
+        fs::read_to_string(&output_path)
+            .unwrap()
+            .starts_with("# yaml-language-server: $schema=../schemas/config.schema.json\n\n")
+    );
     assert!(
         root.join("examples")
             .join("config")
@@ -138,6 +168,39 @@ fn handle_config_command_writes_json_schema_for_consumer_schema() {
 
     let schema = fs::read_to_string(&schema_path).unwrap();
     assert!(schema.contains("http://json-schema.org/draft-07/schema#"));
+
+    let _ = fs::remove_dir_all(root);
+}
+
+#[test]
+fn handle_config_command_validates_full_runtime_config() {
+    let root = temp_dir_path("handle-config-validate");
+    fs::create_dir_all(&root).unwrap();
+    let config_path = root.join("config.yaml");
+    fs::write(&config_path, "required_value: present\n").unwrap();
+
+    handle_config_command::<DemoCli, RequiredConfig>(
+        ConfigCommand::ConfigValidate,
+        config_path.as_path(),
+    )
+    .unwrap();
+
+    let _ = fs::remove_dir_all(root);
+}
+
+#[test]
+fn handle_config_command_rejects_invalid_runtime_config() {
+    let root = temp_dir_path("handle-config-validate-invalid");
+    fs::create_dir_all(&root).unwrap();
+    let config_path = root.join("config.yaml");
+    fs::write(&config_path, "").unwrap();
+
+    let result = handle_config_command::<DemoCli, RequiredConfig>(
+        ConfigCommand::ConfigValidate,
+        config_path.as_path(),
+    );
+
+    assert!(result.is_err());
 
     let _ = fs::remove_dir_all(root);
 }

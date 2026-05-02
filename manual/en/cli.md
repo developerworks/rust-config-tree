@@ -6,6 +6,7 @@
 
 - `config-template`
 - `config-schema`
+- `config-validate`
 - `completions`
 - `install-completions`
 
@@ -90,17 +91,29 @@ demo config-template --output config.example.yaml
 
 If no output path is provided, the command writes `config.example.yaml` in the
 current directory. Add `--schema schemas/myapp.schema.json` to bind generated
-TOML and YAML templates to the JSON Schema.
+TOML and YAML templates to generated JSON Schemas. Split YAML templates bind the
+matching section schema. The command also writes the root and section schemas to
+the selected schema path.
 
 ```bash
 demo config-template --output config.example.toml --schema schemas/myapp.schema.json
 ```
 
-Generate the shared JSON Schema:
+Generate root and section JSON Schemas:
 
 ```bash
 demo config-schema --output schemas/myapp.schema.json
 ```
+
+Validate the complete runtime config tree:
+
+```bash
+demo config-validate
+```
+
+Generated editor schemas intentionally avoid required-field diagnostics for
+split files. `config-validate` loads includes, applies defaults, and runs final
+`confique` validation.
 
 ## Shell Completions
 

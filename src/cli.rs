@@ -16,7 +16,7 @@ use schemars::JsonSchema;
 use crate::{
     ConfigResult, ConfigSchema,
     config::{
-        resolve_config_template_output, write_config_schema, write_config_templates,
+        load_config, resolve_config_template_output, write_config_schemas, write_config_templates,
         write_config_templates_with_schema,
     },
 };
@@ -32,18 +32,22 @@ pub enum ConfigCommand {
         #[arg(long)]
         output: Option<PathBuf>,
 
-        /// JSON Schema path to bind from TOML/YAML templates.
-        #[arg(long)]
+        /// Root JSON Schema path to write and bind from TOML/YAML templates.
+        #[arg(long, default_value = "schemas/config.schema.json")]
         schema: Option<PathBuf>,
     },
 
-    /// Generate a JSON Schema for editor completion and validation.
+    /// Generate JSON Schema files for editor completion and validation.
     #[command(name = "config-schema")]
     JsonSchema {
-        /// Schema output path. Defaults to `schemas/config.schema.json`.
+        /// Root schema output path. Defaults to `schemas/config.schema.json`.
         #[arg(long, default_value = "schemas/config.schema.json")]
         output: PathBuf,
     },
+
+    /// Validate the full runtime config tree.
+    #[command(name = "config-validate")]
+    ConfigValidate,
 
     /// Generate shell completions.
     Completions {
@@ -90,12 +94,17 @@ where
             let output = resolve_config_template_output(output)?;
             match schema {
                 Some(schema) => {
+                    write_config_schemas::<S>(&schema)?;
                     write_config_templates_with_schema::<S>(config_path, output, schema)
                 }
                 None => write_config_templates::<S>(config_path, output),
             }
         }
-        ConfigCommand::JsonSchema { output } => write_config_schema::<S>(output),
+        ConfigCommand::JsonSchema { output } => write_config_schemas::<S>(output),
+        ConfigCommand::ConfigValidate => {
+            load_config::<S>(config_path)?;
+            Ok(())
+        }
         ConfigCommand::Completions { shell } => {
             print_shell_completion::<C>(shell);
             Ok(())

@@ -5,7 +5,7 @@ use std::{
 };
 
 use confique::Config;
-use rust_config_tree::{ConfigSchema, write_config_schema, write_config_templates_with_schema};
+use rust_config_tree::{ConfigSchema, write_config_schemas, write_config_templates_with_schema};
 use schemars::JsonSchema;
 
 #[derive(Debug, Config, JsonSchema)]
@@ -71,7 +71,7 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let config_path = dir.join("config.yaml");
     let schema_path = dir.join("schemas").join("myapp.schema.json");
 
-    write_config_schema::<AppConfig>(&schema_path)?;
+    write_config_schemas::<AppConfig>(&schema_path)?;
     for file_name in [
         "config.example.toml",
         "config.example.yaml",

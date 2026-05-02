@@ -6,6 +6,7 @@
 
 - `config-template`
 - `config-schema`
+- `config-validate`
 - `completions`
 - `install-completions`
 
@@ -88,17 +89,27 @@ demo config-template --output config.example.yaml
 
 如果未提供 output path，命令会在当前目录写入 `config.example.yaml`。添加
 `--schema schemas/myapp.schema.json` 后，生成的 TOML 和 YAML 模板会绑定
-JSON Schema。
+生成的 JSON Schema。拆分出的 YAML 模板会绑定对应的 section schema。该命令
+也会把 root 和 section schemas 写入指定的 schema path。
 
 ```bash
 demo config-template --output config.example.toml --schema schemas/myapp.schema.json
 ```
 
-生成共用 JSON Schema：
+生成 root 和 section JSON Schema：
 
 ```bash
 demo config-schema --output schemas/myapp.schema.json
 ```
+
+校验完整 runtime config tree：
+
+```bash
+demo config-validate
+```
+
+生成的 editor schema 会刻意避免在拆分文件里触发必填字段诊断。
+`config-validate` 会加载 includes、应用默认值，并执行最终 `confique` 校验。
 
 ## Shell Completions
 

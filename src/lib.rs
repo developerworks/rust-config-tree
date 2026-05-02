@@ -11,8 +11,8 @@
 //! final schema. Use [`build_config_figment`] or [`load_config_with_figment`]
 //! when you need runtime source tracking. Use [`write_config_templates`] or
 //! [`ConfigCommand`] to generate example template files that mirror the same
-//! include tree. Use [`write_config_schema`] to generate a shared JSON Schema
-//! for editor completion and validation.
+//! include tree. Use [`write_config_schemas`] to generate root and section JSON
+//! Schemas for editor completion and validation.
 
 mod cli;
 mod config;
@@ -26,10 +26,11 @@ pub use cli::{
     upsert_managed_block,
 };
 pub use config::{
-    ConfigFormat, ConfigResult, ConfigSchema, ConfigTemplateTarget, ConfiqueEnvProvider,
-    build_config_figment, load_config, load_config_from_figment, load_config_with_figment,
-    template_for_path, template_targets_for_paths, template_targets_for_paths_with_schema,
-    trace_config_sources, write_config_schema, write_config_templates,
+    ConfigFormat, ConfigResult, ConfigSchema, ConfigSchemaTarget, ConfigTemplateTarget,
+    ConfiqueEnvProvider, build_config_figment, config_schema_targets_for_path, load_config,
+    load_config_from_figment, load_config_with_figment, template_for_path,
+    template_targets_for_paths, template_targets_for_paths_with_schema, trace_config_sources,
+    write_config_schema, write_config_schemas, write_config_templates,
     write_config_templates_with_schema,
 };
 pub use error::{BoxError, ConfigError, ConfigTreeError, Result};

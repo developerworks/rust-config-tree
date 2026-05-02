@@ -7,7 +7,7 @@
 //! also be split across nested schema sections.
 
 use std::{
-    collections::HashMap,
+    collections::{BTreeSet, HashMap},
     ffi::OsStr,
     fs,
     path::Component,
@@ -25,6 +25,7 @@ use figment::{
     value::{Dict, Map, Uncased},
 };
 use schemars::{JsonSchema, generate::SchemaSettings};
+use serde_json::Value;
 use tracing::trace;
 
 use crate::{
@@ -131,6 +132,15 @@ pub struct ConfigTemplateTarget {
     /// Path that should receive the generated content.
     pub path: PathBuf,
     /// Complete template content to write to `path`.
+    pub content: String,
+}
+
+/// Generated JSON Schema content for one output path.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ConfigSchemaTarget {
+    /// Path that should receive the generated schema.
+    pub path: PathBuf,
+    /// Complete JSON Schema content to write to `path`.
     pub content: String,
 }
 
@@ -368,12 +378,314 @@ fn figment_for_file(path: &Path) -> Figment {
     merge_file_provider(Figment::new(), path)
 }
 
-/// Writes a Draft 7 JSON Schema for a config type.
+fn root_config_schema<S>() -> ConfigResult<Value>
+where
+    S: JsonSchema,
+{
+    let generator = SchemaSettings::draft07().into_generator();
+    let schema = generator.into_root_schema_for::<S>();
+    let mut schema = serde_json::to_value(schema)?;
+    remove_required_recursively(&mut schema);
+
+    Ok(schema)
+}
+
+fn schema_json(schema: &Value) -> ConfigResult<String> {
+    let mut json = serde_json::to_string_pretty(schema)?;
+    ensure_single_trailing_newline(&mut json);
+    Ok(json)
+}
+
+fn remove_required_recursively(value: &mut Value) {
+    match value {
+        Value::Object(object) => {
+            object.remove("required");
+
+            for (key, child) in object.iter_mut() {
+                if is_schema_map_key(key) {
+                    remove_required_from_schema_map(child);
+                } else {
+                    remove_required_recursively(child);
+                }
+            }
+        }
+        Value::Array(items) => {
+            for item in items {
+                remove_required_recursively(item);
+            }
+        }
+        Value::Null | Value::Bool(_) | Value::Number(_) | Value::String(_) => {}
+    }
+}
+
+fn is_schema_map_key(key: &str) -> bool {
+    matches!(
+        key,
+        "$defs" | "definitions" | "properties" | "patternProperties"
+    )
+}
+
+fn remove_required_from_schema_map(value: &mut Value) {
+    match value {
+        Value::Object(object) => {
+            for schema in object.values_mut() {
+                remove_required_recursively(schema);
+            }
+        }
+        _ => remove_required_recursively(value),
+    }
+}
+
+fn section_schema_for_path(root_schema: &Value, section_path: &[&str]) -> Option<Value> {
+    let mut current = root_schema;
+
+    for section in section_path {
+        current = current.get("properties")?.get(*section)?;
+        current = resolve_schema_reference(root_schema, current).unwrap_or(current);
+    }
+
+    Some(standalone_section_schema(root_schema, current))
+}
+
+fn resolve_schema_reference<'a>(root_schema: &'a Value, schema: &'a Value) -> Option<&'a Value> {
+    if let Some(reference) = schema.get("$ref").and_then(Value::as_str) {
+        return resolve_json_pointer_ref(root_schema, reference);
+    }
+
+    schema
+        .get("allOf")
+        .and_then(Value::as_array)
+        .and_then(|schemas| schemas.first())
+        .and_then(|schema| schema.get("$ref"))
+        .and_then(Value::as_str)
+        .and_then(|reference| resolve_json_pointer_ref(root_schema, reference))
+}
+
+fn resolve_json_pointer_ref<'a>(root_schema: &'a Value, reference: &str) -> Option<&'a Value> {
+    let pointer = reference.strip_prefix('#')?;
+    root_schema.pointer(pointer)
+}
+
+fn standalone_section_schema(root_schema: &Value, section_schema: &Value) -> Value {
+    let mut section_schema = section_schema.clone();
+    let Some(object) = section_schema.as_object_mut() else {
+        return section_schema;
+    };
+
+    if let Some(schema_uri) = root_schema.get("$schema") {
+        object
+            .entry("$schema".to_owned())
+            .or_insert_with(|| schema_uri.clone());
+    }
+
+    if let Some(definitions) = root_schema.get("definitions") {
+        object
+            .entry("definitions".to_owned())
+            .or_insert_with(|| definitions.clone());
+    }
+
+    if let Some(defs) = root_schema.get("$defs") {
+        object
+            .entry("$defs".to_owned())
+            .or_insert_with(|| defs.clone());
+    }
+
+    section_schema
+}
+
+fn schema_path_for_section(root_schema_path: &Path, section_path: &[&str]) -> PathBuf {
+    let Some((last, parents)) = section_path.split_last() else {
+        return root_schema_path.to_path_buf();
+    };
+
+    let mut path = root_schema_path
+        .parent()
+        .unwrap_or_else(|| Path::new("."))
+        .to_path_buf();
+
+    for parent in parents {
+        path.push(*parent);
+    }
+
+    path.push(format!("{}.schema.json", *last));
+    path
+}
+
+fn schema_for_output_path<S>(
+    full_schema: &Value,
+    section_path: &[&'static str],
+) -> ConfigResult<Value>
+where
+    S: ConfigSchema,
+{
+    let mut schema = if section_path.is_empty() {
+        full_schema.clone()
+    } else {
+        section_schema_for_path(full_schema, section_path).ok_or_else(|| {
+            std::io::Error::new(
+                std::io::ErrorKind::InvalidData,
+                format!(
+                    "failed to extract JSON Schema for config section {}",
+                    section_path.join(".")
+                ),
+            )
+        })?
+    };
+
+    remove_child_section_properties::<S>(&mut schema, section_path);
+    prune_unused_schema_maps(&mut schema);
+
+    Ok(schema)
+}
+
+fn remove_child_section_properties<S>(schema: &mut Value, section_path: &[&'static str])
+where
+    S: ConfigSchema,
+{
+    let Some(properties) = schema.get_mut("properties").and_then(Value::as_object_mut) else {
+        return;
+    };
+
+    for child_section_path in immediate_child_section_paths(&S::META, section_path) {
+        if let Some(child_name) = child_section_path.last() {
+            properties.remove(*child_name);
+        }
+    }
+}
+
+fn prune_unused_schema_maps(schema: &mut Value) {
+    let mut definitions = BTreeSet::new();
+    let mut defs = BTreeSet::new();
+
+    collect_schema_refs(schema, false, &mut definitions, &mut defs);
+
+    loop {
+        let previous_len = definitions.len() + defs.len();
+        collect_transitive_schema_refs(schema, &mut definitions, &mut defs);
+
+        if definitions.len() + defs.len() == previous_len {
+            break;
+        }
+    }
+
+    retain_schema_map(schema, "definitions", &definitions);
+    retain_schema_map(schema, "$defs", &defs);
+}
+
+fn collect_transitive_schema_refs(
+    schema: &Value,
+    definitions: &mut BTreeSet<String>,
+    defs: &mut BTreeSet<String>,
+) {
+    let current_definitions = definitions.clone();
+    let current_defs = defs.clone();
+    let mut referenced_definitions = BTreeSet::new();
+    let mut referenced_defs = BTreeSet::new();
+
+    if let Some(schema_map) = schema.get("definitions").and_then(Value::as_object) {
+        for name in &current_definitions {
+            if let Some(schema) = schema_map.get(name) {
+                collect_schema_refs(
+                    schema,
+                    true,
+                    &mut referenced_definitions,
+                    &mut referenced_defs,
+                );
+            }
+        }
+    }
+
+    if let Some(schema_map) = schema.get("$defs").and_then(Value::as_object) {
+        for name in &current_defs {
+            if let Some(schema) = schema_map.get(name) {
+                collect_schema_refs(
+                    schema,
+                    true,
+                    &mut referenced_definitions,
+                    &mut referenced_defs,
+                );
+            }
+        }
+    }
+
+    definitions.extend(referenced_definitions);
+    defs.extend(referenced_defs);
+}
+
+fn collect_schema_refs(
+    value: &Value,
+    include_schema_maps: bool,
+    definitions: &mut BTreeSet<String>,
+    defs: &mut BTreeSet<String>,
+) {
+    match value {
+        Value::Object(object) => {
+            if let Some(reference) = object.get("$ref").and_then(Value::as_str) {
+                collect_schema_ref(reference, definitions, defs);
+            }
+
+            for (key, child) in object {
+                if !include_schema_maps && matches!(key.as_str(), "definitions" | "$defs") {
+                    continue;
+                }
+
+                collect_schema_refs(child, include_schema_maps, definitions, defs);
+            }
+        }
+        Value::Array(items) => {
+            for item in items {
+                collect_schema_refs(item, include_schema_maps, definitions, defs);
+            }
+        }
+        Value::Null | Value::Bool(_) | Value::Number(_) | Value::String(_) => {}
+    }
+}
+
+fn collect_schema_ref(
+    reference: &str,
+    definitions: &mut BTreeSet<String>,
+    defs: &mut BTreeSet<String>,
+) {
+    if let Some(name) = schema_ref_name(reference, "#/definitions/") {
+        definitions.insert(name);
+    } else if let Some(name) = schema_ref_name(reference, "#/$defs/") {
+        defs.insert(name);
+    }
+}
+
+fn schema_ref_name(reference: &str, prefix: &str) -> Option<String> {
+    let name = reference.strip_prefix(prefix)?.split('/').next()?;
+    Some(decode_json_pointer_token(name))
+}
+
+fn decode_json_pointer_token(token: &str) -> String {
+    token.replace("~1", "/").replace("~0", "~")
+}
+
+fn retain_schema_map(schema: &mut Value, key: &str, used_names: &BTreeSet<String>) {
+    let Some(object) = schema.as_object_mut() else {
+        return;
+    };
+
+    let Some(schema_map) = object.get_mut(key).and_then(Value::as_object_mut) else {
+        return;
+    };
+
+    schema_map.retain(|name, _| used_names.contains(name));
+
+    if schema_map.is_empty() {
+        object.remove(key);
+    }
+}
+
+/// Writes a Draft 7 JSON Schema for the root config type.
 ///
 /// The same generated schema can be referenced from TOML, YAML, and JSON
 /// configuration files. TOML and YAML templates can bind it with editor
 /// directives. JSON files should usually be bound through editor settings
-/// rather than a runtime `$schema` field.
+/// rather than a runtime `$schema` field. Generated schemas omit JSON Schema
+/// `required` constraints so editors provide completion without requiring every
+/// config field to exist in each partial config file.
 ///
 /// # Type Parameters
 ///
@@ -390,12 +702,87 @@ pub fn write_config_schema<S>(output_path: impl AsRef<Path>) -> ConfigResult<()>
 where
     S: JsonSchema,
 {
-    let generator = SchemaSettings::draft07().into_generator();
-    let schema = generator.into_root_schema_for::<S>();
-    let mut json = serde_json::to_string_pretty(&schema)?;
-    ensure_single_trailing_newline(&mut json);
+    let schema = root_config_schema::<S>()?;
+    let json = schema_json(&schema)?;
 
     write_template(output_path.as_ref(), &json)
+}
+
+/// Collects the root schema and section schemas for a config type.
+///
+/// The root schema is written to `output_path`. Nested `confique` sections are
+/// written next to it as `<section>.schema.json`; deeper sections are nested in
+/// matching directories, for example `schemas/outer/inner.schema.json`. Each
+/// generated schema contains only the fields for its own template file; child
+/// section fields are omitted and completed by their own section schemas.
+///
+/// # Type Parameters
+///
+/// - `S`: Config schema type that derives [`JsonSchema`] and exposes section
+///   metadata through [`ConfigSchema`].
+///
+/// # Arguments
+///
+/// - `output_path`: Destination path for the root JSON Schema.
+///
+/// # Returns
+///
+/// Returns all generated schema targets in traversal order.
+pub fn config_schema_targets_for_path<S>(
+    output_path: impl AsRef<Path>,
+) -> ConfigResult<Vec<ConfigSchemaTarget>>
+where
+    S: ConfigSchema + JsonSchema,
+{
+    let output_path = output_path.as_ref();
+    let full_schema = root_config_schema::<S>()?;
+    let root_schema = schema_for_output_path::<S>(&full_schema, &[])?;
+    let mut targets = vec![ConfigSchemaTarget {
+        path: output_path.to_path_buf(),
+        content: schema_json(&root_schema)?,
+    }];
+
+    for section_path in nested_section_paths(&S::META) {
+        let schema_path = schema_path_for_section(output_path, &section_path);
+        let section_schema = schema_for_output_path::<S>(&full_schema, &section_path)?;
+
+        targets.push(ConfigSchemaTarget {
+            path: schema_path,
+            content: schema_json(&section_schema)?,
+        });
+    }
+
+    Ok(targets)
+}
+
+/// Writes the root schema and section schemas for a config type.
+///
+/// Parent directories are created before each schema is written. Generated
+/// schemas omit JSON Schema `required` constraints so they can be used for IDE
+/// completion against partial config files. The root schema does not complete
+/// nested section fields.
+///
+/// # Type Parameters
+///
+/// - `S`: Config schema type that derives [`JsonSchema`] and exposes section
+///   metadata through [`ConfigSchema`].
+///
+/// # Arguments
+///
+/// - `output_path`: Destination path for the root JSON Schema.
+///
+/// # Returns
+///
+/// Returns `Ok(())` after all schema files have been written.
+pub fn write_config_schemas<S>(output_path: impl AsRef<Path>) -> ConfigResult<()>
+where
+    S: ConfigSchema + JsonSchema,
+{
+    for target in config_schema_targets_for_path::<S>(output_path)? {
+        write_template(&target.path, &target.content)?;
+    }
+
+    Ok(())
 }
 
 /// Renders the default template for one path.
@@ -501,11 +888,13 @@ where
         .collect()
 }
 
-/// Collects template targets and binds TOML/YAML templates to a JSON Schema.
+/// Collects template targets and binds TOML/YAML templates to JSON Schemas.
 ///
 /// TOML targets receive a `#:schema` directive. YAML targets receive a YAML
 /// Language Server modeline. JSON and JSON5 targets are left unchanged so the
-/// runtime configuration is not polluted with a `$schema` field.
+/// runtime configuration is not polluted with a `$schema` field. Root targets
+/// bind `schema_path`; nested section targets bind their generated section
+/// schema path.
 ///
 /// # Type Parameters
 ///
@@ -516,7 +905,8 @@ where
 /// - `config_path`: Root config path preferred as the template source when it
 ///   exists.
 /// - `output_path`: Root output path for generated templates.
-/// - `schema_path`: JSON Schema path to reference from TOML/YAML templates.
+/// - `schema_path`: Root JSON Schema path to reference from root TOML/YAML
+///   templates.
 ///
 /// # Returns
 ///
@@ -529,14 +919,17 @@ pub fn template_targets_for_paths_with_schema<S>(
 where
     S: ConfigSchema,
 {
+    let output_path = output_path.as_ref();
+    let output_base_dir = output_path.parent().unwrap_or_else(|| Path::new("."));
+    let schema_path = schema_path.as_ref();
+
     template_targets_for_paths::<S>(config_path, output_path)?
         .into_iter()
         .map(|mut target| {
-            target.content = template_with_schema_directive(
-                &target.path,
-                schema_path.as_ref(),
-                &target.content,
-            )?;
+            let schema_path =
+                schema_path_for_template_target::<S>(output_base_dir, &target.path, schema_path);
+            target.content =
+                template_with_schema_directive(&target.path, &schema_path, &target.content)?;
             Ok(target)
         })
         .collect()
@@ -577,7 +970,9 @@ where
 ///
 /// TOML targets receive `#:schema <path>`, YAML targets receive
 /// `# yaml-language-server: $schema=<path>`, and JSON targets are left
-/// unchanged. The schema path is rendered relative to each template file.
+/// unchanged. The schema path is rendered relative to each template file. Root
+/// targets bind `schema_path`; nested section targets bind their generated
+/// section schema path.
 ///
 /// # Type Parameters
 ///
@@ -588,7 +983,8 @@ where
 /// - `config_path`: Root config path preferred as the template source when it
 ///   exists.
 /// - `output_path`: Root output path for generated templates.
-/// - `schema_path`: JSON Schema path to reference from TOML/YAML templates.
+/// - `schema_path`: Root JSON Schema path to reference from root TOML/YAML
+///   templates.
 ///
 /// # Returns
 ///
@@ -674,6 +1070,20 @@ fn load_include_paths_only(path: &Path) -> ConfigResult<Vec<PathBuf>> {
         Err(error) if error.missing() => Ok(Vec::new()),
         Err(error) => Err(error.into()),
     }
+}
+
+fn schema_path_for_template_target<S>(
+    root_base_dir: &Path,
+    target_path: &Path,
+    root_schema_path: &Path,
+) -> PathBuf
+where
+    S: ConfigSchema,
+{
+    section_path_for_target::<S>(root_base_dir, target_path)
+        .filter(|section_path| !section_path.is_empty())
+        .map(|section_path| schema_path_for_section(root_schema_path, &section_path))
+        .unwrap_or_else(|| root_schema_path.to_path_buf())
 }
 
 fn template_with_schema_directive(

@@ -15,16 +15,23 @@ write_config_templates::<AppConfig>("config.yaml", "config.example.yaml")?;
 # Ok::<(), Box<dyn std::error::Error + Send + Sync>>(())
 ```
 
-Generate one Draft 7 JSON Schema for TOML, YAML, and JSON editor support:
+Generate Draft 7 JSON Schemas for the root config and nested sections:
 
 ```rust
-use rust_config_tree::write_config_schema;
+use rust_config_tree::write_config_schemas;
 
-write_config_schema::<AppConfig>("schemas/myapp.schema.json")?;
+write_config_schemas::<AppConfig>("schemas/myapp.schema.json")?;
 # Ok::<(), Box<dyn std::error::Error + Send + Sync>>(())
 ```
 
-Bind that schema from generated TOML and YAML templates:
+Generated schemas omit `required` constraints. IDEs can still offer completion,
+but partial files such as `config/log.yaml` do not report missing root fields.
+The root schema only completes fields that belong in the root file; nested
+section fields are omitted there and completed by their own section schemas.
+Present fields are still schema-checked by the IDE. Required fields and final
+merged config validation are handled by `load_config` or `config-validate`.
+
+Bind those schemas from generated TOML and YAML templates:
 
 ```rust
 use rust_config_tree::write_config_templates_with_schema;
@@ -37,10 +44,11 @@ write_config_templates_with_schema::<AppConfig>(
 # Ok::<(), Box<dyn std::error::Error + Send + Sync>>(())
 ```
 
-TOML templates receive a `#:schema` directive. YAML templates receive a YAML
-Language Server modeline. JSON and JSON5 templates are left unchanged so the
-runtime config does not contain a `$schema` field. Bind JSON files with editor
-settings such as VS Code `json.schemas`.
+Root TOML/YAML templates bind the root schema and do not complete child section
+fields. Split section YAML templates bind their section schema. JSON and JSON5
+templates are left unchanged so the runtime config does not contain a
+`$schema` field. Bind JSON files with editor settings such as VS Code
+`json.schemas`.
 
 The output format is inferred from the output path:
 
@@ -51,7 +59,7 @@ The output format is inferred from the output path:
 
 ## Schema Bindings
 
-With a schema path of `schemas/myapp.schema.json`, generated templates use:
+With a schema path of `schemas/myapp.schema.json`, generated root templates use:
 
 ```toml
 #:schema ./schemas/myapp.schema.json
@@ -59,6 +67,13 @@ With a schema path of `schemas/myapp.schema.json`, generated templates use:
 
 ```yaml
 # yaml-language-server: $schema=./schemas/myapp.schema.json
+```
+
+Generated section templates bind section schemas:
+
+```yaml
+# config/log.yaml
+# yaml-language-server: $schema=../schemas/log.schema.json
 ```
 
 For JSON, keep the file free of `$schema` and bind it with editor settings:

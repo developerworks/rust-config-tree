@@ -115,17 +115,17 @@ impl Error for ConfigTreeError {
 #[derive(Debug)]
 pub enum ConfigError {
     /// Tree traversal failed.
-    Tree(ConfigTreeError),
+    Tree(Box<ConfigTreeError>),
     /// Loading an existing `.env` file failed.
-    Dotenv(dotenvy::Error),
+    Dotenv(Box<dotenvy::Error>),
     /// Figment failed to load or deserialize runtime config data.
-    Figment(figment::Error),
+    Figment(Box<figment::Error>),
     /// `confique` failed to load or merge config data.
-    Config(confique::Error),
+    Config(Box<confique::Error>),
     /// JSON schema serialization failed.
-    Json(serde_json::Error),
+    Json(Box<serde_json::Error>),
     /// File system or shell completion IO failed.
-    Io(io::Error),
+    Io(Box<io::Error>),
 }
 
 impl fmt::Display for ConfigError {
@@ -144,48 +144,48 @@ impl fmt::Display for ConfigError {
 impl Error for ConfigError {
     fn source(&self) -> Option<&(dyn Error + 'static)> {
         match self {
-            Self::Tree(err) => Some(err),
-            Self::Dotenv(err) => Some(err),
-            Self::Figment(err) => Some(err),
-            Self::Config(err) => Some(err),
-            Self::Json(err) => Some(err),
-            Self::Io(err) => Some(err),
+            Self::Tree(err) => Some(err.as_ref()),
+            Self::Dotenv(err) => Some(err.as_ref()),
+            Self::Figment(err) => Some(err.as_ref()),
+            Self::Config(err) => Some(err.as_ref()),
+            Self::Json(err) => Some(err.as_ref()),
+            Self::Io(err) => Some(err.as_ref()),
         }
     }
 }
 
 impl From<ConfigTreeError> for ConfigError {
     fn from(err: ConfigTreeError) -> Self {
-        Self::Tree(err)
+        Self::Tree(Box::new(err))
     }
 }
 
 impl From<dotenvy::Error> for ConfigError {
     fn from(err: dotenvy::Error) -> Self {
-        Self::Dotenv(err)
+        Self::Dotenv(Box::new(err))
     }
 }
 
 impl From<figment::Error> for ConfigError {
     fn from(err: figment::Error) -> Self {
-        Self::Figment(err)
+        Self::Figment(Box::new(err))
     }
 }
 
 impl From<confique::Error> for ConfigError {
     fn from(err: confique::Error) -> Self {
-        Self::Config(err)
+        Self::Config(Box::new(err))
     }
 }
 
 impl From<serde_json::Error> for ConfigError {
     fn from(err: serde_json::Error) -> Self {
-        Self::Json(err)
+        Self::Json(Box::new(err))
     }
 }
 
 impl From<io::Error> for ConfigError {
     fn from(err: io::Error) -> Self {
-        Self::Io(err)
+        Self::Io(Box::new(err))
     }
 }

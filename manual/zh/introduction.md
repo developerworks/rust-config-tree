@@ -51,7 +51,8 @@ log:
   的 Figment graph。
 - `write_config_templates::<S>(config_path, output_path)` 写入 root 模板和
   递归发现的子模板。
-- `write_config_schema::<S>(output_path)` 写入 Draft 7 JSON Schema。
+- `write_config_schemas::<S>(output_path)` 写入 root 和 section Draft 7
+  JSON Schema。
 - `handle_config_command::<Cli, S>(command, config_path)` 处理内置 clap 配置
   命令。
 

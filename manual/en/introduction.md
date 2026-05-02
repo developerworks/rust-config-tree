@@ -53,7 +53,8 @@ Use these APIs for most applications:
   Figment graph used for source tracking.
 - `write_config_templates::<S>(config_path, output_path)` writes the root
   template and recursively discovered child templates.
-- `write_config_schema::<S>(output_path)` writes a Draft 7 JSON Schema.
+- `write_config_schemas::<S>(output_path)` writes root and section Draft 7
+  JSON Schemas.
 - `handle_config_command::<Cli, S>(command, config_path)` handles built-in clap
   config commands.
 

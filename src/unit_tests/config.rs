@@ -291,7 +291,59 @@ fn write_config_schema_writes_draft7_json_schema() {
     let schema = fs::read_to_string(&schema_path).unwrap();
     assert!(schema.contains("http://json-schema.org/draft-07/schema#"));
     assert!(schema.contains("\"server\""));
+    assert!(!schema.contains("\"required\""));
     assert!(schema.ends_with('\n'));
+
+    let _ = fs::remove_dir_all(root);
+}
+
+#[test]
+fn write_config_schemas_writes_root_and_section_schemas() {
+    let root = temp_dir_path("write-section-schemas");
+    fs::create_dir_all(root.join("schemas")).unwrap();
+    let schema_path = root.join("schemas").join("myapp.schema.json");
+
+    write_config_schemas::<TestConfig>(&schema_path).unwrap();
+
+    let root_schema = fs::read_to_string(&schema_path).unwrap();
+    assert!(root_schema.contains("\"mode\""));
+    assert!(!root_schema.contains("\"server\""));
+    assert!(!root_schema.contains("\"port\""));
+    assert!(!root_schema.contains("\"definitions\""));
+    assert!(!root_schema.contains("\"required\""));
+
+    let server_schema_path = root.join("schemas").join("server.schema.json");
+    let server_schema = fs::read_to_string(server_schema_path).unwrap();
+    assert!(server_schema.contains("http://json-schema.org/draft-07/schema#"));
+    assert!(server_schema.contains("\"port\""));
+    assert!(!server_schema.contains("\"mode\""));
+    assert!(!server_schema.contains("\"required\""));
+
+    let _ = fs::remove_dir_all(root);
+}
+
+#[test]
+fn write_config_schemas_keeps_section_completion_in_section_schemas() {
+    let root = temp_dir_path("write-nested-section-schemas");
+    fs::create_dir_all(root.join("schemas")).unwrap();
+    let schema_path = root.join("schemas").join("myapp.schema.json");
+
+    write_config_schemas::<RenderedTemplateConfig>(&schema_path).unwrap();
+
+    let root_schema = fs::read_to_string(&schema_path).unwrap();
+    assert!(root_schema.contains("\"root_value\""));
+    assert!(!root_schema.contains("\"branch\""));
+    assert!(!root_schema.contains("\"outer\""));
+
+    let outer_schema = fs::read_to_string(root.join("schemas").join("outer.schema.json")).unwrap();
+    assert!(outer_schema.contains("\"enabled\""));
+    assert!(!outer_schema.contains("\"inner\""));
+    assert!(!outer_schema.contains("\"value\""));
+
+    let inner_schema =
+        fs::read_to_string(root.join("schemas").join("outer").join("inner.schema.json")).unwrap();
+    assert!(inner_schema.contains("\"value\""));
+    assert!(!inner_schema.contains("\"enabled\""));
 
     let _ = fs::remove_dir_all(root);
 }
@@ -323,7 +375,44 @@ fn template_targets_with_schema_add_toml_and_yaml_directives() {
     assert!(
         targets[1]
             .content
-            .starts_with("# yaml-language-server: $schema=../schemas/myapp.schema.json\n\n")
+            .starts_with("# yaml-language-server: $schema=../schemas/server.schema.json\n\n")
+    );
+
+    let _ = fs::remove_dir_all(root);
+}
+
+#[test]
+fn split_yaml_templates_bind_nested_section_schemas() {
+    let root = temp_dir_path("nested-template-schema-directives");
+    fs::create_dir_all(&root).unwrap();
+    let output_path = root.join("config.example.yaml");
+    let schema_path = root.join("schemas").join("myapp.schema.json");
+
+    let targets = template_targets_for_paths_with_schema::<RenderedTemplateConfig>(
+        root.join("config.yaml"),
+        &output_path,
+        &schema_path,
+    )
+    .unwrap();
+
+    let outer = targets
+        .iter()
+        .find(|target| target.path == root.join("config").join("outer.yaml"))
+        .unwrap();
+    assert!(
+        outer
+            .content
+            .starts_with("# yaml-language-server: $schema=../schemas/outer.schema.json\n\n")
+    );
+
+    let inner = targets
+        .iter()
+        .find(|target| target.path == root.join("config").join("outer").join("inner.yaml"))
+        .unwrap();
+    assert!(
+        inner.content.starts_with(
+            "# yaml-language-server: $schema=../../schemas/outer/inner.schema.json\n\n"
+        )
     );
 
     let _ = fs::remove_dir_all(root);
