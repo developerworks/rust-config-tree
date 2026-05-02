@@ -1,7 +1,15 @@
+#![warn(missing_docs)]
+
 //! Configuration-tree loading and CLI helpers for layered config files.
 //!
 //! The high-level API loads `confique` schemas directly, while the lower-level
 //! tree traversal helpers remain available for custom loaders.
+//!
+//! Use [`ConfigSchema`] with a `confique::Config` type when your schema owns an
+//! include field. Use [`load_config`] to load the root config, all recursive
+//! includes, and environment values into the final schema. Use
+//! [`write_config_templates`] or [`ConfigCommand`] to generate example template
+//! files that mirror the same include tree.
 
 mod cli;
 mod config;

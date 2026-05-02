@@ -29,9 +29,54 @@ impl ConfigSchema for TestConfig {
     fn include_paths(layer: &<Self as Config>::Layer) -> Vec<PathBuf> {
         layer.include.clone().unwrap_or_default()
     }
+}
 
-    fn template_include_paths() -> Vec<PathBuf> {
-        vec![PathBuf::from("config/server.yaml")]
+#[derive(Debug, Config)]
+#[allow(dead_code)]
+struct RenderedTemplateConfig {
+    #[config(default = [])]
+    include: Vec<PathBuf>,
+    #[config(default = "root")]
+    root_value: String,
+    #[config(nested)]
+    branch: RenderedBranchConfig,
+    #[config(nested)]
+    outer: RenderedOuterConfig,
+}
+
+#[derive(Debug, Config)]
+#[allow(dead_code)]
+struct RenderedBranchConfig {
+    #[config(default = 42)]
+    leaf: u16,
+}
+
+#[derive(Debug, Config)]
+#[allow(dead_code)]
+struct RenderedOuterConfig {
+    #[config(default = true)]
+    enabled: bool,
+    #[config(nested)]
+    inner: RenderedInnerConfig,
+}
+
+#[derive(Debug, Config)]
+#[allow(dead_code)]
+struct RenderedInnerConfig {
+    #[config(default = "value")]
+    value: String,
+}
+
+impl ConfigSchema for RenderedTemplateConfig {
+    fn include_paths(layer: &<Self as Config>::Layer) -> Vec<PathBuf> {
+        layer.include.clone().unwrap_or_default()
+    }
+
+    fn template_path_for_section(section_path: &[&str]) -> Option<PathBuf> {
+        match section_path {
+            ["branch"] => Some(PathBuf::from("config/custom-branch.yaml")),
+            _ => None,
+        }
     }
 }
 
@@ -144,6 +189,54 @@ fn template_targets_use_schema_default_includes_when_source_has_none() {
     assert_eq!(targets[0].path, output_path);
     assert!(targets[0].content.contains("\"config/server.yaml\""));
     assert_eq!(targets[1].path, root.join("config").join("server.yaml"));
+
+    let _ = fs::remove_dir_all(root);
+}
+
+#[test]
+fn template_targets_auto_split_nested_schema_sections() {
+    let root = temp_dir_path("rendered-template-config");
+    fs::create_dir_all(&root).unwrap();
+    let output_path = root.join("config.example.yaml");
+
+    let targets = template_targets_for_paths::<RenderedTemplateConfig>(
+        root.join("config.yaml"),
+        &output_path,
+    )
+    .unwrap();
+
+    assert_eq!(targets.len(), 4);
+    assert_eq!(targets[0].path, output_path);
+    assert!(targets[0].content.contains("\"config/custom-branch.yaml\""));
+    assert!(targets[0].content.contains("\"config/outer.yaml\""));
+    assert!(targets[0].content.contains("root_value"));
+    assert!(!targets[0].content.contains("branch:"));
+    assert!(!targets[0].content.contains("outer:"));
+
+    assert_eq!(
+        targets[1].path,
+        root.join("config").join("custom-branch.yaml")
+    );
+    assert!(targets[1].content.contains("branch:"));
+    assert!(targets[1].content.contains("leaf: 42"));
+    assert!(!targets[1].content.contains("root_value"));
+    assert!(!targets[1].content.contains("outer:"));
+
+    assert_eq!(targets[2].path, root.join("config").join("outer.yaml"));
+    assert!(targets[2].content.contains("\"outer/inner.yaml\""));
+    assert!(targets[2].content.contains("outer:"));
+    assert!(targets[2].content.contains("enabled: true"));
+    assert!(!targets[2].content.contains("inner:"));
+    assert!(!targets[2].content.contains("branch:"));
+
+    assert_eq!(
+        targets[3].path,
+        root.join("config").join("outer").join("inner.yaml")
+    );
+    assert!(targets[3].content.contains("outer:"));
+    assert!(targets[3].content.contains("inner:"));
+    assert!(targets[3].content.contains("value: value"));
+    assert!(!targets[3].content.contains("enabled"));
 
     let _ = fs::remove_dir_all(root);
 }

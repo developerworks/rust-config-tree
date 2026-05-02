@@ -1,3 +1,9 @@
+//! Clap subcommand integration and shell completion installation helpers.
+//!
+//! This module exposes reusable commands for generating config templates,
+//! printing shell completions, and installing completions into common shell
+//! startup locations.
+
 use std::{
     fs, io,
     path::{Path, PathBuf},
@@ -11,29 +17,52 @@ use crate::{
     config::{resolve_config_template_output, write_config_templates},
 };
 
+/// Built-in clap subcommands for config templates and shell completions.
 #[derive(Debug, Subcommand)]
 pub enum ConfigCommand {
     /// Generate an example config template.
     ///
     /// The output format is inferred from the extension; unknown or missing extensions use YAML.
     ConfigTemplate {
+        /// Template output path. Defaults to `config.example.yaml`.
         #[arg(long)]
         output: Option<PathBuf>,
     },
 
     /// Generate shell completions.
     Completions {
+        /// Shell to generate completions for.
         #[arg(value_enum)]
         shell: Shell,
     },
 
     /// Install shell completions and configure the shell startup file when needed.
     InstallCompletions {
+        /// Shell to install completions for.
         #[arg(value_enum)]
         shell: Shell,
     },
 }
 
+/// Handles a built-in config subcommand for a consumer CLI.
+///
+/// `C` is the clap parser type used to generate completion metadata. `S` is the
+/// application config schema used for template generation.
+///
+/// # Type Parameters
+///
+/// - `C`: The consumer CLI parser type that implements [`CommandFactory`].
+/// - `S`: The consumer config schema used when rendering config templates.
+///
+/// # Arguments
+///
+/// - `command`: Built-in subcommand selected by the consumer CLI.
+/// - `config_path`: Root config path used as the template source when handling
+///   `config-template`.
+///
+/// # Returns
+///
+/// Returns `Ok(())` after the selected subcommand completes.
 pub fn handle_config_command<C, S>(command: ConfigCommand, config_path: &Path) -> ConfigResult<()>
 where
     C: CommandFactory,
@@ -52,6 +81,19 @@ where
     }
 }
 
+/// Writes shell completion output to stdout.
+///
+/// # Type Parameters
+///
+/// - `C`: The consumer CLI parser type used to build the clap command.
+///
+/// # Arguments
+///
+/// - `shell`: Shell whose completion script should be generated.
+///
+/// # Returns
+///
+/// This function writes to stdout and returns no value.
 pub fn print_shell_completion<C>(shell: Shell)
 where
     C: CommandFactory,
@@ -61,6 +103,20 @@ where
     generate(shell, &mut cmd, bin_name, &mut io::stdout());
 }
 
+/// Generates shell completion files and updates shell startup files when needed.
+///
+/// # Type Parameters
+///
+/// - `C`: The consumer CLI parser type used to build the clap command.
+///
+/// # Arguments
+///
+/// - `shell`: Shell whose completion file should be installed.
+///
+/// # Returns
+///
+/// Returns `Ok(())` after the completion file is generated and any required
+/// startup file has been updated.
 pub fn install_shell_completion<C>(shell: Shell) -> ConfigResult<()>
 where
     C: CommandFactory,
@@ -94,12 +150,22 @@ where
     Ok(())
 }
 
+/// Resolves the current user's home directory from environment variables.
+///
+/// # Returns
+///
+/// Returns the home directory when `HOME` or `USERPROFILE` is set.
 fn home_dir() -> Option<PathBuf> {
     std::env::var_os("HOME")
         .map(PathBuf::from)
         .or_else(|| std::env::var_os("USERPROFILE").map(PathBuf::from))
 }
 
+/// Completion and startup-file paths for one shell.
+///
+/// The completion directory receives the generated completion file. The
+/// optional startup path is updated only for shells that require explicit
+/// startup configuration.
 struct ShellInstallTarget {
     shell: Shell,
     completion_dir: PathBuf,
@@ -107,6 +173,17 @@ struct ShellInstallTarget {
 }
 
 impl ShellInstallTarget {
+    /// Creates an install target rooted under `home_dir`.
+    ///
+    /// # Arguments
+    ///
+    /// - `shell`: Shell whose completion target should be created.
+    /// - `home_dir`: Home directory used as the base for completion and startup
+    ///   file paths.
+    ///
+    /// # Returns
+    ///
+    /// Returns the shell-specific install target.
     fn new(shell: Shell, home_dir: &Path) -> ConfigResult<Self> {
         let target = match shell {
             Shell::Bash => Self {
@@ -154,6 +231,17 @@ impl ShellInstallTarget {
         Ok(target)
     }
 
+    /// Builds the shell-specific startup block for a generated completion file.
+    ///
+    /// # Arguments
+    ///
+    /// - `generated_path`: Path to the generated completion file.
+    /// - `completion_dir`: Directory containing generated completion files.
+    ///
+    /// # Returns
+    ///
+    /// Returns the startup-file block body, or `None` when the shell does not
+    /// need startup-file changes.
     fn rc_block_body(&self, generated_path: &Path, completion_dir: &Path) -> Option<String> {
         let generated_path = generated_path.to_str()?;
         let completion_dir = completion_dir.to_str()?;
@@ -183,6 +271,21 @@ impl ShellInstallTarget {
     }
 }
 
+/// Inserts or replaces a managed shell configuration block in a startup file.
+///
+/// The managed block is identified by the binary name and shell, allowing repeat
+/// installs to update the same block instead of appending duplicates.
+///
+/// # Arguments
+///
+/// - `bin_name`: Binary name used in the managed block markers.
+/// - `shell`: Shell whose startup block is being inserted or replaced.
+/// - `file_path`: Startup file to update.
+/// - `block_body`: Shell-specific content placed between the managed markers.
+///
+/// # Returns
+///
+/// Returns `Ok(())` after the startup file has been written.
 pub fn upsert_managed_block(
     bin_name: &str,
     shell: Shell,

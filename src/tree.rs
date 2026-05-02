@@ -1,3 +1,9 @@
+//! Recursive include tree traversal primitives.
+//!
+//! This module provides the format-agnostic tree loader used by the high-level
+//! `confique` API. Callers supply a loader that returns a source value and the
+//! include paths declared by that source.
+
 use std::{
     collections::HashSet,
     path::{Path, PathBuf},
@@ -5,24 +11,60 @@ use std::{
 
 use crate::{BoxError, ConfigTreeError, Result, absolutize_lexical, resolve_include_path};
 
+/// Controls the order in which sibling include paths are traversed.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
 pub enum IncludeOrder {
+    /// Visit include paths in the order they were declared.
     #[default]
     Declared,
+    /// Visit sibling include paths in reverse declaration order.
     Reverse,
 }
 
+/// Options for loading a recursive config tree.
+///
+/// Use this type when the default traversal behavior is not enough, for example
+/// when sibling includes should be visited in reverse declaration order.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
 pub struct ConfigTreeOptions {
     include_order: IncludeOrder,
 }
 
 impl ConfigTreeOptions {
+    /// Sets the sibling include traversal order.
+    ///
+    /// # Arguments
+    ///
+    /// - `include_order`: Order used when visiting sibling include paths.
+    ///
+    /// # Returns
+    ///
+    /// Returns the updated options value.
     pub fn include_order(mut self, include_order: IncludeOrder) -> Self {
         self.include_order = include_order;
         self
     }
 
+    /// Loads a config tree from `root_path` with a custom source loader.
+    ///
+    /// The loader returns both the source value and the include paths declared
+    /// by that source. Relative include paths are resolved from the source path.
+    ///
+    /// # Type Parameters
+    ///
+    /// - `T`: Loaded value type stored for each config source.
+    /// - `E`: Error type returned by `load`.
+    /// - `F`: Source loader callback type.
+    ///
+    /// # Arguments
+    ///
+    /// - `root_path`: Root config path to load first.
+    /// - `load`: Callback that receives each normalized absolute source path
+    ///   and returns the source value with its declared include paths.
+    ///
+    /// # Returns
+    ///
+    /// Returns a [`ConfigTree`] containing loaded nodes in traversal order.
     pub fn load<T, E, F>(&self, root_path: impl AsRef<Path>, mut load: F) -> Result<ConfigTree<T>>
     where
         E: Into<BoxError>,
@@ -80,6 +122,11 @@ impl ConfigTreeOptions {
     }
 }
 
+/// Value and includes returned by a config source loader.
+///
+/// # Type Parameters
+///
+/// - `T`: Loaded source value type.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ConfigSource<T> {
     value: T,
@@ -87,18 +134,43 @@ pub struct ConfigSource<T> {
 }
 
 impl<T> ConfigSource<T> {
+    /// Creates a source from a loaded value and its declared include paths.
+    ///
+    /// # Arguments
+    ///
+    /// - `value`: Loaded source value.
+    /// - `includes`: Include paths declared by the source.
+    ///
+    /// # Returns
+    ///
+    /// Returns a new [`ConfigSource`].
     pub fn new(value: T, includes: Vec<PathBuf>) -> Self {
         Self { value, includes }
     }
 
+    /// Returns the loaded source value.
+    ///
+    /// # Returns
+    ///
+    /// Returns a shared reference to the loaded source value.
     pub fn value(&self) -> &T {
         &self.value
     }
 
+    /// Returns include paths declared by the source.
+    ///
+    /// # Returns
+    ///
+    /// Returns the include paths declared by the source.
     pub fn includes(&self) -> &[PathBuf] {
         &self.includes
     }
 
+    /// Decomposes the source into its value and include paths.
+    ///
+    /// # Returns
+    ///
+    /// Returns `(value, includes)`.
     pub fn into_parts(self) -> (T, Vec<PathBuf>) {
         (self.value, self.includes)
     }
@@ -110,25 +182,50 @@ impl<T> From<(T, Vec<PathBuf>)> for ConfigSource<T> {
     }
 }
 
+/// A loaded config tree in traversal order.
+///
+/// # Type Parameters
+///
+/// - `T`: Loaded source value type stored by each node.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ConfigTree<T> {
     nodes: Vec<ConfigNode<T>>,
 }
 
 impl<T> ConfigTree<T> {
+    /// Returns loaded tree nodes in traversal order.
+    ///
+    /// # Returns
+    ///
+    /// Returns loaded nodes in traversal order.
     pub fn nodes(&self) -> &[ConfigNode<T>] {
         &self.nodes
     }
 
+    /// Decomposes the tree into its nodes.
+    ///
+    /// # Returns
+    ///
+    /// Returns the loaded nodes, preserving traversal order.
     pub fn into_nodes(self) -> Vec<ConfigNode<T>> {
         self.nodes
     }
 
+    /// Decomposes the tree into loaded values, discarding paths and includes.
+    ///
+    /// # Returns
+    ///
+    /// Returns loaded source values in traversal order.
     pub fn into_values(self) -> Vec<T> {
         self.nodes.into_iter().map(|node| node.value).collect()
     }
 }
 
+/// One loaded config source in a tree.
+///
+/// # Type Parameters
+///
+/// - `T`: Loaded source value type stored by this node.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ConfigNode<T> {
     path: PathBuf,
@@ -137,23 +234,60 @@ pub struct ConfigNode<T> {
 }
 
 impl<T> ConfigNode<T> {
+    /// Returns the normalized absolute source path.
+    ///
+    /// # Returns
+    ///
+    /// Returns the normalized absolute source path.
     pub fn path(&self) -> &Path {
         &self.path
     }
 
+    /// Returns the loaded source value.
+    ///
+    /// # Returns
+    ///
+    /// Returns a shared reference to the loaded source value.
     pub fn value(&self) -> &T {
         &self.value
     }
 
+    /// Returns include paths declared by this source.
+    ///
+    /// # Returns
+    ///
+    /// Returns the include paths declared by this source.
     pub fn includes(&self) -> &[PathBuf] {
         &self.includes
     }
 
+    /// Decomposes the node into its loaded value.
+    ///
+    /// # Returns
+    ///
+    /// Returns the loaded source value.
     pub fn into_value(self) -> T {
         self.value
     }
 }
 
+/// Loads a config tree with default traversal options.
+///
+/// # Type Parameters
+///
+/// - `T`: Loaded value type stored for each config source.
+/// - `E`: Error type returned by `load`.
+/// - `F`: Source loader callback type.
+///
+/// # Arguments
+///
+/// - `root_path`: Root config path to load first.
+/// - `load`: Callback that receives each normalized absolute source path and
+///   returns the source value with its declared include paths.
+///
+/// # Returns
+///
+/// Returns a [`ConfigTree`] containing loaded nodes in traversal order.
 pub fn load_config_tree<T, E, F>(root_path: impl AsRef<Path>, load: F) -> Result<ConfigTree<T>>
 where
     E: Into<BoxError>,
@@ -162,6 +296,7 @@ where
     ConfigTreeOptions::default().load(root_path, load)
 }
 
+/// Tracks paths currently being visited and paths already loaded.
 #[derive(Default)]
 pub(crate) struct TraversalState {
     visiting: Vec<PathBuf>,
@@ -169,6 +304,17 @@ pub(crate) struct TraversalState {
 }
 
 impl TraversalState {
+    /// Enters a normalized source path during traversal.
+    ///
+    /// # Arguments
+    ///
+    /// - `path`: Normalized absolute source path.
+    ///
+    /// # Returns
+    ///
+    /// Returns `Ok(true)` when traversal should load the path, `Ok(false)` when
+    /// it was already loaded, or an include-cycle error when the path is already
+    /// in the active traversal stack.
     pub(crate) fn enter(&mut self, path: &Path) -> Result<bool> {
         if let Some(pos) = self.visiting.iter().position(|existing| existing == path) {
             let mut chain = self.visiting[pos..].to_vec();
@@ -184,11 +330,26 @@ impl TraversalState {
         Ok(true)
     }
 
+    /// Leaves the current traversal path.
+    ///
+    /// # Returns
+    ///
+    /// This function mutates the traversal stack and returns no value.
     pub(crate) fn leave(&mut self) {
         self.visiting.pop();
     }
 }
 
+/// Validates include paths declared by a source.
+///
+/// # Arguments
+///
+/// - `path`: Source path whose include list is being validated.
+/// - `paths`: Include paths declared by `path`.
+///
+/// # Returns
+///
+/// Returns `Ok(())` when every include path is non-empty.
 pub(crate) fn validate_include_paths(path: &Path, paths: &[PathBuf]) -> Result<()> {
     for (index, include_path) in paths.iter().enumerate() {
         if include_path.as_os_str().is_empty() {
