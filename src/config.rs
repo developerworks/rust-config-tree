@@ -430,12 +430,7 @@ where
         &root_source_path,
         output_path,
         |node_source_path| -> ConfigResult<Vec<PathBuf>> {
-            let mut include_paths = if node_source_path.exists() {
-                let layer = load_layer::<S>(node_source_path)?;
-                S::include_paths(&layer)
-            } else {
-                Vec::new()
-            };
+            let mut include_paths = template_source_include_paths::<S>(node_source_path)?;
 
             if include_paths.is_empty() {
                 include_paths =
@@ -546,6 +541,28 @@ pub(crate) fn resolve_config_template_output(output: Option<PathBuf>) -> ConfigR
     };
 
     Ok(normalize_lexical(output))
+}
+
+fn template_source_include_paths<S>(path: &Path) -> ConfigResult<Vec<PathBuf>>
+where
+    S: ConfigSchema,
+{
+    if !path.exists() {
+        return Ok(Vec::new());
+    }
+
+    match load_layer::<S>(path) {
+        Ok(layer) => Ok(S::include_paths(&layer)),
+        Err(_) => load_include_paths_only(path),
+    }
+}
+
+fn load_include_paths_only(path: &Path) -> ConfigResult<Vec<PathBuf>> {
+    match figment_for_file(path).extract_inner::<Vec<PathBuf>>("include") {
+        Ok(paths) => Ok(paths),
+        Err(error) if error.missing() => Ok(Vec::new()),
+        Err(error) => Err(error.into()),
+    }
 }
 
 fn template_for_target<S>(
@@ -925,6 +942,7 @@ fn render_yaml_section(
 
     for (depth, section) in section_path.iter().enumerate() {
         write_yaml_indent(output, depth);
+        output.push('#');
         output.push_str(section);
         output.push_str(":\n");
         current_path.push(*section);

@@ -335,6 +335,7 @@ fn template_targets_auto_split_nested_schema_sections() {
         root.join("config").join("custom-branch.yaml")
     );
     assert!(targets[1].content.contains("branch:"));
+    assert!(!targets[1].content.contains("\nbranch:"));
     assert!(targets[1].content.contains("leaf: 42"));
     assert!(!targets[1].content.contains("root_value"));
     assert!(!targets[1].content.contains("outer:"));
@@ -342,6 +343,7 @@ fn template_targets_auto_split_nested_schema_sections() {
     assert_eq!(targets[2].path, root.join("config").join("outer.yaml"));
     assert!(targets[2].content.contains("\"outer/inner.yaml\""));
     assert!(targets[2].content.contains("outer:"));
+    assert!(!targets[2].content.contains("\nouter:"));
     assert!(targets[2].content.contains("enabled: true"));
     assert!(!targets[2].content.contains("inner:"));
     assert!(!targets[2].content.contains("branch:"));
@@ -352,8 +354,36 @@ fn template_targets_auto_split_nested_schema_sections() {
     );
     assert!(targets[3].content.contains("outer:"));
     assert!(targets[3].content.contains("inner:"));
+    assert!(!targets[3].content.contains("\nouter:"));
+    assert!(!targets[3].content.contains("\n  inner:"));
     assert!(targets[3].content.contains("value: value"));
     assert!(!targets[3].content.contains("enabled"));
+
+    let _ = fs::remove_dir_all(root);
+}
+
+#[test]
+fn generated_split_templates_can_be_loaded_and_regenerated() {
+    let root = temp_dir_path("load-generated-template-config");
+    fs::create_dir_all(&root).unwrap();
+    let output_path = root.join("config.example.yaml");
+
+    write_config_templates::<RenderedTemplateConfig>(root.join("config.yaml"), &output_path)
+        .unwrap();
+
+    let config = load_config::<RenderedTemplateConfig>(&output_path).unwrap();
+    assert_eq!(config.root_value, "root");
+    assert_eq!(config.branch.leaf, 42);
+    assert!(config.outer.enabled);
+    assert_eq!(config.outer.inner.value, "value");
+
+    let targets = template_targets_for_paths::<RenderedTemplateConfig>(
+        root.join("config.yaml"),
+        &output_path,
+    )
+    .unwrap();
+
+    assert_eq!(targets.len(), 4);
 
     let _ = fs::remove_dir_all(root);
 }
