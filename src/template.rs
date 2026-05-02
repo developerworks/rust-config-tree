@@ -86,12 +86,8 @@ where
         return Ok(());
     }
 
-    let include_paths = if source_path.exists() {
-        read_includes(&source_path)
-            .map_err(|source| crate::ConfigTreeError::load(&source_path, source))?
-    } else {
-        Vec::new()
-    };
+    let include_paths = read_includes(&source_path)
+        .map_err(|source| crate::ConfigTreeError::load(&source_path, source))?;
     validate_include_paths(&source_path, &include_paths)?;
 
     targets.push(TemplateTarget {

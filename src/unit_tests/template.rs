@@ -98,6 +98,10 @@ fn template_target_into_parts_returns_owned_values() {
 }
 
 fn read_includes(path: &Path) -> io::Result<Vec<PathBuf>> {
+    if !path.exists() {
+        return Ok(Vec::new());
+    }
+
     Ok(fs::read_to_string(path)?
         .lines()
         .filter_map(|line| line.strip_prefix("include: "))

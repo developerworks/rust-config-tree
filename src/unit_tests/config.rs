@@ -29,6 +29,10 @@ impl ConfigSchema for TestConfig {
     fn include_paths(layer: &<Self as Config>::Layer) -> Vec<PathBuf> {
         layer.include.clone().unwrap_or_default()
     }
+
+    fn template_include_paths() -> Vec<PathBuf> {
+        vec![PathBuf::from("config/server.yaml")]
+    }
 }
 
 #[test]
@@ -124,6 +128,24 @@ fn config_format_is_inferred_from_extension() {
         ConfigFormat::from_path("config.unknown"),
         ConfigFormat::Yaml
     );
+}
+
+#[test]
+fn template_targets_use_schema_default_includes_when_source_has_none() {
+    let root = temp_dir_path("default-template-config");
+    fs::create_dir_all(&root).unwrap();
+    let output_path = root.join("config.example.yaml");
+    fs::write(&output_path, "#include: []\n").unwrap();
+
+    let targets =
+        template_targets_for_paths::<TestConfig>(root.join("config.yaml"), &output_path).unwrap();
+
+    assert_eq!(targets.len(), 2);
+    assert_eq!(targets[0].path, output_path);
+    assert!(targets[0].content.contains("\"config/server.yaml\""));
+    assert_eq!(targets[1].path, root.join("config").join("server.yaml"));
+
+    let _ = fs::remove_dir_all(root);
 }
 
 fn temp_dir_path(name: &str) -> PathBuf {

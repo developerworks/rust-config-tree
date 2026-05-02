@@ -7,14 +7,18 @@ use std::{
 use confique::{Config, File, FileFormat};
 
 use crate::{
-    ConfigError, ConfigSource, ConfigTreeOptions, IncludeOrder, collect_template_targets,
-    normalize_lexical,
+    ConfigError, ConfigSource, ConfigTreeOptions, IncludeOrder, absolutize_lexical,
+    collect_template_targets, normalize_lexical, select_template_source,
 };
 
 pub type ConfigResult<T> = std::result::Result<T, ConfigError>;
 
 pub trait ConfigSchema: Config + Sized {
     fn include_paths(layer: &<Self as Config>::Layer) -> Vec<PathBuf>;
+
+    fn template_include_paths() -> Vec<PathBuf> {
+        Vec::new()
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -98,12 +102,25 @@ pub fn template_targets_for_paths<S>(
 where
     S: ConfigSchema,
 {
+    let source_path = select_template_source(config_path, output_path.as_ref());
+    let root_source_path = absolutize_lexical(source_path)?;
+
     collect_template_targets(
-        config_path,
+        &root_source_path,
         output_path.as_ref(),
-        |source_path| -> ConfigResult<Vec<PathBuf>> {
-            let layer = load_layer::<S>(source_path)?;
-            Ok(S::include_paths(&layer))
+        |node_source_path| -> ConfigResult<Vec<PathBuf>> {
+            let mut include_paths = if node_source_path.exists() {
+                let layer = load_layer::<S>(node_source_path)?;
+                S::include_paths(&layer)
+            } else {
+                Vec::new()
+            };
+
+            if include_paths.is_empty() && node_source_path == root_source_path {
+                include_paths = S::template_include_paths();
+            }
+
+            Ok(include_paths)
         },
     )?
     .into_iter()
