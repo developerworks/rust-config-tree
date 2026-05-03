@@ -12,6 +12,26 @@ use crate::normalize_lexical;
 use crate::config::ConfigSchema;
 
 /// Resolves the split section represented by a generated template target.
+///
+/// # Type Parameters
+///
+/// - `S`: Config schema type used to resolve custom section template paths.
+///
+/// # Arguments
+///
+/// - `root_base_dir`: Directory containing the root template output.
+/// - `target_path`: Template target path to map back to a section.
+/// - `split_paths`: Section paths that are split into their own templates.
+///
+/// # Returns
+///
+/// Returns the matching section path when `target_path` represents one.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
 pub(super) fn section_path_for_target<S>(
     root_base_dir: &Path,
     target_path: &Path,
@@ -24,6 +44,26 @@ where
 }
 
 /// Resolves a target path against a caller-provided set of section candidates.
+///
+/// # Type Parameters
+///
+/// - `S`: Config schema type used to resolve custom section template paths.
+///
+/// # Arguments
+///
+/// - `root_base_dir`: Directory containing the root template output.
+/// - `target_path`: Template target path to map back to a section.
+/// - `candidates`: Section paths eligible for matching.
+///
+/// # Returns
+///
+/// Returns the best matching section path when one can be inferred.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
 pub(super) fn section_path_for_target_candidates<S>(
     root_base_dir: &Path,
     target_path: &Path,
@@ -46,6 +86,24 @@ where
 }
 
 /// Returns the generated template path for a split section path.
+///
+/// # Type Parameters
+///
+/// - `S`: Config schema type that may override section template paths.
+///
+/// # Arguments
+///
+/// - `section_path`: Nested section field path.
+///
+/// # Returns
+///
+/// Returns the generated template path for `section_path`.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
 pub(super) fn template_path_for_section<S>(section_path: &[&str]) -> PathBuf
 where
     S: ConfigSchema,
@@ -69,6 +127,21 @@ where
 }
 
 /// Returns `path` relative to `base` when it is inside that base directory.
+///
+/// # Arguments
+///
+/// - `path`: Path to make relative.
+/// - `base`: Base directory to strip from `path`.
+///
+/// # Returns
+///
+/// Returns a relative path when `path` is under `base`, otherwise `path`.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
 pub(super) fn path_relative_to(path: &Path, base: &Path) -> PathBuf {
     match path.strip_prefix(base) {
         Ok(relative) if !relative.as_os_str().is_empty() => relative.to_path_buf(),
@@ -77,6 +150,21 @@ pub(super) fn path_relative_to(path: &Path, base: &Path) -> PathBuf {
 }
 
 /// Infers the closest section path from a user-customized template path.
+///
+/// # Arguments
+///
+/// - `path`: Template path to inspect.
+/// - `candidates`: Section paths eligible for fuzzy matching.
+///
+/// # Returns
+///
+/// Returns the highest-scoring candidate when any candidate matches.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
 fn infer_section_path_from_path(
     path: &Path,
     candidates: &[Vec<&'static str>],
@@ -99,6 +187,20 @@ fn infer_section_path_from_path(
 }
 
 /// Normalizes every path component into a comparable section token.
+///
+/// # Arguments
+///
+/// - `path`: Path whose components should be tokenized.
+///
+/// # Returns
+///
+/// Returns normalized tokens derived from path components and file stems.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
 fn normalized_path_tokens(path: &Path) -> Vec<String> {
     path.components()
         .filter_map(|component| component.as_os_str().to_str())
@@ -114,6 +216,20 @@ fn normalized_path_tokens(path: &Path) -> Vec<String> {
 }
 
 /// Normalizes a path or section token for fuzzy section matching.
+///
+/// # Arguments
+///
+/// - `token`: Raw path component or section segment.
+///
+/// # Returns
+///
+/// Returns a lowercase ASCII token using underscores for separators.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
 fn normalize_token(token: &str) -> String {
     token
         .chars()
@@ -127,6 +243,22 @@ fn normalize_token(token: &str) -> String {
 }
 
 /// Scores how well a section path matches a template path.
+///
+/// # Arguments
+///
+/// - `section_path`: Candidate section path.
+/// - `path_tokens`: Normalized path component tokens.
+/// - `file_token`: Normalized file stem token.
+///
+/// # Returns
+///
+/// Returns a score where higher values indicate a better match.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
 fn section_path_score(section_path: &[&str], path_tokens: &[String], file_token: &str) -> usize {
     let section_tokens = section_path
         .iter()
@@ -153,6 +285,21 @@ fn section_path_score(section_path: &[&str], path_tokens: &[String], file_token:
 }
 
 /// Looks up nested `confique` metadata for a section path.
+///
+/// # Arguments
+///
+/// - `meta`: Root or current `confique` metadata node.
+/// - `section_path`: Nested section path to follow.
+///
+/// # Returns
+///
+/// Returns metadata for the section path when every segment is nested.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
 pub(super) fn meta_at_path(meta: &'static Meta, section_path: &[&str]) -> Option<&'static Meta> {
     let mut current_meta = meta;
     for section in section_path {

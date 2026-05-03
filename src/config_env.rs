@@ -38,9 +38,29 @@ impl ConfiqueEnvProvider {
     ///
     /// - `S`: Config schema whose metadata declares environment variable names.
     ///
+    /// # Arguments
+    ///
+    /// This function has no arguments.
+    ///
     /// # Returns
     ///
     /// Returns a provider that emits only environment variables declared by `S`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use confique::Config;
+    /// use rust_config_tree::ConfiqueEnvProvider;
+    ///
+    /// #[derive(Config)]
+    /// struct AppConfig {
+    ///     #[config(env = "APP_MODE", default = "demo")]
+    ///     mode: String,
+    /// }
+    ///
+    /// let provider = ConfiqueEnvProvider::new::<AppConfig>();
+    /// # let _ = provider;
+    /// ```
     pub fn new<S>() -> Self
     where
         S: Config,
@@ -69,6 +89,22 @@ impl ConfiqueEnvProvider {
 
 /// Supplies Figment data and source labels for schema-declared environment variables.
 impl Provider for ConfiqueEnvProvider {
+    /// Builds metadata used by Figment source tracing.
+    ///
+    /// # Arguments
+    ///
+    /// - `self`: Environment provider whose path-to-variable mapping should be
+    ///   exposed in metadata.
+    ///
+    /// # Returns
+    ///
+    /// Returns Figment metadata that renders schema paths as native env names.
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// let _ = ();
+    /// ```
     fn metadata(&self) -> Metadata {
         let path_to_env = Arc::clone(&self.path_to_env);
 
@@ -79,12 +115,44 @@ impl Provider for ConfiqueEnvProvider {
         })
     }
 
+    /// Reads configured environment variables into Figment data.
+    ///
+    /// # Arguments
+    ///
+    /// - `self`: Environment provider wrapping the filtered Figment env source.
+    ///
+    /// # Returns
+    ///
+    /// Returns Figment data grouped by profile, or a Figment error.
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// let _ = ();
+    /// ```
     fn data(&self) -> Result<Map<Profile, Dict>, figment::Error> {
         self.env.data()
     }
 }
 
 /// Recursively maps schema field paths to their declared environment variables.
+///
+/// # Arguments
+///
+/// - `meta`: `confique` metadata node to inspect.
+/// - `prefix`: Dot-separated field path prefix for `meta`.
+/// - `env_to_path`: Output map from uppercase environment names to field paths.
+/// - `path_to_env`: Output map from field paths to declared environment names.
+///
+/// # Returns
+///
+/// Returns no value; both output maps are updated in place.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
 fn collect_env_mapping(
     meta: &'static Meta,
     prefix: &str,

@@ -23,6 +23,32 @@ use crate::{
 /// # Returns
 ///
 /// Returns the generated template content.
+///
+/// # Examples
+///
+/// ```
+/// use confique::Config;
+/// use rust_config_tree::{ConfigSchema, template_for_path};
+///
+/// #[derive(Config)]
+/// struct AppConfig {
+///     #[config(default = [])]
+///     include: Vec<std::path::PathBuf>,
+///     #[config(default = "demo")]
+///     mode: String,
+/// }
+///
+/// impl ConfigSchema for AppConfig {
+///     fn include_paths(layer: &<Self as Config>::Layer) -> Vec<std::path::PathBuf> {
+///         layer.include.clone().unwrap_or_default()
+///     }
+/// }
+///
+/// let template = template_for_path::<AppConfig>("config.yaml")?;
+///
+/// assert!(template.contains("mode"));
+/// # Ok::<(), rust_config_tree::ConfigError>(())
+/// ```
 pub fn template_for_path<S>(path: impl AsRef<Path>) -> ConfigResult<String>
 where
     S: ConfigSchema,
@@ -37,6 +63,27 @@ where
 }
 
 /// Renders the template content for one collected template target.
+///
+/// # Type Parameters
+///
+/// - `S`: Config schema type used to render fields.
+///
+/// # Arguments
+///
+/// - `path`: Target template path whose extension selects the renderer.
+/// - `include_paths`: Include paths to place in the generated template.
+/// - `section_path`: Section path represented by this target.
+/// - `split_paths`: Section paths split out of the root template.
+///
+/// # Returns
+///
+/// Returns rendered template content for the target.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
 pub(super) fn template_for_target<S>(
     path: &Path,
     include_paths: &[PathBuf],
@@ -59,6 +106,25 @@ where
 }
 
 /// Renders a format-specific template and injects an explicit include block.
+///
+/// # Type Parameters
+///
+/// - `S`: Config schema type used to render fields.
+///
+/// # Arguments
+///
+/// - `path`: Template path whose extension selects the renderer.
+/// - `include_paths`: Include paths to inject.
+///
+/// # Returns
+///
+/// Returns rendered template content with include paths inserted when present.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
 fn template_for_path_with_includes<S>(
     path: &Path,
     include_paths: &[PathBuf],
@@ -91,6 +157,20 @@ where
 }
 
 /// Renders a YAML top-level include list.
+///
+/// # Arguments
+///
+/// - `paths`: Include paths to render.
+///
+/// # Returns
+///
+/// Returns a YAML `include` block.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
 pub(super) fn render_yaml_include(paths: &[PathBuf]) -> String {
     let mut out = String::from("include:\n");
     for path in paths {
@@ -102,6 +182,20 @@ pub(super) fn render_yaml_include(paths: &[PathBuf]) -> String {
 }
 
 /// Renders a TOML top-level include list.
+///
+/// # Arguments
+///
+/// - `paths`: Include paths to render.
+///
+/// # Returns
+///
+/// Returns a TOML `include` assignment.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
 fn render_toml_include(paths: &[PathBuf]) -> String {
     let entries = paths
         .iter()
@@ -112,6 +206,20 @@ fn render_toml_include(paths: &[PathBuf]) -> String {
 }
 
 /// Renders a JSON5 top-level include list.
+///
+/// # Arguments
+///
+/// - `paths`: Include paths to render.
+///
+/// # Returns
+///
+/// Returns a JSON5 `include` property block.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
 fn render_json5_include(paths: &[PathBuf]) -> String {
     let mut out = String::from("  include: [\n");
     for path in paths {
@@ -124,11 +232,40 @@ fn render_json5_include(paths: &[PathBuf]) -> String {
 }
 
 /// Quotes a path using JSON string escaping, which is valid for all outputs.
+///
+/// # Arguments
+///
+/// - `path`: Path to render as a quoted string.
+///
+/// # Returns
+///
+/// Returns a JSON-escaped string representation of `path`.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
 pub(super) fn quote_path(path: &Path) -> String {
     serde_json::to_string(&path.to_string_lossy()).expect("path string serialization cannot fail")
 }
 
 /// Removes one generated default include block when present.
+///
+/// # Arguments
+///
+/// - `value`: Text that may start with `prefix`.
+/// - `prefix`: Prefix to remove at most once.
+///
+/// # Returns
+///
+/// Returns `value` without `prefix` when it was present.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
 fn strip_prefix_once<'a>(value: &'a str, prefix: &str) -> &'a str {
     value.strip_prefix(prefix).unwrap_or(value)
 }

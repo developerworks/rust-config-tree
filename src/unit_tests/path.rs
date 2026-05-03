@@ -3,6 +3,20 @@ use std::path::{Path, PathBuf};
 use super::*;
 
 /// Verifies lexical normalization removes `.` and `..` path components.
+///
+/// # Arguments
+///
+/// This test has no arguments.
+///
+/// # Returns
+///
+/// Returns no value; failed assertions panic.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
 #[test]
 fn normalize_lexical_removes_current_dir_and_parent_segments() {
     assert_eq!(
@@ -16,6 +30,20 @@ fn normalize_lexical_removes_current_dir_and_parent_segments() {
 }
 
 /// Verifies relative includes resolve from their declaring file.
+///
+/// # Arguments
+///
+/// This test has no arguments.
+///
+/// # Returns
+///
+/// Returns no value; failed assertions panic.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
 #[test]
 fn resolve_include_path_resolves_relative_paths_from_parent_file() {
     assert_eq!(
@@ -25,6 +53,20 @@ fn resolve_include_path_resolves_relative_paths_from_parent_file() {
 }
 
 /// Verifies absolute includes stay absolute after normalization.
+///
+/// # Arguments
+///
+/// This test has no arguments.
+///
+/// # Returns
+///
+/// Returns no value; failed assertions panic.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
 #[test]
 fn resolve_include_path_keeps_absolute_include_paths() {
     assert_eq!(
@@ -34,6 +76,20 @@ fn resolve_include_path_keeps_absolute_include_paths() {
 }
 
 /// Verifies lexical absolutization returns an absolute normalized path.
+///
+/// # Arguments
+///
+/// This test has no arguments.
+///
+/// # Returns
+///
+/// Returns no value; failed assertions panic.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
 #[test]
 fn absolutize_lexical_returns_absolute_paths() {
     let path = absolutize_lexical("config/../config.yaml").unwrap();

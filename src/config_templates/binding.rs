@@ -15,6 +15,27 @@ use crate::{
 };
 
 /// Chooses the schema path that should be bound to one template target.
+///
+/// # Type Parameters
+///
+/// - `S`: Config schema type used to map template targets to sections.
+///
+/// # Arguments
+///
+/// - `root_base_dir`: Directory containing the root template output.
+/// - `target_path`: Template target path being bound to a schema.
+/// - `root_schema_path`: Path to the root generated schema.
+/// - `split_paths`: Nested section paths that have their own schemas.
+///
+/// # Returns
+///
+/// Returns the root schema path or the matching section schema path.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
 pub(super) fn schema_path_for_template_target<S>(
     root_base_dir: &Path,
     target_path: &Path,
@@ -31,6 +52,22 @@ where
 }
 
 /// Prepends an editor schema directive when the template format supports one.
+///
+/// # Arguments
+///
+/// - `template_path`: Template path whose extension selects directive syntax.
+/// - `schema_path`: Schema path to reference from the template.
+/// - `content`: Existing template content.
+///
+/// # Returns
+///
+/// Returns template content with a directive for TOML/YAML, or unchanged JSON.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
 pub(super) fn template_with_schema_directive(
     template_path: &Path,
     schema_path: &Path,
@@ -51,6 +88,21 @@ pub(super) fn template_with_schema_directive(
 }
 
 /// Builds a template-local schema reference from two filesystem paths.
+///
+/// # Arguments
+///
+/// - `template_path`: Template path that will contain the schema directive.
+/// - `schema_path`: Schema path referenced by the directive.
+///
+/// # Returns
+///
+/// Returns a path reference relative to the template directory when possible.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
 fn schema_reference_for_path(template_path: &Path, schema_path: &Path) -> ConfigResult<String> {
     let template_path = absolutize_lexical(template_path)?;
     let schema_path = absolutize_lexical(schema_path)?;
@@ -60,6 +112,21 @@ fn schema_reference_for_path(template_path: &Path, schema_path: &Path) -> Config
 }
 
 /// Computes a lexical relative path from `base` to `path`.
+///
+/// # Arguments
+///
+/// - `path`: Destination path to reference.
+/// - `base`: Base directory from which the reference should be relative.
+///
+/// # Returns
+///
+/// Returns a lexical relative path, or `path` unchanged when no prefix matches.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
 fn relative_path_from(path: &Path, base: &Path) -> PathBuf {
     let path_components = path.components().collect::<Vec<_>>();
     let base_components = base.components().collect::<Vec<_>>();
@@ -95,6 +162,20 @@ fn relative_path_from(path: &Path, base: &Path) -> PathBuf {
 }
 
 /// Renders a schema reference in the form expected by editor directives.
+///
+/// # Arguments
+///
+/// - `path`: Schema path reference to render.
+///
+/// # Returns
+///
+/// Returns a slash-separated reference with `./` added for local relative paths.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
 fn render_schema_reference(path: &Path) -> String {
     let value = path.to_string_lossy().replace('\\', "/");
     if path.is_absolute() || value.starts_with("../") || value.starts_with("./") {

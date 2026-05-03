@@ -84,6 +84,45 @@ pub enum ConfigCommand {
 /// # Returns
 ///
 /// Returns `Ok(())` after the selected subcommand completes.
+///
+/// # Examples
+///
+/// ```no_run
+/// use clap::{Parser, Subcommand};
+/// use confique::Config;
+/// use rust_config_tree::{ConfigCommand, ConfigSchema, handle_config_command};
+/// use schemars::JsonSchema;
+///
+/// #[derive(Parser)]
+/// struct Cli {
+///     #[command(subcommand)]
+///     command: Command,
+/// }
+///
+/// #[derive(Subcommand)]
+/// enum Command {
+///     #[command(flatten)]
+///     Config(ConfigCommand),
+/// }
+///
+/// #[derive(Config, JsonSchema)]
+/// struct AppConfig {
+///     #[config(default = [])]
+///     include: Vec<std::path::PathBuf>,
+/// }
+///
+/// impl ConfigSchema for AppConfig {
+///     fn include_paths(layer: &<Self as Config>::Layer) -> Vec<std::path::PathBuf> {
+///         layer.include.clone().unwrap_or_default()
+///     }
+/// }
+///
+/// handle_config_command::<Cli, AppConfig>(
+///     ConfigCommand::ConfigValidate,
+///     std::path::Path::new("config.yaml"),
+/// )?;
+/// # Ok::<(), rust_config_tree::ConfigError>(())
+/// ```
 pub fn handle_config_command<C, S>(command: ConfigCommand, config_path: &Path) -> ConfigResult<()>
 where
     C: CommandFactory,
@@ -127,6 +166,20 @@ where
 /// # Returns
 ///
 /// This function writes to stdout and returns no value.
+///
+/// # Examples
+///
+/// ```no_run
+/// use clap::Parser;
+/// use clap_complete::aot::Shell;
+/// use rust_config_tree::print_shell_completion;
+///
+/// #[derive(Parser)]
+/// #[command(name = "myapp")]
+/// struct Cli {}
+///
+/// print_shell_completion::<Cli>(Shell::Bash);
+/// ```
 pub fn print_shell_completion<C>(shell: Shell)
 where
     C: CommandFactory,
@@ -150,6 +203,21 @@ where
 ///
 /// Returns `Ok(())` after the completion file is generated and any required
 /// startup file has been updated.
+///
+/// # Examples
+///
+/// ```no_run
+/// use clap::Parser;
+/// use clap_complete::aot::Shell;
+/// use rust_config_tree::install_shell_completion;
+///
+/// #[derive(Parser)]
+/// #[command(name = "myapp")]
+/// struct Cli {}
+///
+/// install_shell_completion::<Cli>(Shell::Zsh)?;
+/// # Ok::<(), rust_config_tree::ConfigError>(())
+/// ```
 pub fn install_shell_completion<C>(shell: Shell) -> ConfigResult<()>
 where
     C: CommandFactory,
@@ -185,9 +253,19 @@ where
 
 /// Resolves the current user's home directory from environment variables.
 ///
+/// # Arguments
+///
+/// This function has no arguments.
+///
 /// # Returns
 ///
 /// Returns the home directory when `HOME` or `USERPROFILE` is set.
+///
+/// # Examples
+///
+/// ```no_run
+/// // Internal helper; use `install_shell_completion` to resolve install paths.
+/// ```
 fn home_dir() -> Option<PathBuf> {
     std::env::var_os("HOME")
         .map(PathBuf::from)
@@ -218,6 +296,12 @@ impl ShellInstallTarget {
     /// # Returns
     ///
     /// Returns the shell-specific install target.
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// // Internal helper; use `install_shell_completion` to construct targets.
+    /// ```
     fn new(shell: Shell, home_dir: &Path) -> ConfigResult<Self> {
         let target = match shell {
             Shell::Bash => Self {
@@ -276,6 +360,12 @@ impl ShellInstallTarget {
     ///
     /// Returns the startup-file block body, or `None` when the shell does not
     /// need startup-file changes.
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// // Internal helper; use `install_shell_completion` to generate rc blocks.
+    /// ```
     fn rc_block_body(&self, generated_path: &Path, completion_dir: &Path) -> Option<String> {
         let generated_path = generated_path.to_str()?;
         let completion_dir = completion_dir.to_str()?;
@@ -320,6 +410,23 @@ impl ShellInstallTarget {
 /// # Returns
 ///
 /// Returns `Ok(())` after the startup file has been written.
+///
+/// # Examples
+///
+/// ```
+/// use std::fs;
+/// use clap_complete::aot::Shell;
+/// use rust_config_tree::upsert_managed_block;
+///
+/// let path = std::env::temp_dir().join("rust-config-tree-upsert-doctest.rc");
+/// upsert_managed_block("myapp", Shell::Bash, &path, "body\n")?;
+///
+/// let content = fs::read_to_string(&path)?;
+/// assert!(content.contains("# >>> myapp bash completions >>>"));
+/// assert!(content.contains("body"));
+/// # let _ = fs::remove_file(path);
+/// # Ok::<(), std::io::Error>(())
+/// ```
 pub fn upsert_managed_block(
     bin_name: &str,
     shell: Shell,

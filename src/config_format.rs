@@ -32,6 +32,16 @@ impl ConfigFormat {
     /// # Returns
     ///
     /// Returns the inferred [`ConfigFormat`].
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use rust_config_tree::ConfigFormat;
+    ///
+    /// assert_eq!(ConfigFormat::from_path("config.toml"), ConfigFormat::Toml);
+    /// assert_eq!(ConfigFormat::from_path("config.json5"), ConfigFormat::Json);
+    /// assert_eq!(ConfigFormat::from_path("config.unknown"), ConfigFormat::Yaml);
+    /// ```
     pub fn from_path(path: impl AsRef<Path>) -> Self {
         match path.as_ref().extension().and_then(OsStr::to_str) {
             Some("toml") => Self::Toml,
@@ -42,6 +52,20 @@ impl ConfigFormat {
 }
 
 /// Builds the YAML renderer options used by default templates.
+///
+/// # Arguments
+///
+/// This function has no arguments.
+///
+/// # Returns
+///
+/// Returns YAML format options shared by generated templates.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
 pub(crate) fn yaml_options() -> confique::yaml::FormatOptions {
     let mut options = confique::yaml::FormatOptions::default();
     options.indent = 2;
@@ -52,6 +76,20 @@ pub(crate) fn yaml_options() -> confique::yaml::FormatOptions {
 }
 
 /// Builds the TOML renderer options used by default templates.
+///
+/// # Arguments
+///
+/// This function has no arguments.
+///
+/// # Returns
+///
+/// Returns TOML format options shared by generated templates.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
 pub(crate) fn toml_options() -> confique::toml::FormatOptions {
     let mut options = confique::toml::FormatOptions::default();
     options.general.comments = true;
@@ -61,6 +99,20 @@ pub(crate) fn toml_options() -> confique::toml::FormatOptions {
 }
 
 /// Builds the JSON5 renderer options used by default templates.
+///
+/// # Arguments
+///
+/// This function has no arguments.
+///
+/// # Returns
+///
+/// Returns JSON5 format options shared by generated templates.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
 pub(crate) fn json5_options() -> confique::json5::FormatOptions {
     let mut options = confique::json5::FormatOptions::default();
     options.indent = 2;

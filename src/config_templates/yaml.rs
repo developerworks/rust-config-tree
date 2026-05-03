@@ -11,6 +11,23 @@ use super::{
 use crate::config_util::ensure_single_trailing_newline;
 
 /// Renders a YAML template for either the root config or one split section.
+///
+/// # Arguments
+///
+/// - `meta`: Root config metadata used to render fields.
+/// - `include_paths`: Include paths to emit at the top of the template.
+/// - `section_path`: Empty for the root template, or the split section path.
+/// - `split_paths`: Section paths split into separate templates.
+///
+/// # Returns
+///
+/// Returns complete YAML template content.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
 pub(super) fn render_yaml_template(
     meta: &'static Meta,
     include_paths: &[PathBuf],
@@ -41,6 +58,23 @@ pub(super) fn render_yaml_template(
 }
 
 /// Renders the commented ancestor context for a split YAML section template.
+///
+/// # Arguments
+///
+/// - `meta`: Root config metadata used to find the section metadata.
+/// - `section_path`: Split section path represented by the template.
+/// - `split_paths`: Section paths split into separate templates.
+/// - `output`: Output string receiving rendered YAML.
+///
+/// # Returns
+///
+/// Returns no value; `output` is updated directly.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
 fn render_yaml_section(
     meta: &'static Meta,
     section_path: &[&'static str],
@@ -76,6 +110,25 @@ fn render_yaml_section(
 }
 
 /// Renders leaf fields and non-split nested sections for one metadata node.
+///
+/// # Arguments
+///
+/// - `meta`: Metadata node whose fields should be rendered.
+/// - `current_path`: Mutable section path for `meta`.
+/// - `split_paths`: Section paths split into separate templates.
+/// - `depth`: YAML indentation depth.
+/// - `skip_include_field`: Whether to omit the root include field.
+/// - `output`: Output string receiving rendered YAML.
+///
+/// # Returns
+///
+/// Returns no value; `output` and `current_path` are updated during traversal.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
 fn render_yaml_fields(
     meta: &'static Meta,
     current_path: &mut Vec<&'static str>,
@@ -148,6 +201,25 @@ fn render_yaml_fields(
 }
 
 /// Renders one leaf field with docs, environment hint, and default value.
+///
+/// # Arguments
+///
+/// - `name`: Config field name.
+/// - `doc`: Documentation lines emitted for the field.
+/// - `env`: Optional environment variable name for the field.
+/// - `kind`: Leaf field kind and default metadata.
+/// - `depth`: YAML indentation depth.
+/// - `output`: Output string receiving rendered YAML.
+///
+/// # Returns
+///
+/// Returns no value; `output` is updated directly.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
 fn render_yaml_leaf(
     name: &str,
     doc: &[&str],
@@ -210,6 +282,20 @@ fn render_yaml_leaf(
 }
 
 /// Renders a `confique` default expression as inline YAML.
+///
+/// # Arguments
+///
+/// - `expr`: Default expression from `confique` metadata.
+///
+/// # Returns
+///
+/// Returns an inline YAML representation of the expression.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
 fn render_yaml_expr(expr: &Expr) -> String {
     match expr {
         Expr::Str(value) => render_plain_or_quoted_string(value),
@@ -243,6 +329,20 @@ fn render_yaml_expr(expr: &Expr) -> String {
 }
 
 /// Renders a map key in the inline YAML representation.
+///
+/// # Arguments
+///
+/// - `key`: Map key expression from `confique` metadata.
+///
+/// # Returns
+///
+/// Returns an inline YAML representation of the map key.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
 fn render_yaml_map_key(key: &MapKey) -> String {
     match key {
         MapKey::Str(value) => render_plain_or_quoted_string(value),
@@ -254,6 +354,20 @@ fn render_yaml_map_key(key: &MapKey) -> String {
 }
 
 /// Renders simple YAML scalars plainly and quotes ambiguous strings.
+///
+/// # Arguments
+///
+/// - `value`: String scalar to render.
+///
+/// # Returns
+///
+/// Returns `value` unchanged when plain YAML is safe, otherwise quoted.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
 fn render_plain_or_quoted_string(value: &str) -> String {
     let needs_quotes = value.is_empty()
         || value.starts_with([
@@ -269,6 +383,21 @@ fn render_plain_or_quoted_string(value: &str) -> String {
 }
 
 /// Writes two-space indentation for a YAML nesting depth.
+///
+/// # Arguments
+///
+/// - `output`: Output string receiving indentation.
+/// - `depth`: Number of two-space indentation levels to write.
+///
+/// # Returns
+///
+/// Returns no value; `output` is updated directly.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
 fn write_yaml_indent(output: &mut String, depth: usize) {
     for _ in 0..depth {
         output.push_str("  ");

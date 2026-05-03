@@ -33,6 +33,21 @@ struct TestServerConfig {
 
 /// Exposes fixture includes for runtime, template, and schema tests.
 impl ConfigSchema for TestConfig {
+    /// Returns include paths declared by the fixture layer.
+    ///
+    /// # Arguments
+    ///
+    /// - `layer`: Partially loaded fixture layer.
+    ///
+    /// # Returns
+    ///
+    /// Returns include paths or an empty list when omitted.
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// let _ = ();
+    /// ```
     fn include_paths(layer: &<Self as Config>::Layer) -> Vec<PathBuf> {
         layer.include.clone().unwrap_or_default()
     }
@@ -49,6 +64,21 @@ struct DotenvConfig {
 
 /// Exposes fixture includes for dotenv loading tests.
 impl ConfigSchema for DotenvConfig {
+    /// Returns include paths declared by the dotenv fixture layer.
+    ///
+    /// # Arguments
+    ///
+    /// - `layer`: Partially loaded fixture layer.
+    ///
+    /// # Returns
+    ///
+    /// Returns include paths or an empty list when omitted.
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// let _ = ();
+    /// ```
     fn include_paths(layer: &<Self as Config>::Layer) -> Vec<PathBuf> {
         layer.include.clone().unwrap_or_default()
     }
@@ -72,6 +102,21 @@ struct EnvMappedDatabaseConfig {
 
 /// Exposes fixture includes for environment mapping tests.
 impl ConfigSchema for EnvMappedConfig {
+    /// Returns include paths declared by the env-mapping fixture layer.
+    ///
+    /// # Arguments
+    ///
+    /// - `layer`: Partially loaded fixture layer.
+    ///
+    /// # Returns
+    ///
+    /// Returns include paths or an empty list when omitted.
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// let _ = ();
+    /// ```
     fn include_paths(layer: &<Self as Config>::Layer) -> Vec<PathBuf> {
         layer.include.clone().unwrap_or_default()
     }
@@ -118,10 +163,40 @@ struct RenderedInnerConfig {
 
 /// Exposes fixture includes and a custom section path for split templates.
 impl ConfigSchema for RenderedTemplateConfig {
+    /// Returns include paths declared by the split-template fixture layer.
+    ///
+    /// # Arguments
+    ///
+    /// - `layer`: Partially loaded fixture layer.
+    ///
+    /// # Returns
+    ///
+    /// Returns include paths or an empty list when omitted.
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// let _ = ();
+    /// ```
     fn include_paths(layer: &<Self as Config>::Layer) -> Vec<PathBuf> {
         layer.include.clone().unwrap_or_default()
     }
 
+    /// Returns a custom template path for the `branch` split section.
+    ///
+    /// # Arguments
+    ///
+    /// - `section_path`: Section path requested by template generation.
+    ///
+    /// # Returns
+    ///
+    /// Returns a custom path for `branch`, otherwise `None`.
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// let _ = ();
+    /// ```
     fn template_path_for_section(section_path: &[&str]) -> Option<PathBuf> {
         match section_path {
             ["branch"] => Some(PathBuf::from("config/custom-branch.yaml")),
@@ -148,12 +223,41 @@ struct InlineSectionConfig {
 
 /// Exposes fixture includes for unsplit nested section tests.
 impl ConfigSchema for InlineTemplateConfig {
+    /// Returns include paths declared by the inline fixture layer.
+    ///
+    /// # Arguments
+    ///
+    /// - `layer`: Partially loaded fixture layer.
+    ///
+    /// # Returns
+    ///
+    /// Returns include paths or an empty list when omitted.
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// let _ = ();
+    /// ```
     fn include_paths(layer: &<Self as Config>::Layer) -> Vec<PathBuf> {
         layer.include.clone().unwrap_or_default()
     }
 }
 
 /// Verifies a root config and included child load into the final schema.
+///
+/// # Arguments
+///
+/// This test has no arguments.
+///
+/// # Returns
+///
+/// Returns no value; failed assertions panic.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
 #[test]
 fn load_config_returns_accessible_config_object() {
     let root = temp_dir_path("load-config");
@@ -183,6 +287,20 @@ fn load_config_returns_accessible_config_object() {
 }
 
 /// Verifies `.env` files are discovered from config ancestors.
+///
+/// # Arguments
+///
+/// This test has no arguments.
+///
+/// # Returns
+///
+/// Returns no value; failed assertions panic.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
 #[test]
 fn load_config_loads_dotenv_from_config_ancestors() {
     let _guard = DOTENV_TEST_LOCK.lock().unwrap();
@@ -206,6 +324,20 @@ fn load_config_loads_dotenv_from_config_ancestors() {
 }
 
 /// Verifies process environment values override `.env` values.
+///
+/// # Arguments
+///
+/// This test has no arguments.
+///
+/// # Returns
+///
+/// Returns no value; failed assertions panic.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
 #[test]
 fn load_config_preserves_environment_over_dotenv() {
     let _guard = DOTENV_TEST_LOCK.lock().unwrap();
@@ -229,6 +361,20 @@ fn load_config_preserves_environment_over_dotenv() {
 }
 
 /// Verifies exact `confique` env names are mapped without underscore splitting.
+///
+/// # Arguments
+///
+/// This test has no arguments.
+///
+/// # Returns
+///
+/// Returns no value; failed assertions panic.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
 #[test]
 fn load_config_maps_confique_env_names_without_splitting_underscores() {
     let _guard = DOTENV_TEST_LOCK.lock().unwrap();
@@ -262,6 +408,20 @@ fn load_config_maps_confique_env_names_without_splitting_underscores() {
 }
 
 /// Verifies template targets recurse through includes and render content.
+///
+/// # Arguments
+///
+/// This test has no arguments.
+///
+/// # Returns
+///
+/// Returns no value; failed assertions panic.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
 #[test]
 fn template_targets_for_paths_recurses_and_renders_templates() {
     let root = temp_dir_path("template-config");
@@ -291,6 +451,20 @@ fn template_targets_for_paths_recurses_and_renders_templates() {
 }
 
 /// Verifies template writers create missing parent directories.
+///
+/// # Arguments
+///
+/// This test has no arguments.
+///
+/// # Returns
+///
+/// Returns no value; failed assertions panic.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
 #[test]
 fn write_config_templates_creates_parent_directories() {
     let root = temp_dir_path("write-templates");
@@ -318,6 +492,20 @@ fn write_config_templates_creates_parent_directories() {
 }
 
 /// Verifies root JSON Schema output uses Draft 7 and relaxed required fields.
+///
+/// # Arguments
+///
+/// This test has no arguments.
+///
+/// # Returns
+///
+/// Returns no value; failed assertions panic.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
 #[test]
 fn write_config_schema_writes_draft7_json_schema() {
     let root = temp_dir_path("write-schema");
@@ -336,6 +524,20 @@ fn write_config_schema_writes_draft7_json_schema() {
 }
 
 /// Verifies schema generation writes root and split section schemas.
+///
+/// # Arguments
+///
+/// This test has no arguments.
+///
+/// # Returns
+///
+/// Returns no value; failed assertions panic.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
 #[test]
 fn write_config_schemas_writes_root_and_section_schemas() {
     let root = temp_dir_path("write-section-schemas");
@@ -364,6 +566,20 @@ fn write_config_schemas_writes_root_and_section_schemas() {
 }
 
 /// Verifies nested split schemas keep only their own completion fields.
+///
+/// # Arguments
+///
+/// This test has no arguments.
+///
+/// # Returns
+///
+/// Returns no value; failed assertions panic.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
 #[test]
 fn write_config_schemas_keeps_section_completion_in_section_schemas() {
     let root = temp_dir_path("write-nested-section-schemas");
@@ -391,6 +607,20 @@ fn write_config_schemas_keeps_section_completion_in_section_schemas() {
 }
 
 /// Verifies TOML and YAML templates receive editor schema directives.
+///
+/// # Arguments
+///
+/// This test has no arguments.
+///
+/// # Returns
+///
+/// Returns no value; failed assertions panic.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
 #[test]
 fn template_targets_with_schema_add_toml_and_yaml_directives() {
     let root = temp_dir_path("template-schema-directives");
@@ -425,6 +655,20 @@ fn template_targets_with_schema_add_toml_and_yaml_directives() {
 }
 
 /// Verifies nested YAML templates bind to matching section schemas.
+///
+/// # Arguments
+///
+/// This test has no arguments.
+///
+/// # Returns
+///
+/// Returns no value; failed assertions panic.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
 #[test]
 fn split_yaml_templates_bind_nested_section_schemas() {
     let root = temp_dir_path("nested-template-schema-directives");
@@ -463,6 +707,20 @@ fn split_yaml_templates_bind_nested_section_schemas() {
 }
 
 /// Verifies JSON templates are not modified with schema directives.
+///
+/// # Arguments
+///
+/// This test has no arguments.
+///
+/// # Returns
+///
+/// Returns no value; failed assertions panic.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
 #[test]
 fn schema_binding_keeps_json_templates_unmodified() {
     let root = temp_dir_path("json-template-schema-binding");
@@ -485,6 +743,20 @@ fn schema_binding_keeps_json_templates_unmodified() {
 }
 
 /// Verifies config format inference for supported and unknown extensions.
+///
+/// # Arguments
+///
+/// This test has no arguments.
+///
+/// # Returns
+///
+/// Returns no value; failed assertions panic.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
 #[test]
 fn config_format_is_inferred_from_extension() {
     assert_eq!(ConfigFormat::from_path("config.yaml"), ConfigFormat::Yaml);
@@ -499,6 +771,20 @@ fn config_format_is_inferred_from_extension() {
 }
 
 /// Verifies generated child includes are used when the source has none.
+///
+/// # Arguments
+///
+/// This test has no arguments.
+///
+/// # Returns
+///
+/// Returns no value; failed assertions panic.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
 #[test]
 fn template_targets_use_schema_default_includes_when_source_has_none() {
     let root = temp_dir_path("default-template-config");
@@ -518,6 +804,20 @@ fn template_targets_use_schema_default_includes_when_source_has_none() {
 }
 
 /// Verifies unmarked nested sections remain in the root template and schema.
+///
+/// # Arguments
+///
+/// This test has no arguments.
+///
+/// # Returns
+///
+/// Returns no value; failed assertions panic.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
 #[test]
 fn unmarked_nested_sections_stay_in_root_template_and_schema() {
     let root = temp_dir_path("inline-template-config");
@@ -552,6 +852,20 @@ fn unmarked_nested_sections_stay_in_root_template_and_schema() {
 }
 
 /// Verifies missing schema-derived includes are appended to existing includes.
+///
+/// # Arguments
+///
+/// This test has no arguments.
+///
+/// # Returns
+///
+/// Returns no value; failed assertions panic.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
 #[test]
 fn template_targets_append_missing_schema_default_includes() {
     let root = temp_dir_path("append-default-template-includes");
@@ -588,6 +902,20 @@ fn template_targets_append_missing_schema_default_includes() {
 }
 
 /// Verifies split markers produce section template targets automatically.
+///
+/// # Arguments
+///
+/// This test has no arguments.
+///
+/// # Returns
+///
+/// Returns no value; failed assertions panic.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
 #[test]
 fn template_targets_auto_split_nested_schema_sections() {
     let root = temp_dir_path("rendered-template-config");
@@ -641,6 +969,20 @@ fn template_targets_auto_split_nested_schema_sections() {
 }
 
 /// Verifies generated split templates can be loaded and regenerated.
+///
+/// # Arguments
+///
+/// This test has no arguments.
+///
+/// # Returns
+///
+/// Returns no value; failed assertions panic.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
 #[test]
 fn generated_split_templates_can_be_loaded_and_regenerated() {
     let root = temp_dir_path("load-generated-template-config");
@@ -668,6 +1010,20 @@ fn generated_split_templates_can_be_loaded_and_regenerated() {
 }
 
 /// Builds a unique temporary directory path for config tests.
+///
+/// # Arguments
+///
+/// - `name`: Stable test-specific name segment.
+///
+/// # Returns
+///
+/// Returns a temporary directory path that includes the process id and time.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
 fn temp_dir_path(name: &str) -> PathBuf {
     let now = SystemTime::now()
         .duration_since(UNIX_EPOCH)

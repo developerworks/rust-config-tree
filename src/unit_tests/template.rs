@@ -7,6 +7,20 @@ use std::{
 use super::*;
 
 /// Verifies include recursion mirrors source paths into output paths.
+///
+/// # Arguments
+///
+/// This test has no arguments.
+///
+/// # Returns
+///
+/// Returns no value; failed assertions panic.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
 #[test]
 fn collect_template_targets_recursively_mirrors_output_tree() {
     let root = temp_dir_path("template-targets");
@@ -54,6 +68,20 @@ fn collect_template_targets_recursively_mirrors_output_tree() {
 }
 
 /// Verifies template source selection preference order.
+///
+/// # Arguments
+///
+/// This test has no arguments.
+///
+/// # Returns
+///
+/// Returns no value; failed assertions panic.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
 #[test]
 fn select_template_source_prefers_config_then_existing_output_then_output() {
     let root = temp_dir_path("template-source");
@@ -82,6 +110,20 @@ fn select_template_source_prefers_config_then_existing_output_then_output() {
 }
 
 /// Verifies template target ownership decomposition.
+///
+/// # Arguments
+///
+/// This test has no arguments.
+///
+/// # Returns
+///
+/// Returns no value; failed assertions panic.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
 #[test]
 fn template_target_into_parts_returns_owned_values() {
     let target = TemplateTarget {
@@ -101,6 +143,20 @@ fn template_target_into_parts_returns_owned_values() {
 }
 
 /// Reads test include lines from the custom fixture format.
+///
+/// # Arguments
+///
+/// - `path`: Fixture path to read.
+///
+/// # Returns
+///
+/// Returns include paths declared by `path`, or an empty list when missing.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
 fn read_includes(path: &Path) -> io::Result<Vec<PathBuf>> {
     if !path.exists() {
         return Ok(Vec::new());
@@ -114,6 +170,20 @@ fn read_includes(path: &Path) -> io::Result<Vec<PathBuf>> {
 }
 
 /// Builds a unique temporary directory path for template tests.
+///
+/// # Arguments
+///
+/// - `name`: Stable test-specific name segment.
+///
+/// # Returns
+///
+/// Returns a temporary directory path that includes the process id and time.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
 fn temp_dir_path(name: &str) -> PathBuf {
     let now = SystemTime::now()
         .duration_since(UNIX_EPOCH)

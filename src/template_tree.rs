@@ -26,36 +26,124 @@ pub struct TemplateTarget {
 impl TemplateTarget {
     /// Returns the config source path used to discover this target's includes.
     ///
+    /// # Arguments
+    ///
+    /// - `self`: Template target being inspected.
+    ///
     /// # Returns
     ///
     /// Returns the source path for this template target.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::{io, path::{Path, PathBuf}};
+    /// use rust_config_tree::collect_template_targets;
+    ///
+    /// let targets = collect_template_targets(
+    ///     "config.yaml",
+    ///     "config.example.yaml",
+    ///     |_path: &Path| -> io::Result<Vec<PathBuf>> { Ok(Vec::new()) },
+    /// )?;
+    ///
+    /// assert!(targets[0].source_path().ends_with("config.example.yaml"));
+    /// # Ok::<(), rust_config_tree::ConfigTreeError>(())
+    /// ```
     pub fn source_path(&self) -> &Path {
         &self.source_path
     }
 
     /// Returns the output path that should receive this target's template.
     ///
+    /// # Arguments
+    ///
+    /// - `self`: Template target being inspected.
+    ///
     /// # Returns
     ///
     /// Returns the output path for this template target.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::{io, path::{Path, PathBuf}};
+    /// use rust_config_tree::collect_template_targets;
+    ///
+    /// let targets = collect_template_targets(
+    ///     "config.yaml",
+    ///     "config.example.yaml",
+    ///     |_path: &Path| -> io::Result<Vec<PathBuf>> { Ok(Vec::new()) },
+    /// )?;
+    ///
+    /// assert_eq!(targets[0].target_path(), Path::new("config.example.yaml"));
+    /// # Ok::<(), rust_config_tree::ConfigTreeError>(())
+    /// ```
     pub fn target_path(&self) -> &Path {
         &self.target_path
     }
 
     /// Returns include paths declared by this source target.
     ///
+    /// # Arguments
+    ///
+    /// - `self`: Template target being inspected.
+    ///
     /// # Returns
     ///
     /// Returns the include paths declared by the target source.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::{io, path::{Path, PathBuf}};
+    /// use rust_config_tree::collect_template_targets;
+    ///
+    /// let targets = collect_template_targets(
+    ///     "config.yaml",
+    ///     "config.example.yaml",
+    ///     |path: &Path| -> io::Result<Vec<PathBuf>> {
+    ///         if path.ends_with("config.example.yaml") {
+    ///             Ok(vec![PathBuf::from("child.yaml")])
+    ///         } else {
+    ///             Ok(Vec::new())
+    ///         }
+    ///     },
+    /// )?;
+    ///
+    /// assert_eq!(targets[0].include_paths(), &[PathBuf::from("child.yaml")]);
+    /// # Ok::<(), rust_config_tree::ConfigTreeError>(())
+    /// ```
     pub fn include_paths(&self) -> &[PathBuf] {
         &self.include_paths
     }
 
     /// Decomposes the target into its source path, target path, and include paths.
     ///
+    /// # Arguments
+    ///
+    /// - `self`: Template target to decompose.
+    ///
     /// # Returns
     ///
     /// Returns `(source_path, target_path, include_paths)`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::{io, path::{Path, PathBuf}};
+    /// use rust_config_tree::collect_template_targets;
+    ///
+    /// let mut targets = collect_template_targets(
+    ///     "config.yaml",
+    ///     "config.example.yaml",
+    ///     |_path: &Path| -> io::Result<Vec<PathBuf>> { Ok(Vec::new()) },
+    /// )?;
+    ///
+    /// let (_source_path, target_path, include_paths) = targets.remove(0).into_parts();
+    /// assert_eq!(target_path, PathBuf::from("config.example.yaml"));
+    /// assert!(include_paths.is_empty());
+    /// # Ok::<(), rust_config_tree::ConfigTreeError>(())
+    /// ```
     pub fn into_parts(self) -> (PathBuf, PathBuf, Vec<PathBuf>) {
         (self.source_path, self.target_path, self.include_paths)
     }
@@ -75,6 +163,17 @@ impl TemplateTarget {
 /// # Returns
 ///
 /// Returns the path that should be used as the root template source.
+///
+/// # Examples
+///
+/// ```
+/// use std::path::PathBuf;
+/// use rust_config_tree::select_template_source;
+///
+/// let source = select_template_source("missing-config.yaml", "config.example.yaml");
+///
+/// assert_eq!(source, PathBuf::from("config.example.yaml"));
+/// ```
 pub fn select_template_source(
     config_path: impl AsRef<Path>,
     output_path: impl AsRef<Path>,
@@ -117,6 +216,29 @@ pub fn select_template_source(
 /// # Returns
 ///
 /// Returns all collected template targets in traversal order.
+///
+/// # Examples
+///
+/// ```
+/// use std::{io, path::{Path, PathBuf}};
+/// use rust_config_tree::collect_template_targets;
+///
+/// let targets = collect_template_targets(
+///     "config.yaml",
+///     "examples/config.example.yaml",
+///     |path: &Path| -> io::Result<Vec<PathBuf>> {
+///         if path.ends_with("config.example.yaml") {
+///             Ok(vec![PathBuf::from("child.yaml")])
+///         } else {
+///             Ok(Vec::new())
+///         }
+///     },
+/// )?;
+///
+/// assert_eq!(targets.len(), 2);
+/// assert_eq!(targets[1].target_path(), Path::new("examples/child.yaml"));
+/// # Ok::<(), rust_config_tree::ConfigTreeError>(())
+/// ```
 pub fn collect_template_targets<E, F>(
     config_path: impl AsRef<Path>,
     output_path: impl AsRef<Path>,
@@ -140,6 +262,29 @@ where
 }
 
 /// Recursively maps one source template path to one output template path.
+///
+/// # Type Parameters
+///
+/// - `E`: Error type returned by `read_includes`.
+/// - `F`: Include reader callback type.
+///
+/// # Arguments
+///
+/// - `source_path`: Source template path used to read includes.
+/// - `target_path`: Output path mapped to `source_path`.
+/// - `read_includes`: Callback that reads include paths from a source path.
+/// - `state`: Traversal state used for cycle detection and deduplication.
+/// - `targets`: Output list receiving collected template targets.
+///
+/// # Returns
+///
+/// Returns `Ok(())` after this target and its children are collected.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
 fn collect_template_target<E, F>(
     source_path: &Path,
     target_path: &Path,

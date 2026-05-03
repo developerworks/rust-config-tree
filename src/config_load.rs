@@ -44,6 +44,40 @@ use crate::{
 ///
 /// Returns the merged config schema after loading the root file, recursive
 /// includes, `.env` values, and environment values.
+///
+/// # Examples
+///
+/// ```
+/// use std::fs;
+/// use confique::Config;
+/// use rust_config_tree::{ConfigSchema, load_config};
+///
+/// #[derive(Debug, Config)]
+/// struct AppConfig {
+///     #[config(default = [])]
+///     include: Vec<std::path::PathBuf>,
+///     #[config(default = "demo")]
+///     mode: String,
+/// }
+///
+/// impl ConfigSchema for AppConfig {
+///     fn include_paths(layer: &<Self as Config>::Layer) -> Vec<std::path::PathBuf> {
+///         layer.include.clone().unwrap_or_default()
+///     }
+/// }
+///
+/// # fn run() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+/// let path = std::env::temp_dir().join("rust-config-tree-load-config-doctest.yaml");
+/// fs::write(&path, "mode: local\n")?;
+///
+/// let config = load_config::<AppConfig>(&path)?;
+///
+/// assert_eq!(config.mode, "local");
+/// # let _ = fs::remove_file(path);
+/// # Ok(())
+/// # }
+/// # run().unwrap();
+/// ```
 pub fn load_config<S>(path: impl AsRef<Path>) -> ConfigResult<S>
 where
     S: ConfigSchema,
@@ -69,6 +103,41 @@ where
 /// # Returns
 ///
 /// Returns the merged config schema and its runtime Figment source graph.
+///
+/// # Examples
+///
+/// ```
+/// use std::fs;
+/// use confique::Config;
+/// use rust_config_tree::{ConfigSchema, load_config_with_figment};
+///
+/// #[derive(Debug, Config)]
+/// struct AppConfig {
+///     #[config(default = [])]
+///     include: Vec<std::path::PathBuf>,
+///     #[config(default = "demo")]
+///     mode: String,
+/// }
+///
+/// impl ConfigSchema for AppConfig {
+///     fn include_paths(layer: &<Self as Config>::Layer) -> Vec<std::path::PathBuf> {
+///         layer.include.clone().unwrap_or_default()
+///     }
+/// }
+///
+/// # fn run() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+/// let path = std::env::temp_dir().join("rust-config-tree-load-with-figment-doctest.yaml");
+/// fs::write(&path, "mode: local\n")?;
+///
+/// let (config, figment) = load_config_with_figment::<AppConfig>(&path)?;
+///
+/// assert_eq!(config.mode, "local");
+/// # let _ = figment;
+/// # let _ = fs::remove_file(path);
+/// # Ok(())
+/// # }
+/// # run().unwrap();
+/// ```
 pub fn load_config_with_figment<S>(path: impl AsRef<Path>) -> ConfigResult<(S, Figment)>
 where
     S: ConfigSchema,
@@ -95,6 +164,39 @@ where
 /// # Returns
 ///
 /// Returns a Figment source graph with file and environment providers.
+///
+/// # Examples
+///
+/// ```
+/// use std::fs;
+/// use confique::Config;
+/// use rust_config_tree::{ConfigSchema, build_config_figment};
+///
+/// #[derive(Debug, Config)]
+/// struct AppConfig {
+///     #[config(default = [])]
+///     include: Vec<std::path::PathBuf>,
+///     #[config(default = "demo")]
+///     mode: String,
+/// }
+///
+/// impl ConfigSchema for AppConfig {
+///     fn include_paths(layer: &<Self as Config>::Layer) -> Vec<std::path::PathBuf> {
+///         layer.include.clone().unwrap_or_default()
+///     }
+/// }
+///
+/// # fn run() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+/// let path = std::env::temp_dir().join("rust-config-tree-build-figment-doctest.yaml");
+/// fs::write(&path, "mode: local\n")?;
+///
+/// let figment = build_config_figment::<AppConfig>(&path)?;
+/// # let _ = figment;
+/// # let _ = fs::remove_file(path);
+/// # Ok(())
+/// # }
+/// # run().unwrap();
+/// ```
 pub fn build_config_figment<S>(path: impl AsRef<Path>) -> ConfigResult<Figment>
 where
     S: ConfigSchema,
@@ -128,6 +230,41 @@ where
 /// # Returns
 ///
 /// Returns the final config schema.
+///
+/// # Examples
+///
+/// ```
+/// use std::fs;
+/// use confique::Config;
+/// use rust_config_tree::{ConfigSchema, build_config_figment, load_config_from_figment};
+///
+/// #[derive(Debug, Config)]
+/// struct AppConfig {
+///     #[config(default = [])]
+///     include: Vec<std::path::PathBuf>,
+///     #[config(default = "demo")]
+///     mode: String,
+/// }
+///
+/// impl ConfigSchema for AppConfig {
+///     fn include_paths(layer: &<Self as Config>::Layer) -> Vec<std::path::PathBuf> {
+///         layer.include.clone().unwrap_or_default()
+///     }
+/// }
+///
+/// # fn run() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+/// let path = std::env::temp_dir().join("rust-config-tree-load-from-figment-doctest.yaml");
+/// fs::write(&path, "mode: local\n")?;
+/// let figment = build_config_figment::<AppConfig>(&path)?;
+///
+/// let config = load_config_from_figment::<AppConfig>(&figment)?;
+///
+/// assert_eq!(config.mode, "local");
+/// # let _ = fs::remove_file(path);
+/// # Ok(())
+/// # }
+/// # run().unwrap();
+/// ```
 pub fn load_config_from_figment<S>(figment: &Figment) -> ConfigResult<S>
 where
     S: ConfigSchema,
@@ -154,6 +291,12 @@ where
 /// # Returns
 ///
 /// Returns the loaded `confique` layer for `S`.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
 pub(crate) fn load_layer<S>(path: &Path) -> ConfigResult<<S as Config>::Layer>
 where
     S: ConfigSchema,
@@ -162,6 +305,24 @@ where
 }
 
 /// Loads every config layer reachable from the root include tree.
+///
+/// # Type Parameters
+///
+/// - `S`: Config schema type whose layer type is loaded for each file.
+///
+/// # Arguments
+///
+/// - `path`: Root config path used to start include traversal.
+///
+/// # Returns
+///
+/// Returns the loaded config tree containing one `confique` layer per source.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
 fn load_layer_tree<S>(path: &Path) -> ConfigResult<ConfigTree<<S as Config>::Layer>>
 where
     S: ConfigSchema,
@@ -181,6 +342,21 @@ where
 }
 
 /// Merges one file provider selected from the path extension.
+///
+/// # Arguments
+///
+/// - `figment`: Existing Figment graph to extend.
+/// - `path`: Config file path whose extension selects the provider format.
+///
+/// # Returns
+///
+/// Returns `figment` with the selected file provider merged in.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
 fn merge_file_provider(figment: Figment, path: &Path) -> Figment {
     match ConfigFormat::from_path(path) {
         ConfigFormat::Yaml => figment.merge(Yaml::file_exact(path)),
@@ -190,11 +366,40 @@ fn merge_file_provider(figment: Figment, path: &Path) -> Figment {
 }
 
 /// Builds a Figment graph containing only one config file provider.
+///
+/// # Arguments
+///
+/// - `path`: Config file path to load through Figment.
+///
+/// # Returns
+///
+/// Returns a Figment graph containing exactly that file provider.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
 pub(crate) fn figment_for_file(path: &Path) -> Figment {
     merge_file_provider(Figment::new(), path)
 }
 
 /// Loads the nearest ancestor `.env` file for a config path when it exists.
+///
+/// # Arguments
+///
+/// - `path`: Config file path whose ancestors should be searched.
+///
+/// # Returns
+///
+/// Returns `Ok(())` after loading the first discovered `.env`, or when none
+/// exists.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
 fn load_dotenv_for_path(path: &Path) -> ConfigResult<()> {
     let path = absolutize_lexical(path)?;
     let mut current_dir = path.parent();

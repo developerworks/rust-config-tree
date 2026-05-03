@@ -50,6 +50,25 @@ pub trait ConfigSchema: Config + Sized {
     /// # Returns
     ///
     /// Returns include paths declared by `layer`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use confique::Config;
+    /// use rust_config_tree::ConfigSchema;
+    ///
+    /// #[derive(Config)]
+    /// struct AppConfig {
+    ///     #[config(default = [])]
+    ///     include: Vec<std::path::PathBuf>,
+    /// }
+    ///
+    /// impl ConfigSchema for AppConfig {
+    ///     fn include_paths(layer: &<Self as Config>::Layer) -> Vec<std::path::PathBuf> {
+    ///         layer.include.clone().unwrap_or_default()
+    ///     }
+    /// }
+    /// ```
     fn include_paths(layer: &<Self as Config>::Layer) -> Vec<PathBuf>;
 
     /// Overrides the generated template file path for a split nested section.
@@ -70,6 +89,32 @@ pub trait ConfigSchema: Config + Sized {
     ///
     /// Returns `Some(path)` to override the generated file path, or `None` to
     /// use the default section path.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use confique::Config;
+    /// use rust_config_tree::ConfigSchema;
+    ///
+    /// #[derive(Config)]
+    /// struct AppConfig {
+    ///     #[config(default = [])]
+    ///     include: Vec<std::path::PathBuf>,
+    /// }
+    ///
+    /// impl ConfigSchema for AppConfig {
+    ///     fn include_paths(layer: &<Self as Config>::Layer) -> Vec<std::path::PathBuf> {
+    ///         layer.include.clone().unwrap_or_default()
+    ///     }
+    ///
+    ///     fn template_path_for_section(section_path: &[&str]) -> Option<std::path::PathBuf> {
+    ///         match section_path {
+    ///             ["server"] => Some(std::path::PathBuf::from("config/server.yaml")),
+    ///             _ => None,
+    ///         }
+    ///     }
+    /// }
+    /// ```
     fn template_path_for_section(section_path: &[&str]) -> Option<PathBuf> {
         let _ = section_path;
         None

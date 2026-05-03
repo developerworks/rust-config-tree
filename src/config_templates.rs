@@ -56,6 +56,35 @@ pub use target::ConfigTemplateTarget;
 /// # Returns
 ///
 /// Returns all generated template targets in traversal order.
+///
+/// # Examples
+///
+/// ```
+/// use confique::Config;
+/// use rust_config_tree::{ConfigSchema, template_targets_for_paths};
+/// use schemars::JsonSchema;
+///
+/// #[derive(Config, JsonSchema)]
+/// struct AppConfig {
+///     #[config(default = [])]
+///     include: Vec<std::path::PathBuf>,
+///     #[config(default = "demo")]
+///     mode: String,
+/// }
+///
+/// impl ConfigSchema for AppConfig {
+///     fn include_paths(layer: &<Self as Config>::Layer) -> Vec<std::path::PathBuf> {
+///         layer.include.clone().unwrap_or_default()
+///     }
+/// }
+///
+/// let targets =
+///     template_targets_for_paths::<AppConfig>("config.yaml", "config.example.yaml")?;
+///
+/// assert_eq!(targets.len(), 1);
+/// assert!(targets[0].content.contains("mode"));
+/// # Ok::<(), rust_config_tree::ConfigError>(())
+/// ```
 pub fn template_targets_for_paths<S>(
     config_path: impl AsRef<Path>,
     output_path: impl AsRef<Path>,
@@ -149,6 +178,37 @@ where
 /// # Returns
 ///
 /// Returns all generated template targets in traversal order.
+///
+/// # Examples
+///
+/// ```
+/// use confique::Config;
+/// use rust_config_tree::{ConfigSchema, template_targets_for_paths_with_schema};
+/// use schemars::JsonSchema;
+///
+/// #[derive(Config, JsonSchema)]
+/// struct AppConfig {
+///     #[config(default = [])]
+///     include: Vec<std::path::PathBuf>,
+///     #[config(default = "demo")]
+///     mode: String,
+/// }
+///
+/// impl ConfigSchema for AppConfig {
+///     fn include_paths(layer: &<Self as Config>::Layer) -> Vec<std::path::PathBuf> {
+///         layer.include.clone().unwrap_or_default()
+///     }
+/// }
+///
+/// let targets = template_targets_for_paths_with_schema::<AppConfig>(
+///     "config.yaml",
+///     "config.example.yaml",
+///     "schemas/config.schema.json",
+/// )?;
+///
+/// assert!(targets[0].content.starts_with("# yaml-language-server: $schema="));
+/// # Ok::<(), rust_config_tree::ConfigError>(())
+/// ```
 pub fn template_targets_for_paths_with_schema<S>(
     config_path: impl AsRef<Path>,
     output_path: impl AsRef<Path>,
@@ -196,6 +256,35 @@ where
 /// # Returns
 ///
 /// Returns `Ok(())` after all template files have been written.
+///
+/// # Examples
+///
+/// ```
+/// use confique::Config;
+/// use rust_config_tree::{ConfigSchema, write_config_templates};
+/// use schemars::JsonSchema;
+///
+/// #[derive(Config, JsonSchema)]
+/// struct AppConfig {
+///     #[config(default = [])]
+///     include: Vec<std::path::PathBuf>,
+///     #[config(default = "demo")]
+///     mode: String,
+/// }
+///
+/// impl ConfigSchema for AppConfig {
+///     fn include_paths(layer: &<Self as Config>::Layer) -> Vec<std::path::PathBuf> {
+///         layer.include.clone().unwrap_or_default()
+///     }
+/// }
+///
+/// let output = std::env::temp_dir().join("rust-config-tree-template-doctest.yaml");
+/// write_config_templates::<AppConfig>("config.yaml", &output)?;
+///
+/// assert!(output.exists());
+/// # let _ = std::fs::remove_file(output);
+/// # Ok::<(), rust_config_tree::ConfigError>(())
+/// ```
 pub fn write_config_templates<S>(
     config_path: impl AsRef<Path>,
     output_path: impl AsRef<Path>,
@@ -233,6 +322,40 @@ where
 /// # Returns
 ///
 /// Returns `Ok(())` after all template files have been written.
+///
+/// # Examples
+///
+/// ```
+/// use confique::Config;
+/// use rust_config_tree::{ConfigSchema, write_config_templates_with_schema};
+/// use schemars::JsonSchema;
+///
+/// #[derive(Config, JsonSchema)]
+/// struct AppConfig {
+///     #[config(default = [])]
+///     include: Vec<std::path::PathBuf>,
+///     #[config(default = "demo")]
+///     mode: String,
+/// }
+///
+/// impl ConfigSchema for AppConfig {
+///     fn include_paths(layer: &<Self as Config>::Layer) -> Vec<std::path::PathBuf> {
+///         layer.include.clone().unwrap_or_default()
+///     }
+/// }
+///
+/// let output = std::env::temp_dir().join("rust-config-tree-template-schema-doctest.yaml");
+/// write_config_templates_with_schema::<AppConfig>(
+///     "config.yaml",
+///     &output,
+///     "schemas/config.schema.json",
+/// )?;
+///
+/// let content = std::fs::read_to_string(&output)?;
+/// assert!(content.starts_with("# yaml-language-server: $schema="));
+/// # let _ = std::fs::remove_file(output);
+/// # Ok::<(), Box<dyn std::error::Error + Send + Sync>>(())
+/// ```
 pub fn write_config_templates_with_schema<S>(
     config_path: impl AsRef<Path>,
     output_path: impl AsRef<Path>,

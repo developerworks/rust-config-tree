@@ -67,6 +67,12 @@ impl ConfigTreeError {
     /// # Returns
     ///
     /// Returns a [`ConfigTreeError::Load`] value.
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// let _ = ();
+    /// ```
     pub(crate) fn load<E>(path: &Path, source: E) -> Self
     where
         E: Into<BoxError>,
@@ -80,6 +86,22 @@ impl ConfigTreeError {
 
 /// Formats tree traversal errors for CLI and library callers.
 impl fmt::Display for ConfigTreeError {
+    /// Formats one tree traversal error for display.
+    ///
+    /// # Arguments
+    ///
+    /// - `self`: Error value to format.
+    /// - `f`: Formatter receiving the rendered message.
+    ///
+    /// # Returns
+    ///
+    /// Returns the formatter result.
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// let _ = ();
+    /// ```
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::CurrentDir { .. } => write!(f, "failed to resolve current directory"),
@@ -105,6 +127,21 @@ impl fmt::Display for ConfigTreeError {
 
 /// Exposes underlying IO or loader causes for tree traversal failures.
 impl Error for ConfigTreeError {
+    /// Returns the underlying source error when one exists.
+    ///
+    /// # Arguments
+    ///
+    /// - `self`: Error value whose source should be exposed.
+    ///
+    /// # Returns
+    ///
+    /// Returns the wrapped source error for IO or loader failures.
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// let _ = ();
+    /// ```
     fn source(&self) -> Option<&(dyn Error + 'static)> {
         match self {
             Self::CurrentDir { source } => Some(source),
@@ -133,6 +170,22 @@ pub enum ConfigError {
 
 /// Formats high-level config errors by delegating to their underlying causes.
 impl fmt::Display for ConfigError {
+    /// Formats one high-level config error for display.
+    ///
+    /// # Arguments
+    ///
+    /// - `self`: Error value to format.
+    /// - `f`: Formatter receiving the rendered message.
+    ///
+    /// # Returns
+    ///
+    /// Returns the formatter result.
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// let _ = ();
+    /// ```
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Tree(err) => err.fmt(f),
@@ -147,6 +200,21 @@ impl fmt::Display for ConfigError {
 
 /// Exposes the wrapped source error for high-level config failures.
 impl Error for ConfigError {
+    /// Returns the wrapped high-level source error.
+    ///
+    /// # Arguments
+    ///
+    /// - `self`: Error value whose source should be exposed.
+    ///
+    /// # Returns
+    ///
+    /// Returns the wrapped source error for this variant.
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// let _ = ();
+    /// ```
     fn source(&self) -> Option<&(dyn Error + 'static)> {
         match self {
             Self::Tree(err) => Some(err.as_ref()),
@@ -161,6 +229,21 @@ impl Error for ConfigError {
 
 /// Converts tree traversal failures into high-level config failures.
 impl From<ConfigTreeError> for ConfigError {
+    /// Wraps a tree traversal error.
+    ///
+    /// # Arguments
+    ///
+    /// - `err`: Tree traversal error to wrap.
+    ///
+    /// # Returns
+    ///
+    /// Returns the corresponding high-level config error.
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// let _ = ();
+    /// ```
     fn from(err: ConfigTreeError) -> Self {
         Self::Tree(Box::new(err))
     }
@@ -168,6 +251,21 @@ impl From<ConfigTreeError> for ConfigError {
 
 /// Converts dotenv loading failures into high-level config failures.
 impl From<dotenvy::Error> for ConfigError {
+    /// Wraps a dotenv loading error.
+    ///
+    /// # Arguments
+    ///
+    /// - `err`: Dotenv error to wrap.
+    ///
+    /// # Returns
+    ///
+    /// Returns the corresponding high-level config error.
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// let _ = ();
+    /// ```
     fn from(err: dotenvy::Error) -> Self {
         Self::Dotenv(Box::new(err))
     }
@@ -175,6 +273,21 @@ impl From<dotenvy::Error> for ConfigError {
 
 /// Converts Figment extraction failures into high-level config failures.
 impl From<figment::Error> for ConfigError {
+    /// Wraps a Figment extraction error.
+    ///
+    /// # Arguments
+    ///
+    /// - `err`: Figment error to wrap.
+    ///
+    /// # Returns
+    ///
+    /// Returns the corresponding high-level config error.
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// let _ = ();
+    /// ```
     fn from(err: figment::Error) -> Self {
         Self::Figment(Box::new(err))
     }
@@ -182,6 +295,21 @@ impl From<figment::Error> for ConfigError {
 
 /// Converts `confique` merge failures into high-level config failures.
 impl From<confique::Error> for ConfigError {
+    /// Wraps a `confique` merge or validation error.
+    ///
+    /// # Arguments
+    ///
+    /// - `err`: `confique` error to wrap.
+    ///
+    /// # Returns
+    ///
+    /// Returns the corresponding high-level config error.
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// let _ = ();
+    /// ```
     fn from(err: confique::Error) -> Self {
         Self::Config(Box::new(err))
     }
@@ -189,6 +317,21 @@ impl From<confique::Error> for ConfigError {
 
 /// Converts JSON serialization failures into high-level config failures.
 impl From<serde_json::Error> for ConfigError {
+    /// Wraps a JSON serialization error.
+    ///
+    /// # Arguments
+    ///
+    /// - `err`: JSON error to wrap.
+    ///
+    /// # Returns
+    ///
+    /// Returns the corresponding high-level config error.
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// let _ = ();
+    /// ```
     fn from(err: serde_json::Error) -> Self {
         Self::Json(Box::new(err))
     }
@@ -196,6 +339,21 @@ impl From<serde_json::Error> for ConfigError {
 
 /// Converts IO failures into high-level config failures.
 impl From<io::Error> for ConfigError {
+    /// Wraps an IO error.
+    ///
+    /// # Arguments
+    ///
+    /// - `err`: IO error to wrap.
+    ///
+    /// # Returns
+    ///
+    /// Returns the corresponding high-level config error.
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// let _ = ();
+    /// ```
     fn from(err: io::Error) -> Self {
         Self::Io(Box::new(err))
     }

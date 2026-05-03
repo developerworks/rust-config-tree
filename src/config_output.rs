@@ -22,6 +22,12 @@ use crate::config::ConfigResult;
 /// # Returns
 ///
 /// Returns `Ok(())` after the file has been written.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
 pub(crate) fn write_template(path: &Path, content: &str) -> ConfigResult<()> {
     if let Some(parent) = path
         .parent()
@@ -44,6 +50,12 @@ pub(crate) fn write_template(path: &Path, content: &str) -> ConfigResult<()> {
 /// # Returns
 ///
 /// Returns a normalized absolute output path.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
 pub(crate) fn resolve_config_template_output(output: Option<PathBuf>) -> ConfigResult<PathBuf> {
     let current_dir = std::env::current_dir()?;
     let output = output.unwrap_or_else(|| PathBuf::from("config.example.yaml"));
