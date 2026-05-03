@@ -9,6 +9,7 @@
 - `config-validate`
 - `completions`
 - `install-completions`
+- `uninstall-completions`
 
 Ces sous-commandes integrees sont separees des drapeaux de remplacement de
 configuration propres a l'application. Fusionnez les drapeaux de remplacement
@@ -134,7 +135,20 @@ Installer les completions :
 demo install-completions zsh
 ```
 
+Desinstaller les completions :
+
+```bash
+demo uninstall-completions zsh
+```
+
 L'installateur prend en charge Bash, Elvish, Fish, PowerShell et Zsh. Il ecrit
 le fichier de completion sous le repertoire home de l'utilisateur et met a jour
 le fichier de demarrage du shell pour les shells qui l'exigent.
 
+Avant de modifier un fichier de demarrage shell existant comme `~/.zshrc`,
+`~/.bashrc`, un fichier rc Elvish ou un profil PowerShell, la commande ecrit
+une sauvegarde a cote du fichier original :
+
+```text
+<rc-file>.backup.by.<program-name>.<timestamp>
+```

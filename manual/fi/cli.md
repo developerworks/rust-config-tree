@@ -9,6 +9,7 @@
 - `config-validate`
 - `completions`
 - `install-completions`
+- `uninstall-completions`
 
 Nama sisaanrakennetut alikomennot ovat erillaan sovelluskohtaisista konfiguraation ohituslipuista. Yhdista konfiguraation ohitusliput Figment-providereina runtime-latauspolussa.
 
@@ -117,4 +118,18 @@ Asenna taydennykset:
 demo install-completions zsh
 ```
 
+Poista taydennykset:
+
+```bash
+demo uninstall-completions zsh
+```
+
 Asennin tukee Bashia, Elvishia, Fishiä, PowerShellia ja Zsh:ta. Se kirjoittaa taydennystiedoston kayttajan kotihakemiston alle ja paivittaa shellin kaynnistystiedoston niille shelleille, jotka sita vaativat.
+
+Ennen olemassa olevan shellin kaynnistystiedoston, kuten `~/.zshrc`,
+`~/.bashrc`, Elvish rc -tiedoston tai PowerShell-profiilin muuttamista komento
+kirjoittaa varmuuskopion alkuperaisen tiedoston viereen:
+
+```text
+<rc-file>.backup.by.<program-name>.<timestamp>
+```

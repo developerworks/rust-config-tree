@@ -13,7 +13,8 @@ It handles:
 
 - loading a `confique` schema into a directly usable config object through
   Figment runtime providers
-- `config-template`, `completions`, and `install-completions` command handlers
+- `config-template`, `completions`, `install-completions`, and
+  `uninstall-completions` command handlers
 - Draft 7 root and section JSON Schema generation for editor completion and validation
 - config template generation for YAML, TOML, JSON, and JSON5
 - schema directives for TOML and YAML templates without adding runtime fields
@@ -325,6 +326,7 @@ Flatten `ConfigCommand` into your existing clap command enum to add:
 - `config-validate`
 - `completions`
 - `install-completions`
+- `uninstall-completions`
 
 The consuming application keeps its own `Parser` type and its own command enum.
 `rust-config-tree` only contributes reusable subcommands:
@@ -417,6 +419,17 @@ validation. It prints `Configuration is ok` when validation succeeds.
 `install-completions <shell>` writes completions under the user's home
 directory and updates the shell startup file when the shell requires it. Bash,
 Elvish, Fish, PowerShell, and Zsh are supported.
+
+`uninstall-completions <shell>` removes the current binary's completion file
+and removes the managed shell startup block when that shell uses one.
+
+Before changing an existing shell startup file such as `~/.zshrc`,
+`~/.bashrc`, an Elvish rc file, or a PowerShell profile, the installer writes a
+backup next to the original file:
+
+```text
+<rc-file>.backup.by.<program-name>.<timestamp>
+```
 
 ## Lower-Level Tree API
 

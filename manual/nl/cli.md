@@ -9,6 +9,7 @@
 - `config-validate`
 - `completions`
 - `install-completions`
+- `uninstall-completions`
 
 Deze ingebouwde subcommands staan los van toepassingsspecifieke configuratie-
 overridevlaggen. Voeg configuratie-overridevlaggen als Figment-providers samen
@@ -131,6 +132,20 @@ Installeer completions:
 demo install-completions zsh
 ```
 
+Verwijder completions:
+
+```bash
+demo uninstall-completions zsh
+```
+
 De installer ondersteunt Bash, Elvish, Fish, PowerShell en Zsh. Hij schrijft
 het completionbestand onder de home-directory van de gebruiker en werkt het
 shellstartbestand bij voor shells die dat vereisen.
+
+Voordat een bestaand shellstartbestand zoals `~/.zshrc`, `~/.bashrc`, een
+Elvish rc-bestand of een PowerShell-profiel wordt gewijzigd, schrijft de
+opdracht een backup naast het originele bestand:
+
+```text
+<rc-file>.backup.by.<program-name>.<timestamp>
+```

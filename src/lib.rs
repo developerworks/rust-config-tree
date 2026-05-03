@@ -12,7 +12,9 @@
 //! when you need runtime source tracking. Use [`write_config_templates`] or
 //! [`ConfigCommand`] to generate example template files that mirror the same
 //! include tree. Use [`write_config_schemas`] to generate root and section JSON
-//! Schemas for editor completion and validation.
+//! Schemas for editor completion and validation. Use
+//! [`install_shell_completion`] and [`uninstall_shell_completion`] for reusable
+//! shell completion lifecycle commands.
 
 mod cli;
 mod config;
@@ -31,7 +33,7 @@ mod tree;
 
 pub use cli::{
     ConfigCommand, handle_config_command, install_shell_completion, print_shell_completion,
-    upsert_managed_block,
+    uninstall_shell_completion, upsert_managed_block,
 };
 pub use config::{
     ConfigFormat, ConfigResult, ConfigSchema, ConfigSchemaTarget, ConfigTemplateTarget,

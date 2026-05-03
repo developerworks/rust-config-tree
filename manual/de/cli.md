@@ -9,6 +9,7 @@
 - `config-validate`
 - `completions`
 - `install-completions`
+- `uninstall-completions`
 
 Diese eingebauten Unterbefehle sind von anwendungsspezifischen Flags fuer
 Konfigurationsueberschreibungen getrennt. Fuehre solche Flags im
@@ -132,6 +133,20 @@ Vervollstaendigungen installieren:
 demo install-completions zsh
 ```
 
+Vervollstaendigungen deinstallieren:
+
+```bash
+demo uninstall-completions zsh
+```
+
 Der Installer unterstuetzt Bash, Elvish, Fish, PowerShell und Zsh. Er schreibt
 die Vervollstaendigungsdatei unter das Home-Verzeichnis des Benutzers und
 aktualisiert die Shell-Startdatei fuer Shells, die dies benoetigen.
+
+Bevor eine vorhandene Shell-Startdatei wie `~/.zshrc`, `~/.bashrc`, eine
+Elvish-rc-Datei oder ein PowerShell-Profil geaendert wird, schreibt der Befehl
+ein Backup neben die Originaldatei:
+
+```text
+<rc-file>.backup.by.<program-name>.<timestamp>
+```

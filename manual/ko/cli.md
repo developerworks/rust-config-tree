@@ -9,6 +9,7 @@
 - `config-validate`
 - `completions`
 - `install-completions`
+- `uninstall-completions`
 
 이 내장 하위 명령은 애플리케이션별 설정 override 플래그와 분리되어 있습니다.
 설정 override 플래그는 런타임 로딩 경로에서 Figment 프로바이더로 병합하세요.
@@ -127,5 +128,19 @@ demo completions zsh
 demo install-completions zsh
 ```
 
+완성을 제거합니다.
+
+```bash
+demo uninstall-completions zsh
+```
+
 설치기는 Bash, Elvish, Fish, PowerShell, Zsh를 지원합니다. 사용자 홈 디렉터리
 아래에 완성 파일을 쓰고, 필요한 셸에 대해서는 셸 시작 파일을 업데이트합니다.
+
+기존 셸 시작 파일을 변경하기 전에, 예를 들어 `~/.zshrc`, `~/.bashrc`,
+Elvish rc 파일 또는 PowerShell profile을 변경하기 전에, 명령은 원본 파일 옆에
+백업을 씁니다.
+
+```text
+<rc-file>.backup.by.<program-name>.<timestamp>
+```

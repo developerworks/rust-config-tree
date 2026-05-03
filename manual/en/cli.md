@@ -9,6 +9,7 @@
 - `config-validate`
 - `completions`
 - `install-completions`
+- `uninstall-completions`
 
 These built-in subcommands are separate from application-specific config
 override flags. Merge config override flags as Figment providers in the runtime
@@ -130,6 +131,20 @@ Install completions:
 demo install-completions zsh
 ```
 
+Uninstall completions:
+
+```bash
+demo uninstall-completions zsh
+```
+
 The installer supports Bash, Elvish, Fish, PowerShell, and Zsh. It writes the
 completion file under the user's home directory and updates the shell startup
 file for shells that require it.
+
+Before changing an existing shell startup file such as `~/.zshrc`, `~/.bashrc`,
+an Elvish rc file, or a PowerShell profile, the command writes a backup next to
+the original file:
+
+```text
+<rc-file>.backup.by.<program-name>.<timestamp>
+```

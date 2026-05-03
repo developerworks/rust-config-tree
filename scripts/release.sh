@@ -91,7 +91,7 @@ fi
 
 if [[ -n "$(git status --porcelain)" ]]; then
   git add -A
-  git commit -m "${COMMIT_MESSAGE}"
+  git -c core.editor=true commit -m "${COMMIT_MESSAGE}"
 else
   echo "working tree is clean; no commit created"
 fi

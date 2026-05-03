@@ -9,6 +9,7 @@
 - `config-validate`
 - `completions`
 - `install-completions`
+- `uninstall-completions`
 
 这些内置子命令不同于应用自己的配置覆盖参数。配置覆盖参数应在运行时加载
 路径里作为 Figment provider 合并。
@@ -126,5 +127,18 @@ demo completions zsh
 demo install-completions zsh
 ```
 
+卸载 completions：
+
+```bash
+demo uninstall-completions zsh
+```
+
 安装器支持 Bash、Elvish、Fish、PowerShell 和 Zsh。它会将 completion 文件
 写入用户 home 目录，并为需要显式配置的 shell 更新启动文件。
+
+在修改已有 shell 启动文件之前，例如 `~/.zshrc`、`~/.bashrc`、Elvish rc
+文件或 PowerShell profile，命令会先在原文件旁边写入备份：
+
+```text
+<rc-file>.backup.by.<program-name>.<timestamp>
+```

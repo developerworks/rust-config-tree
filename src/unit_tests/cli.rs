@@ -1,6 +1,6 @@
 use std::{
     fs, io,
-    path::PathBuf,
+    path::{Path, PathBuf},
     time::{SystemTime, UNIX_EPOCH},
 };
 
@@ -201,6 +201,33 @@ fn config_validate_command_is_flattened_into_consumer_cli() {
 
     match cli.command {
         DemoCommand::Config(ConfigCommand::ConfigValidate) => {}
+        command => panic!("unexpected command: {command:?}"),
+    }
+}
+
+/// Verifies the uninstall completion command remains available through CLI flattening.
+///
+/// # Arguments
+///
+/// This test has no arguments.
+///
+/// # Returns
+///
+/// Returns no value; failed assertions panic.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
+#[test]
+fn uninstall_completions_command_is_flattened_into_consumer_cli() {
+    let cli = DemoCli::parse_from(["demo", "uninstall-completions", "zsh"]);
+
+    match cli.command {
+        DemoCommand::Config(ConfigCommand::UninstallCompletions { shell }) => {
+            assert_eq!(shell, Shell::Zsh);
+        }
         command => panic!("unexpected command: {command:?}"),
     }
 }
@@ -459,6 +486,137 @@ fn upsert_managed_block_rejects_missing_end_marker() {
     let _ = fs::remove_file(path);
 }
 
+/// Verifies zsh startup setup uses one directory-level managed block.
+///
+/// # Arguments
+///
+/// This test has no arguments.
+///
+/// # Returns
+///
+/// Returns no value; failed assertions panic.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
+#[test]
+fn zsh_rc_block_uses_shared_completion_marker() {
+    let target = ShellInstallTarget::new(Shell::Zsh, PathBuf::from("/tmp/home").as_path()).unwrap();
+    let body = target
+        .rc_block_body(
+            PathBuf::from("/tmp/home/.zsh/completions/_demo").as_path(),
+            PathBuf::from("/tmp/home/.zsh/completions").as_path(),
+        )
+        .unwrap();
+
+    assert_eq!(
+        target.managed_block_name("demo"),
+        "rust-config-tree".to_owned()
+    );
+    assert_eq!(
+        body,
+        concat!(
+            "typeset -U fpath\n",
+            "fpath=(\"/tmp/home/.zsh/completions\" $fpath)\n",
+            "\n",
+            "autoload -Uz compinit\n",
+            "compinit\n",
+        )
+    );
+}
+
+/// Verifies managed startup files are backed up before rewriting existing content.
+///
+/// # Arguments
+///
+/// This test has no arguments.
+///
+/// # Returns
+///
+/// Returns no value; failed assertions panic.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
+#[test]
+fn upsert_managed_block_backs_up_existing_startup_file() {
+    let path = temp_file_path("backup-upsert");
+    let _ = fs::remove_file(&path);
+    fs::write(&path, "before\n").unwrap();
+
+    upsert_managed_block("demo", Shell::Bash, &path, "body\n").unwrap();
+
+    let backups = backup_paths_for(&path);
+    assert_eq!(backups.len(), 1);
+    assert!(
+        backups[0]
+            .file_name()
+            .unwrap()
+            .to_string_lossy()
+            .starts_with("rust-config-tree-cli-backup-upsert-")
+    );
+    assert!(backups[0].to_string_lossy().contains(".backup.by.demo."));
+    assert_eq!(fs::read_to_string(&backups[0]).unwrap(), "before\n");
+
+    let _ = fs::remove_file(&path);
+    for backup in backups {
+        let _ = fs::remove_file(backup);
+    }
+}
+
+/// Verifies removing a managed block preserves the original startup file first.
+///
+/// # Arguments
+///
+/// This test has no arguments.
+///
+/// # Returns
+///
+/// Returns no value; failed assertions panic.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
+#[test]
+fn remove_managed_block_removes_block_and_backs_up_existing_startup_file() {
+    let path = temp_file_path("backup-remove");
+    let _ = fs::remove_file(&path);
+    fs::write(
+        &path,
+        concat!(
+            "before\n\n",
+            "# >>> demo bash completions >>>\n",
+            "body\n",
+            "# <<< demo bash completions <<<\n\n",
+            "after\n",
+        ),
+    )
+    .unwrap();
+
+    remove_managed_block("demo", Shell::Bash, &path).unwrap();
+
+    assert_eq!(fs::read_to_string(&path).unwrap(), "before\n\nafter\n");
+    let backups = backup_paths_for(&path);
+    assert_eq!(backups.len(), 1);
+    assert!(backups[0].to_string_lossy().contains(".backup.by.demo."));
+    assert!(
+        fs::read_to_string(&backups[0])
+            .unwrap()
+            .contains("# >>> demo bash completions >>>")
+    );
+
+    let _ = fs::remove_file(&path);
+    for backup in backups {
+        let _ = fs::remove_file(backup);
+    }
+}
+
 /// Builds a unique temporary directory path for CLI tests.
 ///
 /// # Arguments
@@ -505,4 +663,36 @@ fn temp_file_path(name: &str) -> PathBuf {
         "rust-config-tree-cli-{name}-{}",
         std::process::id()
     ))
+}
+
+/// Lists backup files created for a temporary startup file path.
+///
+/// # Arguments
+///
+/// - `path`: Startup file path whose backup siblings should be returned.
+///
+/// # Returns
+///
+/// Returns sorted backup paths next to `path`.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
+fn backup_paths_for(path: &Path) -> Vec<PathBuf> {
+    let prefix = format!("{}.backup.by.", path.file_name().unwrap().to_string_lossy());
+    let mut paths = fs::read_dir(path.parent().unwrap())
+        .unwrap()
+        .map(|entry| entry.unwrap().path())
+        .filter(|entry_path| {
+            entry_path
+                .file_name()
+                .unwrap()
+                .to_string_lossy()
+                .starts_with(&prefix)
+        })
+        .collect::<Vec<_>>();
+    paths.sort();
+    paths
 }

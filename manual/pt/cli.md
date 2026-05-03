@@ -9,6 +9,7 @@
 - `config-validate`
 - `completions`
 - `install-completions`
+- `uninstall-completions`
 
 Esses subcomandos embutidos sao separados das flags de sobrescrita de
 configuracao especificas da aplicacao. Mescle flags de sobrescrita de
@@ -134,7 +135,20 @@ Instale completions:
 demo install-completions zsh
 ```
 
+Desinstale completions:
+
+```bash
+demo uninstall-completions zsh
+```
+
 O instalador suporta Bash, Elvish, Fish, PowerShell e Zsh. Ele grava o arquivo
 de completion sob o diretorio home do usuario e atualiza o arquivo de
 inicializacao do shell para shells que exigem isso.
 
+Antes de alterar um arquivo de inicializacao de shell existente, como
+`~/.zshrc`, `~/.bashrc`, um arquivo rc do Elvish ou um perfil do PowerShell, o
+comando grava um backup ao lado do arquivo original:
+
+```text
+<rc-file>.backup.by.<program-name>.<timestamp>
+```

@@ -9,6 +9,7 @@
 - `config-validate`
 - `completions`
 - `install-completions`
+- `uninstall-completions`
 
 これらの built-in subcommands は application-specific config override flags とは
 別のものです。config override flags は runtime loading path で Figment provider
@@ -130,7 +131,19 @@ completion を install します。
 demo install-completions zsh
 ```
 
+completion を uninstall します。
+
+```bash
+demo uninstall-completions zsh
+```
+
 installer は Bash、Elvish、Fish、PowerShell、Zsh を support します。completion
 file を user home directory 以下に書き、必要な shell では startup file も更新
 します。
 
+既存の shell startup file、たとえば `~/.zshrc`、`~/.bashrc`、Elvish rc file、
+PowerShell profile を変更する前に、command は元ファイルの横に backup を書きます。
+
+```text
+<rc-file>.backup.by.<program-name>.<timestamp>
+```

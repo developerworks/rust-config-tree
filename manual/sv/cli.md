@@ -9,6 +9,7 @@
 - `config-validate`
 - `completions`
 - `install-completions`
+- `uninstall-completions`
 
 Dessa inbyggda underkommandon ar separata fran programspecifika
 override-flaggor for konfiguration. Slå samman override-flaggor som
@@ -130,6 +131,20 @@ Installera kompletteringar:
 demo install-completions zsh
 ```
 
+Avinstallera kompletteringar:
+
+```bash
+demo uninstall-completions zsh
+```
+
 Installeraren stoder Bash, Elvish, Fish, PowerShell och Zsh. Den skriver
 kompletteringsfilen under anvandarens hemkatalog och uppdaterar skalets
 startfil for skal som kraver det.
+
+Innan en befintlig skalstartfil som `~/.zshrc`, `~/.bashrc`, en Elvish
+rc-fil eller en PowerShell-profil andras skriver kommandot en backup bredvid
+originalfilen:
+
+```text
+<rc-file>.backup.by.<program-name>.<timestamp>
+```
