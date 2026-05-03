@@ -1,3 +1,6 @@
+//! Generates example templates in YAML, TOML, and JSON5 and writes matching
+//! JSON Schema files for editor completion.
+
 use std::{
     fs, io,
     path::{Path, PathBuf},
@@ -60,12 +63,14 @@ struct LogConfig {
     level: String,
 }
 
+/// Exposes the example's include list to template generation.
 impl ConfigSchema for AppConfig {
     fn include_paths(layer: &<Self as Config>::Layer) -> Vec<PathBuf> {
         layer.include.clone().unwrap_or_default()
     }
 }
 
+/// Generates schemas and templates, then prints every generated path.
 fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let dir = temp_example_dir("generate-templates")?;
     let config_path = dir.join("config.yaml");
@@ -92,6 +97,7 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     Ok(())
 }
 
+/// Returns generated files under `dir` in stable display order.
 fn generated_files(dir: &Path) -> io::Result<Vec<PathBuf>> {
     let mut files = Vec::new();
     collect_files(dir, &mut files)?;
@@ -99,6 +105,7 @@ fn generated_files(dir: &Path) -> io::Result<Vec<PathBuf>> {
     Ok(files)
 }
 
+/// Recursively appends regular files under `dir` to `files`.
 fn collect_files(dir: &Path, files: &mut Vec<PathBuf>) -> io::Result<()> {
     for entry in fs::read_dir(dir)? {
         let entry = entry?;
@@ -113,6 +120,7 @@ fn collect_files(dir: &Path, files: &mut Vec<PathBuf>) -> io::Result<()> {
     Ok(())
 }
 
+/// Creates a unique temporary directory for one example run.
 fn temp_example_dir(name: &str) -> io::Result<PathBuf> {
     let nanos = SystemTime::now()
         .duration_since(UNIX_EPOCH)

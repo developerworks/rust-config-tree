@@ -51,6 +51,7 @@ pub enum ConfigTreeError {
     },
 }
 
+/// Convenience constructors for tree traversal errors.
 impl ConfigTreeError {
     /// Builds a loader failure for a source path.
     ///
@@ -77,6 +78,7 @@ impl ConfigTreeError {
     }
 }
 
+/// Formats tree traversal errors for CLI and library callers.
 impl fmt::Display for ConfigTreeError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
@@ -101,6 +103,7 @@ impl fmt::Display for ConfigTreeError {
     }
 }
 
+/// Exposes underlying IO or loader causes for tree traversal failures.
 impl Error for ConfigTreeError {
     fn source(&self) -> Option<&(dyn Error + 'static)> {
         match self {
@@ -128,6 +131,7 @@ pub enum ConfigError {
     Io(Box<io::Error>),
 }
 
+/// Formats high-level config errors by delegating to their underlying causes.
 impl fmt::Display for ConfigError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
@@ -141,6 +145,7 @@ impl fmt::Display for ConfigError {
     }
 }
 
+/// Exposes the wrapped source error for high-level config failures.
 impl Error for ConfigError {
     fn source(&self) -> Option<&(dyn Error + 'static)> {
         match self {
@@ -154,36 +159,42 @@ impl Error for ConfigError {
     }
 }
 
+/// Converts tree traversal failures into high-level config failures.
 impl From<ConfigTreeError> for ConfigError {
     fn from(err: ConfigTreeError) -> Self {
         Self::Tree(Box::new(err))
     }
 }
 
+/// Converts dotenv loading failures into high-level config failures.
 impl From<dotenvy::Error> for ConfigError {
     fn from(err: dotenvy::Error) -> Self {
         Self::Dotenv(Box::new(err))
     }
 }
 
+/// Converts Figment extraction failures into high-level config failures.
 impl From<figment::Error> for ConfigError {
     fn from(err: figment::Error) -> Self {
         Self::Figment(Box::new(err))
     }
 }
 
+/// Converts `confique` merge failures into high-level config failures.
 impl From<confique::Error> for ConfigError {
     fn from(err: confique::Error) -> Self {
         Self::Config(Box::new(err))
     }
 }
 
+/// Converts JSON serialization failures into high-level config failures.
 impl From<serde_json::Error> for ConfigError {
     fn from(err: serde_json::Error) -> Self {
         Self::Json(Box::new(err))
     }
 }
 
+/// Converts IO failures into high-level config failures.
 impl From<io::Error> for ConfigError {
     fn from(err: io::Error) -> Self {
         Self::Io(Box::new(err))

@@ -1,3 +1,6 @@
+//! Merges CLI override values on top of the config tree before `confique`
+//! validation.
+
 use std::{
     fs, io,
     path::PathBuf,
@@ -50,6 +53,7 @@ struct LogConfig {
     level: String,
 }
 
+/// Exposes the example's include list to the config tree loader.
 impl ConfigSchema for AppConfig {
     fn include_paths(layer: &<Self as Config>::Layer) -> Vec<PathBuf> {
         layer.include.clone().unwrap_or_default()
@@ -77,7 +81,9 @@ struct CliLogOverrides {
     level: Option<String>,
 }
 
+/// Converts parsed CLI flags into a sparse Figment override provider.
 impl CliOverrides {
+    /// Builds only the override branches selected by CLI arguments.
     fn from_cli(cli: &Cli) -> Self {
         Self {
             server: cli
@@ -91,6 +97,7 @@ impl CliOverrides {
     }
 }
 
+/// Loads config files, merges CLI overrides, and prints the final config.
 fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let cli = Cli::parse();
     let config_path = match &cli.config {
@@ -99,6 +106,8 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     };
 
     let figment = build_config_figment::<AppConfig>(&config_path)?
+        // Serialized defaults are merged last, so provided CLI flags override
+        // file and environment values while omitted flags disappear.
         .merge(Serialized::defaults(CliOverrides::from_cli(&cli)));
     let config = load_config_from_figment::<AppConfig>(&figment)?;
 
@@ -111,6 +120,7 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     Ok(())
 }
 
+/// Creates a minimal config file used when `--config` is omitted.
 fn write_demo_config() -> io::Result<PathBuf> {
     let dir = temp_example_dir("cli-overrides")?;
     let root_config = dir.join("config.yaml");
@@ -130,6 +140,7 @@ log:
     Ok(root_config)
 }
 
+/// Creates a unique temporary directory for one example run.
 fn temp_example_dir(name: &str) -> io::Result<PathBuf> {
     let nanos = SystemTime::now()
         .duration_since(UNIX_EPOCH)

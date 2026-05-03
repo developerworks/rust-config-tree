@@ -1,3 +1,6 @@
+//! Loads a root YAML config plus one included child file into a `confique`
+//! schema.
+
 use std::{
     fs, io,
     path::PathBuf,
@@ -30,12 +33,14 @@ struct ServerConfig {
     port: u16,
 }
 
+/// Exposes the example's top-level include list to the tree loader.
 impl ConfigSchema for AppConfig {
     fn include_paths(layer: &<Self as Config>::Layer) -> Vec<PathBuf> {
         layer.include.clone().unwrap_or_default()
     }
 }
 
+/// Writes demo files, loads them, and prints the merged config.
 fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let root_config = write_demo_config()?;
     let config = load_config::<AppConfig>(&root_config)?;
@@ -49,6 +54,7 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     Ok(())
 }
 
+/// Creates a root config file and one included child file for the example.
 fn write_demo_config() -> io::Result<PathBuf> {
     let dir = temp_example_dir("basic-loading")?;
     let config_dir = dir.join("config");
@@ -79,6 +85,7 @@ server:
     Ok(root_config)
 }
 
+/// Creates a unique temporary directory for one example run.
 fn temp_example_dir(name: &str) -> io::Result<PathBuf> {
     let nanos = SystemTime::now()
         .duration_since(UNIX_EPOCH)

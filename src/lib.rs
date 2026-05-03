@@ -16,9 +16,17 @@
 
 mod cli;
 mod config;
+mod config_env;
+mod config_format;
+mod config_load;
+mod config_output;
+mod config_schema;
+mod config_templates;
+mod config_trace;
+mod config_util;
 mod error;
 mod path;
-mod template;
+mod template_tree;
 mod tree;
 
 pub use cli::{
@@ -35,7 +43,7 @@ pub use config::{
 };
 pub use error::{BoxError, ConfigError, ConfigTreeError, Result};
 pub use path::{absolutize_lexical, normalize_lexical, resolve_include_path};
-pub use template::{TemplateTarget, collect_template_targets, select_template_source};
+pub use template_tree::{TemplateTarget, collect_template_targets, select_template_source};
 pub use tree::{
     ConfigNode, ConfigSource, ConfigTree, ConfigTreeOptions, IncludeOrder, load_config_tree,
 };

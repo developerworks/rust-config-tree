@@ -30,6 +30,7 @@ pub struct ConfigTreeOptions {
     include_order: IncludeOrder,
 }
 
+/// Builder-style configuration for include tree traversal.
 impl ConfigTreeOptions {
     /// Sets the sibling include traversal order.
     ///
@@ -76,6 +77,7 @@ impl ConfigTreeOptions {
         Ok(ConfigTree { nodes })
     }
 
+    /// Recursively loads one source path and its declared includes.
     fn collect<T, E, F>(
         &self,
         path: &Path,
@@ -133,6 +135,7 @@ pub struct ConfigSource<T> {
     includes: Vec<PathBuf>,
 }
 
+/// Constructors and accessors for values returned by source loaders.
 impl<T> ConfigSource<T> {
     /// Creates a source from a loaded value and its declared include paths.
     ///
@@ -176,6 +179,7 @@ impl<T> ConfigSource<T> {
     }
 }
 
+/// Converts the common `(value, includes)` loader shape into a source value.
 impl<T> From<(T, Vec<PathBuf>)> for ConfigSource<T> {
     fn from((value, includes): (T, Vec<PathBuf>)) -> Self {
         Self::new(value, includes)
@@ -192,6 +196,7 @@ pub struct ConfigTree<T> {
     nodes: Vec<ConfigNode<T>>,
 }
 
+/// Accessors for a loaded config tree.
 impl<T> ConfigTree<T> {
     /// Returns loaded tree nodes in traversal order.
     ///
@@ -233,6 +238,7 @@ pub struct ConfigNode<T> {
     includes: Vec<PathBuf>,
 }
 
+/// Accessors for one loaded config tree node.
 impl<T> ConfigNode<T> {
     /// Returns the normalized absolute source path.
     ///
@@ -303,6 +309,7 @@ pub(crate) struct TraversalState {
     loaded: HashSet<PathBuf>,
 }
 
+/// Include traversal state transitions.
 impl TraversalState {
     /// Enters a normalized source path during traversal.
     ///

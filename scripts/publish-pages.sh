@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Builds every localized mdBook into one static Pages artifact under
+# `target/mdbook`, then writes a language selector as the artifact root.
+
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 OUT_DIR="${ROOT_DIR}/target/mdbook"
 

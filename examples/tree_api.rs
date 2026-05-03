@@ -1,3 +1,5 @@
+//! Uses the lower-level tree API with a custom line-based config format.
+
 use std::{
     fs, io,
     path::{Path, PathBuf},
@@ -6,6 +8,7 @@ use std::{
 
 use rust_config_tree::{ConfigSource, ConfigTreeOptions, IncludeOrder, load_config_tree};
 
+/// Builds a demo include tree and prints traversal results.
 fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let root_config = write_demo_tree()?;
     let tree = load_config_tree(&root_config, load_source)?;
@@ -27,6 +30,7 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     Ok(())
 }
 
+/// Loads the custom line-based example format from one file.
 fn load_source(path: &Path) -> io::Result<ConfigSource<String>> {
     let content = fs::read_to_string(path)?;
     let includes = content
@@ -38,6 +42,7 @@ fn load_source(path: &Path) -> io::Result<ConfigSource<String>> {
     Ok(ConfigSource::new(content, includes))
 }
 
+/// Creates a root file and two included files for the tree API example.
 fn write_demo_tree() -> io::Result<PathBuf> {
     let dir = temp_example_dir("tree-api")?;
     let config_dir = dir.join("config");
@@ -54,6 +59,7 @@ fn write_demo_tree() -> io::Result<PathBuf> {
     Ok(root_config)
 }
 
+/// Creates a unique temporary directory for one example run.
 fn temp_example_dir(name: &str) -> io::Result<PathBuf> {
     let nanos = SystemTime::now()
         .duration_since(UNIX_EPOCH)

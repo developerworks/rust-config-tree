@@ -1,11 +1,16 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Runs the same local gates used before publishing, then optionally commits,
+# pushes, waits for the Pages workflow, and publishes the already prepared
+# crate version.
+
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 DRY_RUN=1
 WAIT_PAGES=1
 COMMIT_MESSAGE=""
 
+# Prints release script usage.
 usage() {
   cat <<'EOF'
 Usage:

@@ -33,6 +33,7 @@ struct TestConfig {
     include: Vec<PathBuf>,
 }
 
+/// Exposes the fixture include list to template command tests.
 impl ConfigSchema for TestConfig {
     fn include_paths(layer: &<Self as Config>::Layer) -> Vec<PathBuf> {
         layer.include.clone().unwrap_or_default()
@@ -47,12 +48,14 @@ struct RequiredConfig {
     required_value: String,
 }
 
+/// Exposes the fixture include list to validation command tests.
 impl ConfigSchema for RequiredConfig {
     fn include_paths(layer: &<Self as Config>::Layer) -> Vec<PathBuf> {
         layer.include.clone().unwrap_or_default()
     }
 }
 
+/// Verifies config commands can be flattened into a consumer CLI.
 #[test]
 fn config_command_can_be_flattened_into_a_consumer_cli() {
     let cli = DemoCli::parse_from(["demo", "config-template", "--output", "config.yaml"]);
@@ -66,6 +69,7 @@ fn config_command_can_be_flattened_into_a_consumer_cli() {
     }
 }
 
+/// Verifies the template command accepts a custom schema output path.
 #[test]
 fn config_template_command_accepts_schema_path() {
     let cli = DemoCli::parse_from([
@@ -86,6 +90,7 @@ fn config_template_command_accepts_schema_path() {
     }
 }
 
+/// Verifies the schema command remains available through CLI flattening.
 #[test]
 fn config_schema_command_is_flattened_into_consumer_cli() {
     let cli = DemoCli::parse_from([
@@ -103,6 +108,7 @@ fn config_schema_command_is_flattened_into_consumer_cli() {
     }
 }
 
+/// Verifies the validation command remains available through CLI flattening.
 #[test]
 fn config_validate_command_is_flattened_into_consumer_cli() {
     let cli = DemoCli::parse_from(["demo", "config-validate"]);
@@ -113,6 +119,7 @@ fn config_validate_command_is_flattened_into_consumer_cli() {
     }
 }
 
+/// Verifies the template command writes templates and schemas for a consumer schema.
 #[test]
 fn handle_config_command_writes_templates_for_consumer_schema() {
     let root = temp_dir_path("handle-config-template");
@@ -152,6 +159,7 @@ fn handle_config_command_writes_templates_for_consumer_schema() {
     let _ = fs::remove_dir_all(root);
 }
 
+/// Verifies the schema command writes a Draft 7 JSON Schema.
 #[test]
 fn handle_config_command_writes_json_schema_for_consumer_schema() {
     let root = temp_dir_path("handle-config-schema");
@@ -172,6 +180,7 @@ fn handle_config_command_writes_json_schema_for_consumer_schema() {
     let _ = fs::remove_dir_all(root);
 }
 
+/// Verifies the validation command accepts a complete runtime config.
 #[test]
 fn handle_config_command_validates_full_runtime_config() {
     let root = temp_dir_path("handle-config-validate");
@@ -188,6 +197,7 @@ fn handle_config_command_validates_full_runtime_config() {
     let _ = fs::remove_dir_all(root);
 }
 
+/// Verifies the validation command reports invalid runtime config.
 #[test]
 fn handle_config_command_rejects_invalid_runtime_config() {
     let root = temp_dir_path("handle-config-validate-invalid");
@@ -205,6 +215,7 @@ fn handle_config_command_rejects_invalid_runtime_config() {
     let _ = fs::remove_dir_all(root);
 }
 
+/// Verifies shell completion setup inserts a new managed block.
 #[test]
 fn upsert_managed_block_inserts_new_block() {
     let path = temp_file_path("insert");
@@ -219,6 +230,7 @@ fn upsert_managed_block_inserts_new_block() {
     let _ = fs::remove_file(path);
 }
 
+/// Verifies shell completion setup replaces an existing managed block.
 #[test]
 fn upsert_managed_block_replaces_existing_block() {
     let path = temp_file_path("replace");
@@ -251,6 +263,7 @@ fn upsert_managed_block_replaces_existing_block() {
     let _ = fs::remove_file(path);
 }
 
+/// Verifies malformed managed blocks are rejected instead of duplicated.
 #[test]
 fn upsert_managed_block_rejects_missing_end_marker() {
     let path = temp_file_path("missing-end");
@@ -262,6 +275,7 @@ fn upsert_managed_block_rejects_missing_end_marker() {
     let _ = fs::remove_file(path);
 }
 
+/// Builds a unique temporary directory path for CLI tests.
 fn temp_dir_path(name: &str) -> PathBuf {
     let now = SystemTime::now()
         .duration_since(UNIX_EPOCH)
@@ -273,6 +287,7 @@ fn temp_dir_path(name: &str) -> PathBuf {
     ))
 }
 
+/// Builds a stable temporary file path for shell startup file tests.
 fn temp_file_path(name: &str) -> PathBuf {
     std::env::temp_dir().join(format!(
         "rust-config-tree-cli-{name}-{}",

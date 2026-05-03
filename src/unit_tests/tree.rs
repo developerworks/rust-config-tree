@@ -6,6 +6,7 @@ use std::{
 
 use super::*;
 
+/// Verifies recursive include traversal loads every reachable file.
 #[test]
 fn load_config_tree_recursively_loads_include_tree() {
     let root = temp_dir_path("load-tree");
@@ -43,6 +44,7 @@ fn load_config_tree_recursively_loads_include_tree() {
     let _ = fs::remove_dir_all(root);
 }
 
+/// Verifies sibling include traversal can be reversed.
 #[test]
 fn config_tree_options_can_reverse_include_order() {
     let root = temp_dir_path("reverse-tree");
@@ -73,6 +75,7 @@ fn config_tree_options_can_reverse_include_order() {
     let _ = fs::remove_dir_all(root);
 }
 
+/// Verifies recursive include cycles are rejected.
 #[test]
 fn load_config_tree_rejects_recursive_include_cycle() {
     let root = temp_dir_path("cycle");
@@ -88,6 +91,7 @@ fn load_config_tree_rejects_recursive_include_cycle() {
     let _ = fs::remove_dir_all(root);
 }
 
+/// Verifies repeated include targets are loaded only once.
 #[test]
 fn load_config_tree_skips_previously_loaded_files() {
     let root = temp_dir_path("dedupe");
@@ -107,6 +111,7 @@ fn load_config_tree_skips_previously_loaded_files() {
     let _ = fs::remove_dir_all(root);
 }
 
+/// Verifies loader errors are wrapped with the failing path.
 #[test]
 fn load_config_tree_wraps_loader_errors_with_path() {
     let path = PathBuf::from("/tmp/missing-config-tree-test.yaml");
@@ -117,6 +122,7 @@ fn load_config_tree_wraps_loader_errors_with_path() {
     assert!(err.to_string().contains(&path.display().to_string()));
 }
 
+/// Verifies `ConfigSource` accessors and ownership decomposition.
 #[test]
 fn config_source_exposes_parts() {
     let source = ConfigSource::new("value", vec![PathBuf::from("child.yaml")]);
@@ -129,6 +135,7 @@ fn config_source_exposes_parts() {
     );
 }
 
+/// Verifies `ConfigNode` accessors and ownership decomposition.
 #[test]
 fn config_node_exposes_fields() {
     let tree = ConfigTree {
@@ -146,12 +153,14 @@ fn config_node_exposes_fields() {
     assert_eq!(tree.into_nodes()[0].clone().into_value(), "value");
 }
 
+/// Loads the line-based fixture config format used by tree tests.
 fn read_config(path: &Path) -> io::Result<ConfigSource<String>> {
     let content = fs::read_to_string(path)?;
     let includes = parse_includes(&content);
     Ok(ConfigSource::new(content, includes))
 }
 
+/// Extracts include lines from the tree test fixture format.
 fn parse_includes(content: &str) -> Vec<PathBuf> {
     content
         .lines()
@@ -160,6 +169,7 @@ fn parse_includes(content: &str) -> Vec<PathBuf> {
         .collect()
 }
 
+/// Builds a unique temporary directory path for tree tests.
 fn temp_dir_path(name: &str) -> PathBuf {
     let now = SystemTime::now()
         .duration_since(UNIX_EPOCH)

@@ -22,6 +22,7 @@ pub struct TemplateTarget {
     include_paths: Vec<PathBuf>,
 }
 
+/// Accessors for generated template target metadata.
 impl TemplateTarget {
     /// Returns the config source path used to discover this target's includes.
     ///
@@ -138,6 +139,7 @@ where
     Ok(targets)
 }
 
+/// Recursively maps one source template path to one output template path.
 fn collect_template_target<E, F>(
     source_path: &Path,
     target_path: &Path,

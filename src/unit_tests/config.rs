@@ -21,6 +21,7 @@ struct TestConfig {
     #[config(default = "paper")]
     mode: String,
     #[config(nested)]
+    #[schemars(extend("x-tree-split" = true))]
     server: TestServerConfig,
 }
 
@@ -30,6 +31,7 @@ struct TestServerConfig {
     port: u16,
 }
 
+/// Exposes fixture includes for runtime, template, and schema tests.
 impl ConfigSchema for TestConfig {
     fn include_paths(layer: &<Self as Config>::Layer) -> Vec<PathBuf> {
         layer.include.clone().unwrap_or_default()
@@ -45,6 +47,7 @@ struct DotenvConfig {
     mode: String,
 }
 
+/// Exposes fixture includes for dotenv loading tests.
 impl ConfigSchema for DotenvConfig {
     fn include_paths(layer: &<Self as Config>::Layer) -> Vec<PathBuf> {
         layer.include.clone().unwrap_or_default()
@@ -67,6 +70,7 @@ struct EnvMappedDatabaseConfig {
     pool_size: u32,
 }
 
+/// Exposes fixture includes for environment mapping tests.
 impl ConfigSchema for EnvMappedConfig {
     fn include_paths(layer: &<Self as Config>::Layer) -> Vec<PathBuf> {
         layer.include.clone().unwrap_or_default()
@@ -81,8 +85,10 @@ struct RenderedTemplateConfig {
     #[config(default = "root")]
     root_value: String,
     #[config(nested)]
+    #[schemars(extend("x-tree-split" = true))]
     branch: RenderedBranchConfig,
     #[config(nested)]
+    #[schemars(extend("x-tree-split" = true))]
     outer: RenderedOuterConfig,
 }
 
@@ -99,6 +105,7 @@ struct RenderedOuterConfig {
     #[config(default = true)]
     enabled: bool,
     #[config(nested)]
+    #[schemars(extend("x-tree-split" = true))]
     inner: RenderedInnerConfig,
 }
 
@@ -109,6 +116,7 @@ struct RenderedInnerConfig {
     value: String,
 }
 
+/// Exposes fixture includes and a custom section path for split templates.
 impl ConfigSchema for RenderedTemplateConfig {
     fn include_paths(layer: &<Self as Config>::Layer) -> Vec<PathBuf> {
         layer.include.clone().unwrap_or_default()
@@ -122,6 +130,30 @@ impl ConfigSchema for RenderedTemplateConfig {
     }
 }
 
+#[derive(Debug, Config, JsonSchema)]
+#[allow(dead_code)]
+struct InlineTemplateConfig {
+    #[config(default = [])]
+    include: Vec<PathBuf>,
+    #[config(nested)]
+    inline: InlineSectionConfig,
+}
+
+#[derive(Debug, Config, JsonSchema)]
+#[allow(dead_code)]
+struct InlineSectionConfig {
+    #[config(default = "inline")]
+    value: String,
+}
+
+/// Exposes fixture includes for unsplit nested section tests.
+impl ConfigSchema for InlineTemplateConfig {
+    fn include_paths(layer: &<Self as Config>::Layer) -> Vec<PathBuf> {
+        layer.include.clone().unwrap_or_default()
+    }
+}
+
+/// Verifies a root config and included child load into the final schema.
 #[test]
 fn load_config_returns_accessible_config_object() {
     let root = temp_dir_path("load-config");
@@ -150,6 +182,7 @@ fn load_config_returns_accessible_config_object() {
     let _ = fs::remove_dir_all(root);
 }
 
+/// Verifies `.env` files are discovered from config ancestors.
 #[test]
 fn load_config_loads_dotenv_from_config_ancestors() {
     let _guard = DOTENV_TEST_LOCK.lock().unwrap();
@@ -172,6 +205,7 @@ fn load_config_loads_dotenv_from_config_ancestors() {
     let _ = fs::remove_dir_all(root);
 }
 
+/// Verifies process environment values override `.env` values.
 #[test]
 fn load_config_preserves_environment_over_dotenv() {
     let _guard = DOTENV_TEST_LOCK.lock().unwrap();
@@ -194,6 +228,7 @@ fn load_config_preserves_environment_over_dotenv() {
     let _ = fs::remove_dir_all(root);
 }
 
+/// Verifies exact `confique` env names are mapped without underscore splitting.
 #[test]
 fn load_config_maps_confique_env_names_without_splitting_underscores() {
     let _guard = DOTENV_TEST_LOCK.lock().unwrap();
@@ -226,6 +261,7 @@ fn load_config_maps_confique_env_names_without_splitting_underscores() {
     let _ = fs::remove_dir_all(root);
 }
 
+/// Verifies template targets recurse through includes and render content.
 #[test]
 fn template_targets_for_paths_recurses_and_renders_templates() {
     let root = temp_dir_path("template-config");
@@ -254,6 +290,7 @@ fn template_targets_for_paths_recurses_and_renders_templates() {
     let _ = fs::remove_dir_all(root);
 }
 
+/// Verifies template writers create missing parent directories.
 #[test]
 fn write_config_templates_creates_parent_directories() {
     let root = temp_dir_path("write-templates");
@@ -280,6 +317,7 @@ fn write_config_templates_creates_parent_directories() {
     let _ = fs::remove_dir_all(root);
 }
 
+/// Verifies root JSON Schema output uses Draft 7 and relaxed required fields.
 #[test]
 fn write_config_schema_writes_draft7_json_schema() {
     let root = temp_dir_path("write-schema");
@@ -297,6 +335,7 @@ fn write_config_schema_writes_draft7_json_schema() {
     let _ = fs::remove_dir_all(root);
 }
 
+/// Verifies schema generation writes root and split section schemas.
 #[test]
 fn write_config_schemas_writes_root_and_section_schemas() {
     let root = temp_dir_path("write-section-schemas");
@@ -309,6 +348,7 @@ fn write_config_schemas_writes_root_and_section_schemas() {
     assert!(root_schema.contains("\"mode\""));
     assert!(!root_schema.contains("\"server\""));
     assert!(!root_schema.contains("\"port\""));
+    assert!(!root_schema.contains("x-tree-split"));
     assert!(!root_schema.contains("\"definitions\""));
     assert!(!root_schema.contains("\"required\""));
 
@@ -317,11 +357,13 @@ fn write_config_schemas_writes_root_and_section_schemas() {
     assert!(server_schema.contains("http://json-schema.org/draft-07/schema#"));
     assert!(server_schema.contains("\"port\""));
     assert!(!server_schema.contains("\"mode\""));
+    assert!(!server_schema.contains("x-tree-split"));
     assert!(!server_schema.contains("\"required\""));
 
     let _ = fs::remove_dir_all(root);
 }
 
+/// Verifies nested split schemas keep only their own completion fields.
 #[test]
 fn write_config_schemas_keeps_section_completion_in_section_schemas() {
     let root = temp_dir_path("write-nested-section-schemas");
@@ -348,6 +390,7 @@ fn write_config_schemas_keeps_section_completion_in_section_schemas() {
     let _ = fs::remove_dir_all(root);
 }
 
+/// Verifies TOML and YAML templates receive editor schema directives.
 #[test]
 fn template_targets_with_schema_add_toml_and_yaml_directives() {
     let root = temp_dir_path("template-schema-directives");
@@ -381,6 +424,7 @@ fn template_targets_with_schema_add_toml_and_yaml_directives() {
     let _ = fs::remove_dir_all(root);
 }
 
+/// Verifies nested YAML templates bind to matching section schemas.
 #[test]
 fn split_yaml_templates_bind_nested_section_schemas() {
     let root = temp_dir_path("nested-template-schema-directives");
@@ -418,6 +462,7 @@ fn split_yaml_templates_bind_nested_section_schemas() {
     let _ = fs::remove_dir_all(root);
 }
 
+/// Verifies JSON templates are not modified with schema directives.
 #[test]
 fn schema_binding_keeps_json_templates_unmodified() {
     let root = temp_dir_path("json-template-schema-binding");
@@ -439,6 +484,7 @@ fn schema_binding_keeps_json_templates_unmodified() {
     let _ = fs::remove_dir_all(root);
 }
 
+/// Verifies config format inference for supported and unknown extensions.
 #[test]
 fn config_format_is_inferred_from_extension() {
     assert_eq!(ConfigFormat::from_path("config.yaml"), ConfigFormat::Yaml);
@@ -452,6 +498,7 @@ fn config_format_is_inferred_from_extension() {
     );
 }
 
+/// Verifies generated child includes are used when the source has none.
 #[test]
 fn template_targets_use_schema_default_includes_when_source_has_none() {
     let root = temp_dir_path("default-template-config");
@@ -470,6 +517,41 @@ fn template_targets_use_schema_default_includes_when_source_has_none() {
     let _ = fs::remove_dir_all(root);
 }
 
+/// Verifies unmarked nested sections remain in the root template and schema.
+#[test]
+fn unmarked_nested_sections_stay_in_root_template_and_schema() {
+    let root = temp_dir_path("inline-template-config");
+    fs::create_dir_all(&root).unwrap();
+    let output_path = root.join("config.example.yaml");
+
+    let template_targets =
+        template_targets_for_paths::<InlineTemplateConfig>(root.join("config.yaml"), &output_path)
+            .unwrap();
+
+    assert_eq!(template_targets.len(), 1);
+    assert_eq!(template_targets[0].path, output_path);
+    assert!(template_targets[0].content.contains("inline:"));
+    assert!(template_targets[0].content.contains("value: inline"));
+    assert!(
+        !template_targets[0]
+            .content
+            .contains("\"config/inline.yaml\"")
+    );
+
+    let schema_path = root.join("schemas").join("config.schema.json");
+    let schema_targets =
+        config_schema_targets_for_path::<InlineTemplateConfig>(&schema_path).unwrap();
+
+    assert_eq!(schema_targets.len(), 1);
+    assert_eq!(schema_targets[0].path, schema_path);
+    assert!(schema_targets[0].content.contains("\"inline\""));
+    assert!(schema_targets[0].content.contains("\"value\""));
+    assert!(!schema_targets[0].content.contains("x-tree-split"));
+
+    let _ = fs::remove_dir_all(root);
+}
+
+/// Verifies missing schema-derived includes are appended to existing includes.
 #[test]
 fn template_targets_append_missing_schema_default_includes() {
     let root = temp_dir_path("append-default-template-includes");
@@ -505,6 +587,7 @@ fn template_targets_append_missing_schema_default_includes() {
     let _ = fs::remove_dir_all(root);
 }
 
+/// Verifies split markers produce section template targets automatically.
 #[test]
 fn template_targets_auto_split_nested_schema_sections() {
     let root = temp_dir_path("rendered-template-config");
@@ -557,6 +640,7 @@ fn template_targets_auto_split_nested_schema_sections() {
     let _ = fs::remove_dir_all(root);
 }
 
+/// Verifies generated split templates can be loaded and regenerated.
 #[test]
 fn generated_split_templates_can_be_loaded_and_regenerated() {
     let root = temp_dir_path("load-generated-template-config");
@@ -583,6 +667,7 @@ fn generated_split_templates_can_be_loaded_and_regenerated() {
     let _ = fs::remove_dir_all(root);
 }
 
+/// Builds a unique temporary directory path for config tests.
 fn temp_dir_path(name: &str) -> PathBuf {
     let now = SystemTime::now()
         .duration_since(UNIX_EPOCH)

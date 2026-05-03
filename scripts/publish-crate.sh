@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Prepares or publishes the crate. The prepare step is intentionally reusable by
+# `scripts/release.sh`, so version auto-bumping can happen before the final
+# workspace checks and commit.
+
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 DRY_RUN=1
 ALLOW_DIRTY=0
@@ -14,6 +18,7 @@ PUBLISH_RETRY_DELAY="${PUBLISH_RETRY_DELAY:-10}"
 export CARGO_NET_RETRY="${CARGO_NET_RETRY:-10}"
 export CARGO_HTTP_TIMEOUT="${CARGO_HTTP_TIMEOUT:-60}"
 
+# Prints CLI usage and release-related environment variables.
 usage() {
   cat <<'EOF'
 Usage:
@@ -29,14 +34,17 @@ Network-sensitive publish steps are retried. Override retry behavior with:
 EOF
 }
 
+# Reads the crate package name from Cargo.toml.
 crate_name() {
   sed -n 's/^name = "\(.*\)"/\1/p' Cargo.toml | head -n 1
 }
 
+# Reads the crate package version from Cargo.toml.
 crate_version() {
   sed -n 's/^version = "\(.*\)"/\1/p' Cargo.toml | head -n 1
 }
 
+# Runs a command with exponential backoff for transient network failures.
 run_with_retry() {
   local attempts="$1"
   local delay="$2"
@@ -62,6 +70,7 @@ run_with_retry() {
   done
 }
 
+# Fetches only the HTTP status code for a URL with retry handling.
 curl_status_with_retry() {
   local url="$1"
 
@@ -77,6 +86,7 @@ curl_status_with_retry() {
       "${url}"
 }
 
+# Checks whether a crate version already exists on crates.io.
 crate_version_exists() {
   local name="$1"
   local version="$2"
@@ -103,6 +113,7 @@ crate_version_exists() {
   esac
 }
 
+# Bumps a semantic x.y.z version according to the requested release kind.
 bump_version() {
   local version="$1"
   local kind="$2"
@@ -137,6 +148,7 @@ bump_version() {
   echo "${major}.${minor}.${patch}"
 }
 
+# Rewrites package.version in Cargo.toml and verifies the result.
 set_crate_version() {
   local old_version="$1"
   local new_version="$2"
@@ -150,6 +162,7 @@ set_crate_version() {
   fi
 }
 
+# Auto-bumps package.version until it is not present on crates.io.
 ensure_unpublished_version() {
   local name="$1"
   local version="$2"

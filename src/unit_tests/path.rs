@@ -2,6 +2,7 @@ use std::path::{Path, PathBuf};
 
 use super::*;
 
+/// Verifies lexical normalization removes `.` and `..` path components.
 #[test]
 fn normalize_lexical_removes_current_dir_and_parent_segments() {
     assert_eq!(
@@ -14,6 +15,7 @@ fn normalize_lexical_removes_current_dir_and_parent_segments() {
     );
 }
 
+/// Verifies relative includes resolve from their declaring file.
 #[test]
 fn resolve_include_path_resolves_relative_paths_from_parent_file() {
     assert_eq!(
@@ -22,6 +24,7 @@ fn resolve_include_path_resolves_relative_paths_from_parent_file() {
     );
 }
 
+/// Verifies absolute includes stay absolute after normalization.
 #[test]
 fn resolve_include_path_keeps_absolute_include_paths() {
     assert_eq!(
@@ -30,6 +33,7 @@ fn resolve_include_path_keeps_absolute_include_paths() {
     );
 }
 
+/// Verifies lexical absolutization returns an absolute normalized path.
 #[test]
 fn absolutize_lexical_returns_absolute_paths() {
     let path = absolutize_lexical("config/../config.yaml").unwrap();

@@ -6,6 +6,7 @@ use std::{
 
 use super::*;
 
+/// Verifies include recursion mirrors source paths into output paths.
 #[test]
 fn collect_template_targets_recursively_mirrors_output_tree() {
     let root = temp_dir_path("template-targets");
@@ -52,6 +53,7 @@ fn collect_template_targets_recursively_mirrors_output_tree() {
     let _ = fs::remove_dir_all(root);
 }
 
+/// Verifies template source selection preference order.
 #[test]
 fn select_template_source_prefers_config_then_existing_output_then_output() {
     let root = temp_dir_path("template-source");
@@ -79,6 +81,7 @@ fn select_template_source_prefers_config_then_existing_output_then_output() {
     let _ = fs::remove_dir_all(root);
 }
 
+/// Verifies template target ownership decomposition.
 #[test]
 fn template_target_into_parts_returns_owned_values() {
     let target = TemplateTarget {
@@ -97,6 +100,7 @@ fn template_target_into_parts_returns_owned_values() {
     );
 }
 
+/// Reads test include lines from the custom fixture format.
 fn read_includes(path: &Path) -> io::Result<Vec<PathBuf>> {
     if !path.exists() {
         return Ok(Vec::new());
@@ -109,6 +113,7 @@ fn read_includes(path: &Path) -> io::Result<Vec<PathBuf>> {
         .collect())
 }
 
+/// Builds a unique temporary directory path for template tests.
 fn temp_dir_path(name: &str) -> PathBuf {
     let now = SystemTime::now()
         .duration_since(UNIX_EPOCH)

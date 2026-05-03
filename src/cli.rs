@@ -205,6 +205,7 @@ struct ShellInstallTarget {
     rc_path: Option<PathBuf>,
 }
 
+/// Shell-specific completion install path construction.
 impl ShellInstallTarget {
     /// Creates an install target rooted under `home_dir`.
     ///

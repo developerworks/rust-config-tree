@@ -1,3 +1,5 @@
+//! Embeds the reusable `config-*` subcommands in an application CLI.
+
 use std::{
     fs, io,
     path::PathBuf,
@@ -23,6 +25,7 @@ struct Cli {
 enum Command {
     Run,
 
+    /// Flatten the crate-provided config commands into this example CLI.
     #[command(flatten)]
     Config(ConfigCommand),
 }
@@ -48,12 +51,14 @@ struct ServerConfig {
     port: u16,
 }
 
+/// Exposes the example's include list to the config command handlers.
 impl ConfigSchema for AppConfig {
     fn include_paths(layer: &<Self as Config>::Layer) -> Vec<PathBuf> {
         layer.include.clone().unwrap_or_default()
     }
 }
 
+/// Parses the example CLI and dispatches either app run or config commands.
 fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let cli = Cli::parse();
     let config_path = match &cli.config {
@@ -78,6 +83,7 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     Ok(())
 }
 
+/// Creates a minimal config file used when `--config` is omitted.
 fn write_demo_config() -> io::Result<PathBuf> {
     let dir = temp_example_dir("config-commands")?;
     let root_config = dir.join("config.yaml");
@@ -96,6 +102,7 @@ server:
     Ok(root_config)
 }
 
+/// Creates a unique temporary directory for one example run.
 fn temp_example_dir(name: &str) -> io::Result<PathBuf> {
     let nanos = SystemTime::now()
         .duration_since(UNIX_EPOCH)
