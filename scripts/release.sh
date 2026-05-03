@@ -1,4 +1,10 @@
 #!/usr/bin/env bash
+
+if [ -z "${BASH_VERSION:-}" ]; then
+  echo "release.sh must be run with bash; use scripts/release.sh or bash scripts/release.sh" >&2
+  exit 2
+fi
+
 set -euo pipefail
 
 # Runs the same local gates used before publishing, then optionally commits,
@@ -9,6 +15,19 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 DRY_RUN=1
 WAIT_PAGES=1
 COMMIT_MESSAGE=""
+
+export GIT_EDITOR=true
+export GIT_SEQUENCE_EDITOR=true
+export GIT_MERGE_AUTOEDIT=no
+export GH_PROMPT_DISABLED=1
+
+# Runs Git without opening an editor or interactive prompts.
+git_cmd() {
+  git \
+    -c core.editor=true \
+    -c sequence.editor=true \
+    "$@"
+}
 
 # Prints release script usage.
 usage() {
@@ -64,7 +83,7 @@ done
 cd "${ROOT_DIR}"
 
 VERSION="$(sed -n 's/^version = "\(.*\)"/\1/p' Cargo.toml | head -n 1)"
-BRANCH="$(git branch --show-current)"
+BRANCH="$(git_cmd branch --show-current)"
 
 if [[ -z "${COMMIT_MESSAGE}" ]]; then
   COMMIT_MESSAGE="Release ${VERSION}"
@@ -80,7 +99,7 @@ scripts/publish-crate.sh --prepare-only --allow-dirty
 cargo fmt --check
 cargo clippy --all-targets --all-features -- -D warnings
 cargo test
-git diff --check
+git_cmd diff --check
 
 if ((DRY_RUN)); then
   scripts/publish-crate.sh --dry-run --allow-dirty --no-bump
@@ -89,14 +108,14 @@ if ((DRY_RUN)); then
   exit 0
 fi
 
-if [[ -n "$(git status --porcelain)" ]]; then
-  git add -A
-  git -c core.editor=true commit -m "${COMMIT_MESSAGE}"
+if [[ -n "$(git_cmd status --porcelain)" ]]; then
+  git_cmd add -A
+  git_cmd commit --no-edit -m "${COMMIT_MESSAGE}"
 else
   echo "working tree is clean; no commit created"
 fi
 
-git push
+git_cmd push
 
 if ((WAIT_PAGES)); then
   if command -v gh >/dev/null 2>&1; then
