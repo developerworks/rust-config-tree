@@ -24,7 +24,7 @@ Det hanterar:
 - detektering av include-cykler
 - deterministisk traverseringsordning
 - speglad insamling av mallmal
-- automatisk YAML-malluppdelning for nastlade schemasektioner
+- opt-in YAML-malluppdelning for sektioner markerade med `x-tree-split`
 
 Program tillhandahaller sitt schema genom att derivera `confique::Config` och
 implementera `ConfigSchema` for att exponera schemats include-falt.
@@ -50,9 +50,10 @@ liten adapter som hamtar includes fran det mellanliggande `confique`-lagret.
 use std::path::PathBuf;
 
 use confique::Config;
+use schemars::JsonSchema;
 use rust_config_tree::ConfigSchema;
 
-#[derive(Debug, Config)]
+#[derive(Debug, Config, JsonSchema)]
 struct AppConfig {
     #[config(default = [])]
     include: Vec<PathBuf>,
@@ -61,10 +62,11 @@ struct AppConfig {
     mode: String,
 
     #[config(nested)]
+    #[schemars(extend("x-tree-split" = true))]
     server: ServerConfig,
 }
 
-#[derive(Debug, Config)]
+#[derive(Debug, Config, JsonSchema)]
 struct ServerConfig {
     #[config(default = 8080)]
     port: u16,
@@ -202,7 +204,7 @@ harleds fran utdatasokvagen:
 - okanda eller saknade filandelse genererar YAML
 
 Anvand `write_config_schemas` for att skapa Draft 7 JSON Schemas for
-rotkonfigurationen och nastlade sektioner. De genererade schemana utelamnar
+rotkonfigurationen och `x-tree-split`-markerade nastlade sektioner. De genererade schemana utelamnar
 `required`-begransningar sa IDE:er kan erbjuda komplettering for partiella
 konfigurationsfiler utan att rapportera saknade falt:
 
@@ -216,11 +218,16 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 }
 ```
 
-For ett schema med sektionerna `server` och `log` skriver detta
+Mark a nested field with `#[schemars(extend("x-tree-split" = true))]` when it
+should be generated as its own `config/*.yaml` template and
+`schemas/*.schema.json` schema. Unmarked nested fields stay in the parent
+template and parent schema.
+
+For ett schema med sektionerna `server` och `log` markerade med `x-tree-split` skriver detta
 `schemas/myapp.schema.json`, `schemas/server.schema.json` och
 `schemas/log.schema.json`. Rotschemat innehaller bara falt som hor hemma i
 rotkonfigurationsfilen, som `include` och rotens skalara falt. Det utelamnar
-avsiktligt nastlade sektionsproperties, sa `server` och `log` kompletteras bara
+avsiktligt delade sektionsproperties, sa `server` och `log` kompletteras bara
 nar deras egna YAML-sektionsfiler redigeras.
 
 Anvand `write_config_templates` for att skapa en rotmall och varje mallfil som
@@ -253,7 +260,7 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 }
 ```
 
-Rotmal for TOML/YAML binder rotschemat och kompletterar inte barnsektioners
+Rotmal for TOML/YAML binder rotschemat och kompletterar inte delade barnsektioners
 falt. Delade sektionsmal for YAML binder sin motsvarande sektionsschema, till
 exempel far `config/log.yaml`
 `# yaml-language-server: $schema=../schemas/log.schema.json`. JSON- och
@@ -267,7 +274,7 @@ Mallgenerering valjer kalltrad i denna ordning:
 - utdatasokvagen, behandlad som ett nytt tomt malltrad
 
 Om en kallnod saknar include-lista harleder `rust-config-tree`
-barnmallfiler fran nastlade `confique`-sektioner. Med schemat ovan producerar en
+barnmallfiler fran nastlade `confique`-sektioner markerade med `x-tree-split`. Med schemat ovan producerar en
 tom `config.example.yaml`-kalla:
 
 ```text
@@ -277,7 +284,7 @@ config/server.yaml
 
 Rotmallen far ett include-block for `config/server.yaml`. YAML-mal som mappar
 till en nastlad sektion, till exempel `config/server.yaml`, innehaller bara den
-sektionen. Ytterligare nastlade sektioner delas rekursivt pa samma satt.
+sektionen. Ytterligare nastlade sektioner delas rekursivt bara nar de falten ocksa bar `x-tree-split`.
 
 Overstyr `template_path_for_section` nar en sektion ska genereras pa en annan
 sokvag:

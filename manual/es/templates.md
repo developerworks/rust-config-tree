@@ -26,10 +26,15 @@ write_config_schemas::<AppConfig>("schemas/myapp.schema.json")?;
 # Ok::<(), Box<dyn std::error::Error + Send + Sync>>(())
 ```
 
+Mark a nested field with `#[schemars(extend("x-tree-split" = true))]` when it
+should be generated as its own `config/*.yaml` template and
+`schemas/*.schema.json` schema. Unmarked nested fields stay in the parent
+template and parent schema.
+
 Los esquemas generados omiten restricciones `required`. Los IDE todavía pueden
 ofrecer completado, pero archivos parciales como `config/log.yaml` no informan
 campos raíz faltantes. El esquema raíz solo completa campos que pertenecen al
-archivo raíz; los campos de secciones anidadas se omiten allí y se completan
+archivo raíz; los campos de secciones divididas se omiten allí y se completan
 mediante sus propios esquemas de sección. Los campos presentes siguen siendo
 comprobados por el esquema en el IDE. Los campos obligatorios y la validación
 final de la configuración fusionada los gestionan `load_config` o
@@ -131,10 +136,10 @@ config/server.yaml
 Los destinos de include relativos se reflejan bajo el directorio padre del
 archivo de salida. Los destinos de include absolutos siguen siendo absolutos.
 
-## División automática de secciones
+## División opt-in de secciones
 
 Cuando un archivo fuente no tiene includes, el crate puede derivar destinos de
-include desde secciones anidadas del esquema. Para un esquema con una sección
+include desde secciones anidadas del esquema marcadas con `x-tree-split`. Para un esquema con una sección marcada
 `server`, una fuente de plantilla raíz vacía puede producir:
 
 ```text
@@ -143,4 +148,4 @@ config/server.yaml
 ```
 
 La plantilla raíz recibe un bloque include, y `config/server.yaml` contiene solo
-la sección `server`. Las secciones anidadas se dividen recursivamente.
+la sección `server`. Las secciones anidadas solo se dividen recursivamente cuando esos campos tambien llevan `x-tree-split`.

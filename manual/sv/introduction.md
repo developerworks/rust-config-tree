@@ -39,7 +39,7 @@ konfigurationen ar fortfarande ett normalt `confique`-schemavarde.
 - Draft 7 JSON Schema-generering for editor-komplettering och validering.
 - Generering av YAML-, TOML-, JSON- och JSON5-mallar.
 - TOML `#:schema` och YAML Language Server-modelines for genererade mallar.
-- Automatisk YAML-malluppdelning for nastlade sektioner.
+- Opt-in YAML-malluppdelning for sektioner markerade med `x-tree-split`.
 - Inbyggda clap-underkommandon for konfigurationsmallar, JSON Schema och skalkompletteringar.
 - Ett lagre niva trad-API for anropare som inte anvander `confique`.
 

@@ -12,6 +12,7 @@ use schemars::JsonSchema;
 #[derive(Debug, Config, JsonSchema)]
 struct AppConfig {
     #[config(nested)]
+    #[schemars(extend("x-tree-split" = true))]
     server: ServerConfig,
 }
 ```
@@ -28,8 +29,8 @@ write_config_schemas::<AppConfig>("schemas/myapp.schema.json")?;
 这会写入 root schema 和 `schemas/server.schema.json` 这类 section schema。
 生成的 schema 会移除 `required` 约束，局部配置文件仍有补全，但不会出现缺字段
 诊断。
-root schema 会省略嵌套 section 属性，所以 child section 的补全只会出现在
-绑定对应 section schema 的文件里。
+root schema 会省略被拆分的 nested section 属性，所以 child section 的补全只会出现在
+绑定对应 section schema 的文件里。没有标记的 nested section 会保留在 root schema 中。
 
 IDE schema 仍会校验已经出现的字段，包括生成 schema 支持的类型、枚举和未知
 属性检查。必填字段和最终合并配置的校验使用 `config-validate`。

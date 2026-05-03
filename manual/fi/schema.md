@@ -8,18 +8,20 @@ Sovellusskeemat ovat tavallisia `confique`-konfiguraatiotyyppeja. Juuriskeeman t
 use std::path::PathBuf;
 
 use confique::Config;
+use schemars::JsonSchema;
 use rust_config_tree::ConfigSchema;
 
-#[derive(Debug, Config)]
+#[derive(Debug, Config, JsonSchema)]
 struct AppConfig {
     #[config(default = [])]
     include: Vec<PathBuf>,
 
     #[config(nested)]
+    #[schemars(extend("x-tree-split" = true))]
     database: DatabaseConfig,
 }
 
-#[derive(Debug, Config)]
+#[derive(Debug, Config, JsonSchema)]
 struct DatabaseConfig {
     #[config(env = "APP_DATABASE_URL")]
     url: String,
@@ -51,12 +53,16 @@ Lataaja saa jokaisesta tiedostosta osittain ladatun kerroksen. Sen avulla se voi
 
 ## Sisakkaiset osiot
 
-Kayta `#[config(nested)]`-attribuuttia rakenteisille osioille. Sisakkaiset osiot ovat tarkeita seka runtime-lataukselle etta mallien jakamiselle:
+Kayta `#[config(nested)]`-attribuuttia rakenteisille osioille. Sisakkaisia
+osioita kaytetaan aina runtime-lataukseen. Lisaa
+`#[schemars(extend("x-tree-split" = true))]`, kun nested-kentta tulee luoda
+myos omaksi `config/*.yaml`-malliksi ja `schemas/*.schema.json`-skeemaksi:
 
 ```rust
-#[derive(Debug, Config)]
+#[derive(Debug, Config, JsonSchema)]
 struct AppConfig {
     #[config(nested)]
+    #[schemars(extend("x-tree-split" = true))]
     server: ServerConfig,
 }
 ```
@@ -71,7 +77,7 @@ server:
 
 ## Malliosioiden ohitukset
 
-Kun mallilahteella ei ole includeja, crate voi johtaa lapsimallitiedostot sisakkaisista skeemaosioista. Oletuspolku ylatasolla on `config/<section>.yaml`.
+Kun mallilahteella ei ole includeja, crate voi johtaa lapsimallitiedostot `x-tree-split`-merkityista sisakkaisista skeemaosioista. Oletuspolku ylatasolla on `config/<section>.yaml`.
 
 Ohita polku `template_path_for_section`-funktiolla:
 

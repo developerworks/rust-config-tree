@@ -31,8 +31,8 @@ Il gere :
 - la detection des cycles d'inclusion ;
 - un ordre de traversee deterministe ;
 - la collecte miroir des cibles de modeles ;
-- le decoupage automatique des modeles YAML pour les sections de schema
-  imbriquees.
+- decoupage opt-in des modeles YAML pour les sections imbriquees
+  marquees `x-tree-split`.
 
 Les applications fournissent leur schema en derivant `confique::Config` et en
 implementant `ConfigSchema` pour exposer le champ d'inclusion du schema.
@@ -59,9 +59,10 @@ intermediaire `confique`.
 use std::path::PathBuf;
 
 use confique::Config;
+use schemars::JsonSchema;
 use rust_config_tree::ConfigSchema;
 
-#[derive(Debug, Config)]
+#[derive(Debug, Config, JsonSchema)]
 struct AppConfig {
     #[config(default = [])]
     include: Vec<PathBuf>,
@@ -70,10 +71,11 @@ struct AppConfig {
     mode: String,
 
     #[config(nested)]
+    #[schemars(extend("x-tree-split" = true))]
     server: ServerConfig,
 }
 
-#[derive(Debug, Config)]
+#[derive(Debug, Config, JsonSchema)]
 struct ServerConfig {
     #[config(default = 8080)]
     port: u16,
@@ -217,7 +219,7 @@ d'inclusions. Le format de sortie est deduit du chemin de sortie :
 - les extensions inconnues ou absentes generent du YAML.
 
 Utilisez `write_config_schemas` pour creer des schemas JSON Draft 7 pour la
-configuration racine et les sections imbriquees. Les schemas generes omettent
+configuration racine et les sections imbriquees decoupees. Les schemas generes omettent
 les contraintes `required` afin que les IDE puissent proposer la completion pour
 des fichiers de configuration partiels sans signaler de champs manquants :
 
@@ -231,13 +233,18 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 }
 ```
 
-Pour un schema avec les sections `server` et `log`, cela ecrit
+Mark a nested field with `#[schemars(extend("x-tree-split" = true))]` when it
+should be generated as its own `config/*.yaml` template and
+`schemas/*.schema.json` schema. Unmarked nested fields stay in the parent
+template and parent schema.
+
+Pour un schema avec les sections `server` et `log` marquees `x-tree-split`, cela ecrit
 `schemas/myapp.schema.json`, `schemas/server.schema.json` et
 `schemas/log.schema.json`. Le schema racine ne contient que les champs qui
 appartiennent au fichier racine, comme `include` et les champs scalaires racine.
-Il omet intentionnellement les proprietes des sections imbriquees, donc `server`
+Il omet intentionnellement les proprietes des sections decoupees, donc `server`
 et `log` ne sont completes que lors de l'edition de leurs propres fichiers YAML
-de section.
+de section. Les sections imbriquees non marquees restent dans le schema racine.
 
 Utilisez `write_config_templates` pour creer un modele racine et chaque fichier
 modele accessible depuis son arbre d'inclusion :
@@ -283,7 +290,7 @@ La generation de modeles choisit son arbre source dans cet ordre :
 - le chemin de sortie, traite comme un nouvel arbre de modeles vide.
 
 Si un noeud source n'a pas de liste d'inclusions, `rust-config-tree` derive les
-fichiers modeles enfants depuis les sections `confique` imbriquees. Avec le
+fichiers modeles enfants depuis les sections `confique` imbriquees marquees `x-tree-split`. Avec le
 schema ci-dessus, une source `config.example.yaml` vide produit :
 
 ```text
@@ -294,7 +301,7 @@ config/server.yaml
 Le modele racine recoit un bloc d'inclusion pour `config/server.yaml`. Les
 cibles YAML qui correspondent a une section imbriquee, comme
 `config/server.yaml`, ne contiennent que cette section. Les sections encore plus
-imbriquees sont separees recursivement de la meme facon.
+imbriquees ne sont separees recursivement que lorsque ces champs portent aussi `x-tree-split`.
 
 Remplacez `template_path_for_section` lorsqu'une section doit etre generee a un
 autre chemin :
@@ -415,7 +422,7 @@ d'execution. Cela ecrit aussi le schema racine et les schemas de section au
 chemin de schema choisi.
 
 `config-schema --output <path>` ecrit le schema JSON Draft 7 racine et les
-schemas de section. Si aucun chemin de sortie n'est fourni, le schema racine est
+schemas de section. Les sections imbriquees non marquees restent dans le schema racine. Si aucun chemin de sortie n'est fourni, le schema racine est
 ecrit dans `schemas/config.schema.json`.
 
 `config-validate` charge l'arbre complet de configuration d'execution et lance

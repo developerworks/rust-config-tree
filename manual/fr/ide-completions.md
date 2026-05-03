@@ -13,6 +13,7 @@ use schemars::JsonSchema;
 #[derive(Debug, Config, JsonSchema)]
 struct AppConfig {
     #[config(nested)]
+    #[schemars(extend("x-tree-split" = true))]
     server: ServerConfig,
 }
 ```

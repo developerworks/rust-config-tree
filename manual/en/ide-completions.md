@@ -12,6 +12,7 @@ use schemars::JsonSchema;
 #[derive(Debug, Config, JsonSchema)]
 struct AppConfig {
     #[config(nested)]
+    #[schemars(extend("x-tree-split" = true))]
     server: ServerConfig,
 }
 ```
@@ -28,8 +29,9 @@ write_config_schemas::<AppConfig>("schemas/myapp.schema.json")?;
 This writes the root schema and section schemas such as
 `schemas/server.schema.json`. Generated schemas omit `required` constraints so
 completion works for partial config files without missing-field diagnostics.
-The root schema omits nested section properties, so child section completion is
-available only in files that bind the matching section schema.
+The root schema omits split nested section properties, so split child section
+completion is available only in files that bind the matching section schema.
+Unmarked nested sections remain in the root schema.
 
 IDE schemas still validate present fields, including type, enum, and unknown
 property checks supported by the generated schema. Use `config-validate` for

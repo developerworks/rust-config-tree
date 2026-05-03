@@ -44,7 +44,7 @@ configuración final sigue siendo un valor normal de esquema `confique`.
 - Generación de plantillas YAML, TOML, JSON y JSON5.
 - Directivas TOML `#:schema` y modelines de YAML Language Server para
   plantillas generadas.
-- División automática de plantillas YAML para secciones anidadas.
+- División opt-in de plantillas YAML para secciones marcadas con `x-tree-split`.
 - Subcomandos clap incorporados para plantillas de configuración, JSON Schema y
   completions de shell.
 - Una API de árbol de menor nivel para llamadores que no usan `confique`.

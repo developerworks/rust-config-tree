@@ -41,7 +41,7 @@ uiteindelijke configuratie is nog steeds een normale `confique`-schemawaarde.
 - Draft 7 JSON Schema-generatie voor editorcompletion en validatie.
 - YAML-, TOML-, JSON- en JSON5-sjabloongeneratie.
 - TOML `#:schema` en YAML Language Server-schemamodelines voor gegenereerde sjablonen.
-- Automatisch splitsen van YAML-sjablonen voor geneste secties.
+- Opt-in YAML-sjabloonsplitsing voor secties gemarkeerd met `x-tree-split`.
 - Ingebouwde clap-subcommands voor configuratiesjablonen, JSON Schema en shellcompletions.
 - Een lagere tree-API voor callers die geen `confique` gebruiken.
 

@@ -40,7 +40,7 @@ resolved from the file that declared them. The final config is still a normal
 - Draft 7 JSON Schema generation for editor completion and validation.
 - YAML, TOML, JSON, and JSON5 template generation.
 - TOML `#:schema` and YAML Language Server schema modelines for generated templates.
-- Automatic YAML template splitting for nested sections.
+- Opt-in YAML template splitting for nested sections marked with `x-tree-split`.
 - Built-in clap subcommands for config templates, JSON Schema, and shell completions.
 - A lower-level tree API for callers that do not use `confique`.
 

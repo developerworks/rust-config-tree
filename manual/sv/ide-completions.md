@@ -13,6 +13,7 @@ use schemars::JsonSchema;
 #[derive(Debug, Config, JsonSchema)]
 struct AppConfig {
     #[config(nested)]
+    #[schemars(extend("x-tree-split" = true))]
     server: ServerConfig,
 }
 ```
@@ -30,8 +31,9 @@ Detta skriver rotschemat och sektionsscheman som
 `schemas/server.schema.json`. Genererade scheman utelamnar
 `required`-begransningar sa komplettering fungerar for partiella
 konfigurationsfiler utan diagnostik for saknade falt. Rotschemat utelamnar
-nastlade sektionsproperties, sa barnsektionskomplettering ar bara tillganglig i
-filer som binder matchande sektionsschema.
+delade sektionsproperties, sa barnsektionskomplettering ar bara tillganglig i
+filer som binder matchande sektionsschema. Omarkerade nastlade sektioner stannar
+i rotschemat.
 
 IDE-scheman validerar fortfarande befintliga falt, inklusive typ, enum och
 kontroller for okanda properties som stods av det genererade schemat. Anvand

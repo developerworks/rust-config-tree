@@ -10,18 +10,20 @@ includes fran det mellanliggande `confique`-lagret.
 use std::path::PathBuf;
 
 use confique::Config;
+use schemars::JsonSchema;
 use rust_config_tree::ConfigSchema;
 
-#[derive(Debug, Config)]
+#[derive(Debug, Config, JsonSchema)]
 struct AppConfig {
     #[config(default = [])]
     include: Vec<PathBuf>,
 
     #[config(nested)]
+    #[schemars(extend("x-tree-split" = true))]
     database: DatabaseConfig,
 }
 
-#[derive(Debug, Config)]
+#[derive(Debug, Config, JsonSchema)]
 struct DatabaseConfig {
     #[config(env = "APP_DATABASE_URL")]
     url: String,
@@ -56,13 +58,16 @@ valideras.
 
 ## Nastlade sektioner
 
-Anvand `#[config(nested)]` for strukturerade sektioner. Nastlade sektioner ar
-viktiga for bade runtime-laddning och malluppdelning:
+Anvand `#[config(nested)]` for strukturerade sektioner. Nastlade sektioner
+anvands alltid for runtime-laddning. Lagg till
+`#[schemars(extend("x-tree-split" = true))]` nar ett nastlat falt ocksa ska
+genereras som egen `config/*.yaml`-mall och `schemas/*.schema.json`-schema:
 
 ```rust
-#[derive(Debug, Config)]
+#[derive(Debug, Config, JsonSchema)]
 struct AppConfig {
     #[config(nested)]
+    #[schemars(extend("x-tree-split" = true))]
     server: ServerConfig,
 }
 ```
@@ -78,7 +83,7 @@ server:
 ## Overstyrning av mallsektioner
 
 Nar en mallkalla saknar includes kan craten harleda barnmallfiler fran nastlade
-schemasektioner. Standardsokvagen pa toppniva ar `config/<section>.yaml`.
+schemasektioner markerade med `x-tree-split`. Standardsokvagen pa toppniva ar `config/<section>.yaml`.
 
 Overstyr den sokvagen med `template_path_for_section`:
 

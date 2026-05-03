@@ -25,7 +25,7 @@
 - include 순환 감지
 - 결정적인 순회 순서
 - 미러링된 템플릿 대상 수집
-- 중첩 스키마 섹션을 위한 자동 YAML 템플릿 분할
+- `x-tree-split`로 표시한 중첩 스키마 섹션의 YAML 템플릿 분할
 
 애플리케이션은 `confique::Config`를 derive하고 `ConfigSchema`를 구현해
 스키마의 include 필드를 노출합니다.
@@ -51,9 +51,10 @@ clap = { version = "4", features = ["derive"] }
 use std::path::PathBuf;
 
 use confique::Config;
+use schemars::JsonSchema;
 use rust_config_tree::ConfigSchema;
 
-#[derive(Debug, Config)]
+#[derive(Debug, Config, JsonSchema)]
 struct AppConfig {
     #[config(default = [])]
     include: Vec<PathBuf>,
@@ -62,10 +63,11 @@ struct AppConfig {
     mode: String,
 
     #[config(nested)]
+    #[schemars(extend("x-tree-split" = true))]
     server: ServerConfig,
 }
 
-#[derive(Debug, Config)]
+#[derive(Debug, Config, JsonSchema)]
 struct ServerConfig {
     #[config(default = 8080)]
     port: u16,
@@ -198,7 +200,7 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 - `.json` 및 `.json5`는 JSON5 호환 템플릿 생성
 - 알 수 없거나 없는 확장자는 YAML 생성
 
-`write_config_schemas`를 사용해 루트 설정과 중첩 섹션의 Draft 7 JSON Schema를
+`write_config_schemas`를 사용해 루트 설정과 분할된 중첩 섹션의 Draft 7 JSON Schema를
 생성합니다. 생성된 스키마는 `required` 제약을 생략하므로, IDE가 부분 설정 파일에
 대해 누락 필드 오류를 보고하지 않고 완성을 제공할 수 있습니다.
 
@@ -212,11 +214,16 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 }
 ```
 
-`server`와 `log` 섹션이 있는 스키마라면 `schemas/myapp.schema.json`,
+Mark a nested field with `#[schemars(extend("x-tree-split" = true))]` when it
+should be generated as its own `config/*.yaml` template and
+`schemas/*.schema.json` schema. Unmarked nested fields stay in the parent
+template and parent schema.
+
+`server`와 `log` 섹션이 `x-tree-split`로 표시된 스키마라면 `schemas/myapp.schema.json`,
 `schemas/server.schema.json`, `schemas/log.schema.json`을 씁니다. 루트 스키마에는
 `include`와 루트 스칼라 필드처럼 루트 설정 파일에 속하는 필드만 포함됩니다.
-중첩 섹션 프로퍼티는 의도적으로 생략되어, `server`와 `log`는 각자의 섹션 YAML
-파일을 편집할 때만 완성됩니다.
+분할된 섹션 프로퍼티는 의도적으로 생략되어, `server`와 `log`는 각자의 섹션 YAML
+파일을 편집할 때만 완성됩니다. 표시하지 않은 중첩 섹션은 루트 스키마에 남습니다.
 
 `write_config_templates`를 사용해 루트 템플릿과 include 트리에서 도달 가능한 모든
 템플릿 파일을 생성합니다.
@@ -261,7 +268,7 @@ JSON5 대상은 의도적으로 `$schema` 필드를 받지 않습니다. VS Code
 - 기존 출력 템플릿 경로
 - 새 빈 템플릿 트리로 간주한 출력 경로
 
-소스 노드에 include 목록이 없으면 `rust-config-tree`는 중첩 `confique` 섹션에서
+소스 노드에 include 목록이 없으면 `rust-config-tree`는 `x-tree-split`로 표시한 중첩 `confique` 섹션에서
 자식 템플릿 파일을 derive합니다. 위 스키마에서 빈 `config.example.yaml` 소스는
 다음을 생성합니다.
 
@@ -272,7 +279,7 @@ config/server.yaml
 
 루트 템플릿은 `config/server.yaml` include 블록을 받습니다. `config/server.yaml`
 처럼 중첩 섹션에 매핑되는 YAML 대상은 해당 섹션만 포함합니다. 더 깊은 중첩
-섹션도 같은 방식으로 재귀 분할됩니다.
+섹션은 해당 필드도 `x-tree-split`를 가질 때만 재귀 분할됩니다.
 
 섹션이 다른 경로에 생성되어야 한다면 `template_path_for_section`을 override하세요.
 

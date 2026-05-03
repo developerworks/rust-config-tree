@@ -43,7 +43,7 @@ finale Konfiguration bleibt ein normales `confique`-Schema.
   Validierung.
 - Vorlagenerzeugung fuer YAML, TOML, JSON und JSON5.
 - TOML-`#:schema` und YAML-Language-Server-Modelines fuer erzeugte Vorlagen.
-- Automatische YAML-Vorlagenaufteilung fuer verschachtelte Abschnitte.
+- Opt-in-YAML-Vorlagenaufteilung fuer mit `x-tree-split` markierte Abschnitte.
 - Eingebaute clap-Unterbefehle fuer Konfigurationsvorlagen, JSON-Schema und
   Shell-Vervollstaendigungen.
 - Eine untergeordnete Tree-API fuer Aufrufer, die `confique` nicht verwenden.

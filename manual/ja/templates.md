@@ -15,7 +15,7 @@ write_config_templates::<AppConfig>("config.yaml", "config.example.yaml")?;
 # Ok::<(), Box<dyn std::error::Error + Send + Sync>>(())
 ```
 
-root config と nested section の Draft 7 JSON Schema を生成します。
+root config と split nested section の Draft 7 JSON Schema を生成します。
 
 ```rust
 use rust_config_tree::write_config_schemas;
@@ -23,6 +23,11 @@ use rust_config_tree::write_config_schemas;
 write_config_schemas::<AppConfig>("schemas/myapp.schema.json")?;
 # Ok::<(), Box<dyn std::error::Error + Send + Sync>>(())
 ```
+
+Mark a nested field with `#[schemars(extend("x-tree-split" = true))]` when it
+should be generated as its own `config/*.yaml` template and
+`schemas/*.schema.json` schema. Unmarked nested fields stay in the parent
+template and parent schema.
 
 generated schemas は `required` constraint を省略します。IDE は補完を提供
 できますが、`config/log.yaml` のような partial file で missing root field を
@@ -44,7 +49,7 @@ write_config_templates_with_schema::<AppConfig>(
 # Ok::<(), Box<dyn std::error::Error + Send + Sync>>(())
 ```
 
-root TOML/YAML template は root schema に bind され、child section field を補完
+root TOML/YAML template は root schema に bind され、split child section field を補完
 しません。split section YAML template は対応する section schema に bind されます。
 JSON / JSON5 template は runtime config に `$schema` field を入れないよう変更
 されません。JSON file は VS Code `json.schemas` などの editor settings で bind
@@ -122,7 +127,7 @@ config/server.yaml
 relative include target は output file の parent directory 下に mirror されます。
 absolute include target は absolute のままです。
 
-## Automatic Section Splitting
+## Opt-in Section Splitting
 
 source file に include がない場合、crate は nested schema section から include
 target を導出できます。`server` section を持つ schema では、empty root template
@@ -134,5 +139,5 @@ config/server.yaml
 ```
 
 root template は include block を受け取り、`config/server.yaml` は `server`
-section だけを含みます。nested section は同じように recursive splitting されます。
+section だけを含みます。nested section は、その field も `x-tree-split` を持つ場合だけ recursive splitting されます。
 

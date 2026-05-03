@@ -15,7 +15,7 @@ write_config_templates::<AppConfig>("config.yaml", "config.example.yaml")?;
 # Ok::<(), Box<dyn std::error::Error + Send + Sync>>(())
 ```
 
-루트 설정과 중첩 섹션의 Draft 7 JSON Schema를 생성합니다.
+루트 설정과 분할된 중첩 섹션의 Draft 7 JSON Schema를 생성합니다.
 
 ```rust
 use rust_config_tree::write_config_schemas;
@@ -24,9 +24,14 @@ write_config_schemas::<AppConfig>("schemas/myapp.schema.json")?;
 # Ok::<(), Box<dyn std::error::Error + Send + Sync>>(())
 ```
 
+Mark a nested field with `#[schemars(extend("x-tree-split" = true))]` when it
+should be generated as its own `config/*.yaml` template and
+`schemas/*.schema.json` schema. Unmarked nested fields stay in the parent
+template and parent schema.
+
 생성된 스키마는 `required` 제약을 생략합니다. IDE는 여전히 완성을 제공하지만
 `config/log.yaml` 같은 부분 파일에 대해 빠진 루트 필드를 보고하지 않습니다. 루트
-스키마는 루트 파일에 속하는 필드만 완성합니다. 중첩 섹션 필드는 여기서 생략되고
+스키마는 루트 파일에 속하는 필드만 완성합니다. 분할된 섹션 필드는 여기서 생략되고
 자체 섹션 스키마에서 완성됩니다. 존재하는 필드는 IDE에서 계속 스키마 검사를
 받습니다. 필수 필드와 최종 병합 설정 검증은 `load_config` 또는
 `config-validate`가 처리합니다.
@@ -124,10 +129,10 @@ config/server.yaml
 상대 include 대상은 출력 파일의 부모 디렉터리 아래에 미러링됩니다. 절대 include
 대상은 절대 경로 그대로 유지됩니다.
 
-## 자동 섹션 분할
+## opt-in 섹션 분할
 
-소스 파일에 include가 없으면 crate는 중첩 스키마 섹션에서 include 대상을 derive할
-수 있습니다. `server` 섹션이 있는 스키마의 경우 빈 루트 템플릿 소스는 다음을
+소스 파일에 include가 없으면 crate는 `x-tree-split`로 표시한 중첩 스키마 섹션에서 include 대상을 derive할
+수 있습니다. 표시한 `server` 섹션이 있는 스키마의 경우 빈 루트 템플릿 소스는 다음을
 생성할 수 있습니다.
 
 ```text
@@ -136,4 +141,4 @@ config/server.yaml
 ```
 
 루트 템플릿은 include 블록을 받고, `config/server.yaml`에는 `server` 섹션만
-포함됩니다. 중첩 섹션은 재귀적으로 분할됩니다.
+포함됩니다. 중첩 섹션은 해당 필드도 `x-tree-split`를 가질 때만 재귀적으로 분할됩니다.

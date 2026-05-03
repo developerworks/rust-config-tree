@@ -13,7 +13,7 @@ write_config_templates::<AppConfig>("config.yaml", "config.example.yaml")?;
 # Ok::<(), Box<dyn std::error::Error + Send + Sync>>(())
 ```
 
-Luo Draft 7 JSON Schema -skeemat juurikonfiguraatiolle ja sisakkaisille osioille:
+Luo Draft 7 JSON Schema -skeemat juurikonfiguraatiolle ja jaetuille sisakkaisille osioille:
 
 ```rust
 use rust_config_tree::write_config_schemas;
@@ -21,6 +21,11 @@ use rust_config_tree::write_config_schemas;
 write_config_schemas::<AppConfig>("schemas/myapp.schema.json")?;
 # Ok::<(), Box<dyn std::error::Error + Send + Sync>>(())
 ```
+
+Mark a nested field with `#[schemars(extend("x-tree-split" = true))]` when it
+should be generated as its own `config/*.yaml` template and
+`schemas/*.schema.json` schema. Unmarked nested fields stay in the parent
+template and parent schema.
 
 Luodut skeemat jattavat `required`-rajoitteet pois. IDEt voivat silti tarjota taydennysta, mutta osittaiset tiedostot kuten `config/log.yaml` eivat ilmoita puuttuvista juurikentista. Juuriskeema taydentaa vain juuritiedostoon kuuluvat kentat; sisakkaisten osioiden kentat jatetaan siella pois ja taydennetaan niiden omilla osioskeemoilla. Paikalla olevat kentat tarkistetaan yha skeemalla IDEssa. Pakolliset kentat ja lopullinen yhdistetyn konfiguraation validointi hoidetaan `load_config`-funktiolla tai `config-validate`-komennolla.
 
@@ -37,7 +42,7 @@ write_config_templates_with_schema::<AppConfig>(
 # Ok::<(), Box<dyn std::error::Error + Send + Sync>>(())
 ```
 
-Juuri-TOML/YAML-mallit sitovat juuriskeeman eivatka taydenna lapsiosioiden kenttia. Jaetut osio-YAML-mallit sitovat oman osioskeemansa. JSON- ja JSON5-mallit jatetaan muuttamatta, jotta runtime-konfiguraatio ei sisalla `$schema`-kenttaa. Sido JSON-tiedostot editoriasetuksilla, kuten VS Coden `json.schemas`.
+Juuri-TOML/YAML-mallit sitovat juuriskeeman eivatka taydenna jaettujen lapsiosioiden kenttia. Jaetut osio-YAML-mallit sitovat oman osioskeemansa. JSON- ja JSON5-mallit jatetaan muuttamatta, jotta runtime-konfiguraatio ei sisalla `$schema`-kenttaa. Sido JSON-tiedostot editoriasetuksilla, kuten VS Coden `json.schemas`.
 
 Tulostemuoto paatellaan tulostepolusta:
 
@@ -110,13 +115,13 @@ config/server.yaml
 
 Suhteelliset include-kohteet peilataan tulostetiedoston emohakemiston alle. Absoluuttiset include-kohteet pysyvat absoluuttisina.
 
-## Automaattinen osioiden jakaminen
+## Opt-in-osioiden jakaminen
 
-Kun lahdetiedostolla ei ole includeja, crate voi johtaa include-kohteet sisakkaisista skeemaosioista. Skeemalle, jossa on `server`-osio, tyhja juurimallilahde voi tuottaa:
+Kun lahdetiedostolla ei ole includeja, crate voi johtaa include-kohteet `x-tree-split`-merkityista sisakkaisista skeemaosioista. Skeemalle, jossa on merkitty `server`-osio, tyhja juurimallilahde voi tuottaa:
 
 ```text
 config.example.yaml
 config/server.yaml
 ```
 
-Juurimalli saa include-lohkon, ja `config/server.yaml` sisaltaa vain `server`-osion. Sisakkaiset osiot jaetaan rekursiivisesti.
+Juurimalli saa include-lohkon, ja `config/server.yaml` sisaltaa vain `server`-osion. Sisakkaiset osiot jaetaan rekursiivisesti vain, kun myos niilla kentilla on `x-tree-split`.

@@ -16,7 +16,7 @@ write_config_templates::<AppConfig>("config.yaml", "config.example.yaml")?;
 # Ok::<(), Box<dyn std::error::Error + Send + Sync>>(())
 ```
 
-Gere JSON Schemas Draft 7 para a configuracao raiz e secoes aninhadas:
+Gere JSON Schemas Draft 7 para a configuracao raiz e secoes aninhadas marcadas para divisao:
 
 ```rust
 use rust_config_tree::write_config_schemas;
@@ -25,10 +25,15 @@ write_config_schemas::<AppConfig>("schemas/myapp.schema.json")?;
 # Ok::<(), Box<dyn std::error::Error + Send + Sync>>(())
 ```
 
+Mark a nested field with `#[schemars(extend("x-tree-split" = true))]` when it
+should be generated as its own `config/*.yaml` template and
+`schemas/*.schema.json` schema. Unmarked nested fields stay in the parent
+template and parent schema.
+
 Os esquemas gerados omitem restricoes `required`. IDEs ainda podem oferecer
 completamento, mas arquivos parciais como `config/log.yaml` nao relatam campos
 raiz ausentes. O esquema raiz completa apenas campos que pertencem ao arquivo
-raiz; campos de secoes aninhadas sao omitidos ali e completados por seus
+raiz; campos de secoes divididas sao omitidos ali e completados por seus
 proprios esquemas de secao. Campos presentes ainda sao verificados pelo esquema
 no IDE. Campos obrigatorios e a validacao final da configuracao mesclada sao
 tratados por `load_config` ou `config-validate`.
@@ -128,10 +133,10 @@ config/server.yaml
 Destinos de include relativos sao espelhados sob o diretorio pai do arquivo de
 saida. Destinos de include absolutos permanecem absolutos.
 
-## Divisao automatica de secoes
+## Divisao opt-in de secoes
 
 Quando um arquivo de origem nao tem includes, o crate pode derivar destinos de
-include a partir de secoes de esquema aninhadas. Para um esquema com uma secao
+include a partir de secoes de esquema aninhadas marcadas com `x-tree-split`. Para um esquema com uma secao marcada
 `server`, uma origem de modelo raiz vazia pode produzir:
 
 ```text
@@ -140,5 +145,5 @@ config/server.yaml
 ```
 
 O modelo raiz recebe um bloco de include, e `config/server.yaml` contem apenas a
-secao `server`. Secoes aninhadas sao divididas recursivamente.
+secao `server`. Secoes aninhadas so sao divididas recursivamente quando esses campos tambem carregam `x-tree-split`.
 

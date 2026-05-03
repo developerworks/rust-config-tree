@@ -11,3 +11,10 @@ All notable changes to `rust-config-tree` are documented in this file.
   from nested schema sections are now appended instead of being skipped. This
   keeps newly added nested config sections split into their own generated files
   on regeneration.
+
+### Changed
+
+- Nested config sections are now split only when the field schema has
+  `x-tree-split = true`, for example
+  `#[schemars(extend("x-tree-split" = true))]`. Unmarked nested sections remain
+  in their parent template and parent JSON Schema.

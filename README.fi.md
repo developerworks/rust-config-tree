@@ -23,7 +23,7 @@ Se kasittelee:
 - include-syklien tunnistuksen
 - deterministisen lapikayntijarjestyksen
 - peilatun mallikohteiden keruun
-- automaattisen YAML-mallien jakamisen sisakkaisille skeemaosioille
+- opt-in YAML-mallien jakamisen `x-tree-split`-merkityille osioille
 
 Sovellukset tarjoavat skeemansa johtamalla `confique::Config`-traitin ja toteuttamalla `ConfigSchema`-traitin, joka paljastaa skeeman include-kentan.
 
@@ -47,9 +47,10 @@ Sovelluksen skeema omistaa include-kentan. `rust-config-tree` tarvitsee vain pie
 use std::path::PathBuf;
 
 use confique::Config;
+use schemars::JsonSchema;
 use rust_config_tree::ConfigSchema;
 
-#[derive(Debug, Config)]
+#[derive(Debug, Config, JsonSchema)]
 struct AppConfig {
     #[config(default = [])]
     include: Vec<PathBuf>,
@@ -58,10 +59,11 @@ struct AppConfig {
     mode: String,
 
     #[config(nested)]
+    #[schemars(extend("x-tree-split" = true))]
     server: ServerConfig,
 }
 
-#[derive(Debug, Config)]
+#[derive(Debug, Config, JsonSchema)]
 struct ServerConfig {
     #[config(default = 8080)]
     port: u16,
@@ -176,7 +178,7 @@ Mallit renderoidaan samalla skeemalla ja include-lapikaynnin saannoilla. Tuloste
 - `.json` ja `.json5` tuottavat JSON5-yhteensopivia malleja
 - tuntematon tai puuttuva paate tuottaa YAMLia
 
-Kayta `write_config_schemas`-funktiota Draft 7 JSON Schema -skeemojen luontiin juurikonfiguraatiolle ja sisakkaisille osioille. Luodut skeemat jattavat `required`-rajoitteet pois, jotta IDEt voivat tarjota taydennysta osittaisille konfiguraatiotiedostoille ilman puuttuvien kenttien virheilmoituksia:
+Kayta `write_config_schemas`-funktiota Draft 7 JSON Schema -skeemojen luontiin juurikonfiguraatiolle ja jaetuille sisakkaisille osioille. Luodut skeemat jattavat `required`-rajoitteet pois, jotta IDEt voivat tarjota taydennysta osittaisille konfiguraatiotiedostoille ilman puuttuvien kenttien virheilmoituksia:
 
 ```rust
 use rust_config_tree::write_config_schemas;
@@ -188,7 +190,12 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 }
 ```
 
-Skeemalle, jossa on `server`- ja `log`-osiot, tama kirjoittaa tiedostot `schemas/myapp.schema.json`, `schemas/server.schema.json` ja `schemas/log.schema.json`. Juuriskeema sisaltaa vain juurikonfiguraatiotiedostoon kuuluvat kentat, kuten `include` ja juuritason skalaarikentat. Se jattaa sisakkaisten osioiden ominaisuudet tarkoituksella pois, joten `server` ja `log` taydentyvat vain niiden omia osio-YAML-tiedostoja muokattaessa.
+Mark a nested field with `#[schemars(extend("x-tree-split" = true))]` when it
+should be generated as its own `config/*.yaml` template and
+`schemas/*.schema.json` schema. Unmarked nested fields stay in the parent
+template and parent schema.
+
+Skeemalle, jossa `server`- ja `log`-osiot on merkitty `x-tree-split`illa, tama kirjoittaa tiedostot `schemas/myapp.schema.json`, `schemas/server.schema.json` ja `schemas/log.schema.json`. Juuriskeema sisaltaa vain juurikonfiguraatiotiedostoon kuuluvat kentat, kuten `include` ja juuritason skalaarikentat. Se jattaa jaettujen osioiden ominaisuudet tarkoituksella pois, joten `server` ja `log` taydentyvat vain niiden omia osio-YAML-tiedostoja muokattaessa.
 
 Kayta `write_config_templates`-funktiota juurimallin ja kaikkien sen include-puusta loytyvien mallitiedostojen luontiin:
 
@@ -218,7 +225,7 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 }
 ```
 
-Juuri-TOML/YAML-kohteet sitovat juuriskeeman eivatka taydenna lapsiosioiden kenttia. Jaetut osio-YAML-kohteet sitovat vastaavan osioskeeman; esimerkiksi `config/log.yaml` saa rivin `# yaml-language-server: $schema=../schemas/log.schema.json`. JSON- ja JSON5-kohteisiin ei tarkoituksella lisata `$schema`-kenttaa; sido ne editoriasetuksilla, kuten VS Coden `json.schemas`.
+Juuri-TOML/YAML-kohteet sitovat juuriskeeman eivatka taydenna jaettujen lapsiosioiden kenttia. Jaetut osio-YAML-kohteet sitovat vastaavan osioskeeman; esimerkiksi `config/log.yaml` saa rivin `# yaml-language-server: $schema=../schemas/log.schema.json`. JSON- ja JSON5-kohteisiin ei tarkoituksella lisata `$schema`-kenttaa; sido ne editoriasetuksilla, kuten VS Coden `json.schemas`.
 
 Mallien luonti valitsee lahdepuun tassa jarjestyksessa:
 
@@ -226,14 +233,14 @@ Mallien luonti valitsee lahdepuun tassa jarjestyksessa:
 - olemassa oleva tulostemallipolku
 - tulostepolku, jota kasitellaan uutena tyhjana mallipuuna
 
-Jos lahdesolmulla ei ole include-listaa, `rust-config-tree` johtaa lapsimallitiedostot sisakkaisista `confique`-osioista. Ylla olevalla skeemalla tyhja `config.example.yaml`-lahde tuottaa:
+Jos lahdesolmulla ei ole include-listaa, `rust-config-tree` johtaa lapsimallitiedostot `x-tree-split`-merkityista sisakkaisista `confique`-osioista. Ylla olevalla skeemalla tyhja `config.example.yaml`-lahde tuottaa:
 
 ```text
 config.example.yaml
 config/server.yaml
 ```
 
-Juurimalli saa include-lohkon tiedostolle `config/server.yaml`. YAML-kohteet, jotka vastaavat sisakkaista osiota, kuten `config/server.yaml`, sisaltavat vain kyseisen osion. Syvemmat sisakkaiset osiot jaetaan rekursiivisesti samalla tavalla.
+Juurimalli saa include-lohkon tiedostolle `config/server.yaml`. YAML-kohteet, jotka vastaavat sisakkaista osiota, kuten `config/server.yaml`, sisaltavat vain kyseisen osion. Syvemmat sisakkaiset osiot jaetaan rekursiivisesti vain, kun myos niilla kentilla on `x-tree-split`.
 
 Ohita `template_path_for_section`, kun osio tulee luoda eri polkuun:
 

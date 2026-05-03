@@ -25,7 +25,7 @@
 - include 循环检测
 - 确定性遍历顺序
 - 镜像模板目标收集
-- 按嵌套 schema section 自动拆分 YAML 模板
+- 按显式标记的嵌套 schema section 拆分 YAML 模板
 
 应用通过派生 `confique::Config` 并实现 `ConfigSchema` 来提供自己的 schema。
 `ConfigSchema` 用于暴露 schema 中的 include 字段。
@@ -51,9 +51,10 @@ adapter，用来从中间 `confique` layer 提取 include。
 use std::path::PathBuf;
 
 use confique::Config;
+use schemars::JsonSchema;
 use rust_config_tree::ConfigSchema;
 
-#[derive(Debug, Config)]
+#[derive(Debug, Config, JsonSchema)]
 struct AppConfig {
     #[config(default = [])]
     include: Vec<PathBuf>,
@@ -62,10 +63,11 @@ struct AppConfig {
     mode: String,
 
     #[config(nested)]
+    #[schemars(extend("x-tree-split" = true))]
     server: ServerConfig,
 }
 
-#[derive(Debug, Config)]
+#[derive(Debug, Config, JsonSchema)]
 struct ServerConfig {
     #[config(default = 8080)]
     port: u16,
@@ -171,9 +173,12 @@ command-line overrides
 - `.json` 和 `.json5` 生成 JSON5-compatible 模板
 - 未知或缺失扩展名生成 YAML
 
-使用 `write_config_schemas` 为 root config 和嵌套 section 生成 Draft 7
-JSON Schema。生成的 schema 会移除 `required` 约束，这样 IDE 可以为局部
-配置文件提供补全，同时不会因为缺少字段而报错：
+使用 `write_config_schemas` 为 root config 和显式拆分的嵌套 section 生成
+Draft 7 JSON Schema。需要独立生成 `config/*.yaml` 和
+`schemas/*.schema.json` 的 nested 字段使用
+`#[schemars(extend("x-tree-split" = true))]` 标记。没有这个标记的 nested
+字段会留在父模板和父 schema 中。生成的 schema 会移除 `required` 约束，这样
+IDE 可以为局部配置文件提供补全，同时不会因为缺少字段而报错：
 
 ```rust
 use rust_config_tree::write_config_schemas;
@@ -185,11 +190,13 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 }
 ```
 
-如果 schema 包含 `server` 和 `log` section，会写入
+如果 schema 中的 `server` 和 `log` section 标记了 `x-tree-split`，会写入
 `schemas/myapp.schema.json`、`schemas/server.schema.json` 和
 `schemas/log.schema.json`。root schema 只包含 root 配置文件应该写的字段，
-例如 `include` 和 root scalar 字段。它会刻意省略嵌套 section 属性，所以
-`server` 和 `log` 只会在编辑各自的 section YAML 文件时补全。
+例如 `include` 和 root scalar 字段。它会刻意省略被拆分的嵌套 section
+属性，所以 `server` 和 `log` 只会在编辑各自的 section YAML 文件时补全。
+没有 `x-tree-split` 的 nested section 会保留在 root schema 中，因为它们
+没有独立的模板文件和 schema 文件。
 
 使用 `write_config_templates` 创建 root 模板和 include tree 中的子模板：
 
@@ -220,8 +227,8 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 }
 ```
 
-root TOML/YAML 目标会绑定 root schema，并且不会补全 child section 字段。
-拆分出来的 section YAML 目标会绑定对应的 section schema，例如
+root TOML/YAML 目标会绑定 root schema，并且不会补全被拆分的 child section
+字段。拆分出来的 section YAML 目标会绑定对应的 section schema，例如
 `config/log.yaml` 会写入
 `# yaml-language-server: $schema=../schemas/log.schema.json`。JSON 和 JSON5
 目标不会写 `$schema` 字段；这类文件应通过 VS Code `json.schemas` 等编辑器

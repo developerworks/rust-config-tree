@@ -26,7 +26,7 @@ Het ondersteunt:
 - detectie van include-cycli
 - deterministische traversalvolgorde
 - gespiegeld verzamelen van sjabloondoelen
-- automatisch splitsen van YAML-sjablonen voor geneste schemaselecties
+- opt-in YAML-sjabloonsplitsing voor secties gemarkeerd met `x-tree-split`
 
 Toepassingen leveren hun schema door `confique::Config` af te leiden en
 `ConfigSchema` te implementeren om het include-veld van het schema zichtbaar te
@@ -54,9 +54,10 @@ haalt.
 use std::path::PathBuf;
 
 use confique::Config;
+use schemars::JsonSchema;
 use rust_config_tree::ConfigSchema;
 
-#[derive(Debug, Config)]
+#[derive(Debug, Config, JsonSchema)]
 struct AppConfig {
     #[config(default = [])]
     include: Vec<PathBuf>,
@@ -65,10 +66,11 @@ struct AppConfig {
     mode: String,
 
     #[config(nested)]
+    #[schemars(extend("x-tree-split" = true))]
     server: ServerConfig,
 }
 
-#[derive(Debug, Config)]
+#[derive(Debug, Config, JsonSchema)]
 struct ServerConfig {
     #[config(default = 8080)]
     port: u16,
@@ -210,7 +212,7 @@ uitvoerformaat wordt afgeleid uit het uitvoerpad:
 - onbekende of ontbrekende extensies genereren YAML
 
 Gebruik `write_config_schemas` om Draft 7 JSON Schemas voor de rootconfiguratie
-en geneste secties te maken. De gegenereerde schema's laten `required`-regels
+en gesplitste geneste secties te maken. De gegenereerde schema's laten `required`-regels
 weg, zodat IDE's completion kunnen bieden voor gedeeltelijke configuratiebestanden
 zonder ontbrekende velden te rapporteren:
 
@@ -224,12 +226,17 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 }
 ```
 
-Voor een schema met `server`- en `log`-secties schrijft dit
+Mark a nested field with `#[schemars(extend("x-tree-split" = true))]` when it
+should be generated as its own `config/*.yaml` template and
+`schemas/*.schema.json` schema. Unmarked nested fields stay in the parent
+template and parent schema.
+
+Voor een schema met `server`- en `log`-secties gemarkeerd met `x-tree-split` schrijft dit
 `schemas/myapp.schema.json`, `schemas/server.schema.json` en
 `schemas/log.schema.json`. Het rootschema bevat alleen velden die in het
 rootconfiguratiebestand thuishoren, zoals `include` en scalaire rootvelden. Het
-laat geneste sectie-eigenschappen bewust weg, zodat `server` en `log` alleen
-worden aangevuld wanneer hun eigen sectie-YAML-bestanden worden bewerkt.
+laat gesplitste sectie-eigenschappen bewust weg, zodat `server` en `log` alleen
+worden aangevuld wanneer hun eigen sectie-YAML-bestanden worden bewerkt. Ongemarkeerde geneste secties blijven in het rootschema.
 
 Gebruik `write_config_templates` om een rootsjabloon en elk sjabloonbestand dat
 via de include-boom bereikbaar is te maken:
@@ -262,7 +269,7 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 ```
 
 Root-TOML/YAML-doelen koppelen het rootschema en vullen geen velden van
-kindsecties aan. Gesplitste sectie-YAML-doelen koppelen hun passende
+gesplitste kindsecties aan. Gesplitste sectie-YAML-doelen koppelen hun passende
 sectieschema, bijvoorbeeld `config/log.yaml` krijgt
 `# yaml-language-server: $schema=../schemas/log.schema.json`. JSON- en
 JSON5-doelen krijgen bewust geen `$schema`-veld; koppel ze met editorinstellingen
@@ -275,7 +282,7 @@ Sjabloongeneratie kiest de bronboom in deze volgorde:
 - het uitvoerpad, behandeld als een nieuwe lege sjabloonboom
 
 Als een bronnode geen include-lijst heeft, leidt `rust-config-tree` kind-
-sjabloonbestanden af uit geneste `confique`-secties. Met het schema hierboven
+sjabloonbestanden af uit geneste `confique`-secties gemarkeerd met `x-tree-split`. Met het schema hierboven
 produceert een lege `config.example.yaml`-bron:
 
 ```text
@@ -285,8 +292,8 @@ config/server.yaml
 
 Het rootsjabloon krijgt een include-blok voor `config/server.yaml`. YAML-doelen
 die naar een geneste sectie verwijzen, zoals `config/server.yaml`, bevatten
-alleen die sectie. Verdere geneste secties worden op dezelfde manier recursief
-gesplitst.
+alleen die sectie. Verdere geneste secties worden alleen recursief gesplitst wanneer die velden ook
+`x-tree-split` dragen.
 
 Overschrijf `template_path_for_section` wanneer een sectie op een ander pad
 moet worden gegenereerd:

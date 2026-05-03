@@ -29,7 +29,7 @@ Gestiona:
 - detección de ciclos de include
 - orden de recorrido determinista
 - recopilación reflejada de destinos de plantilla
-- división automática de plantillas YAML para secciones anidadas del esquema
+- división opt-in de plantillas YAML para secciones marcadas con `x-tree-split`
 
 Las aplicaciones proporcionan su esquema derivando `confique::Config` e
 implementando `ConfigSchema` para exponer el campo de includes del esquema.
@@ -56,9 +56,10 @@ intermedia de `confique`.
 use std::path::PathBuf;
 
 use confique::Config;
+use schemars::JsonSchema;
 use rust_config_tree::ConfigSchema;
 
-#[derive(Debug, Config)]
+#[derive(Debug, Config, JsonSchema)]
 struct AppConfig {
     #[config(default = [])]
     include: Vec<PathBuf>,
@@ -67,10 +68,11 @@ struct AppConfig {
     mode: String,
 
     #[config(nested)]
+    #[schemars(extend("x-tree-split" = true))]
     server: ServerConfig,
 }
 
-#[derive(Debug, Config)]
+#[derive(Debug, Config, JsonSchema)]
 struct ServerConfig {
     #[config(default = 8080)]
     port: u16,
@@ -214,7 +216,7 @@ recorrido de includes. El formato de salida se infiere de la ruta de salida:
 - extensiones desconocidas o ausentes generan YAML
 
 Usa `write_config_schemas` para crear JSON Schemas Draft 7 para la
-configuración raíz y las secciones anidadas. Los esquemas generados omiten
+configuración raíz y las secciones marcadas con `x-tree-split`. Los esquemas generados omiten
 restricciones `required` para que los IDE puedan ofrecer completado en archivos
 de configuración parciales sin informar campos faltantes:
 
@@ -228,11 +230,16 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 }
 ```
 
-Para un esquema con secciones `server` y `log`, esto escribe
+Mark a nested field with `#[schemars(extend("x-tree-split" = true))]` when it
+should be generated as its own `config/*.yaml` template and
+`schemas/*.schema.json` schema. Unmarked nested fields stay in the parent
+template and parent schema.
+
+Para un esquema con secciones `server` y `log` marcadas con `x-tree-split`, esto escribe
 `schemas/myapp.schema.json`, `schemas/server.schema.json` y
 `schemas/log.schema.json`. El esquema raíz contiene solo campos que pertenecen
 al archivo de configuración raíz, como `include` y campos escalares raíz. Omite
-deliberadamente las propiedades de secciones anidadas, de modo que `server` y
+deliberadamente las propiedades de secciones divididas, de modo que `server` y
 `log` solo se completan al editar sus propios archivos YAML de sección.
 
 Usa `write_config_templates` para crear una plantilla raíz y todos los archivos
@@ -279,7 +286,7 @@ La generación de plantillas elige su árbol fuente en este orden:
 - la ruta de salida, tratada como un nuevo árbol de plantillas vacío
 
 Si un nodo fuente no tiene lista de includes, `rust-config-tree` deriva
-archivos de plantilla hijos desde las secciones anidadas de `confique`. Con el
+archivos de plantilla hijos desde las secciones anidadas de `confique` marcadas con `x-tree-split`. Con el
 esquema anterior, una fuente `config.example.yaml` vacía produce:
 
 ```text
@@ -289,8 +296,8 @@ config/server.yaml
 
 La plantilla raíz recibe un bloque include para `config/server.yaml`. Los
 destinos YAML que se mapean a una sección anidada, como `config/server.yaml`,
-contienen solo esa sección. Las secciones anidadas más profundas se dividen
-recursivamente de la misma forma.
+contienen solo esa sección. Las secciones anidadas mas profundas solo se dividen
+recursivamente cuando esos campos tambien llevan `x-tree-split`.
 
 Sobrescribe `template_path_for_section` cuando una sección deba generarse en
 una ruta distinta:

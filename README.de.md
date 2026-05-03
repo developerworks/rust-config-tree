@@ -29,7 +29,7 @@ Es unterstuetzt:
 - Erkennung von Include-Zyklen
 - deterministische Traversierungsreihenfolge
 - gespiegelte Sammlung von Vorlagenzielen
-- automatische YAML-Vorlagenaufteilung fuer verschachtelte Schemaabschnitte
+- Opt-in-YAML-Vorlagenaufteilung fuer mit `x-tree-split` markierte Abschnitte
 
 Anwendungen stellen ihr Schema bereit, indem sie `confique::Config` ableiten
 und `ConfigSchema` implementieren, um das Include-Feld des Schemas offenzulegen.
@@ -56,9 +56,10 @@ einen kleinen Adapter, der Includes aus der zwischengeschalteten
 use std::path::PathBuf;
 
 use confique::Config;
+use schemars::JsonSchema;
 use rust_config_tree::ConfigSchema;
 
-#[derive(Debug, Config)]
+#[derive(Debug, Config, JsonSchema)]
 struct AppConfig {
     #[config(default = [])]
     include: Vec<PathBuf>,
@@ -67,10 +68,11 @@ struct AppConfig {
     mode: String,
 
     #[config(nested)]
+    #[schemars(extend("x-tree-split" = true))]
     server: ServerConfig,
 }
 
-#[derive(Debug, Config)]
+#[derive(Debug, Config, JsonSchema)]
 struct ServerConfig {
     #[config(default = 8080)]
     port: u16,
@@ -212,7 +214,7 @@ gerendert. Das Ausgabeformat wird aus dem Ausgabepfad abgeleitet:
 - unbekannte oder fehlende Erweiterungen erzeugen YAML
 
 Verwende `write_config_schemas`, um Draft-7-JSON-Schemas fuer die
-Root-Konfiguration und verschachtelte Abschnitte zu erzeugen. Die erzeugten
+Root-Konfiguration und explizit aufgeteilte verschachtelte Abschnitte zu erzeugen. Die erzeugten
 Schemas lassen `required`-Einschraenkungen weg, damit IDEs Vervollstaendigung
 fuer partielle Konfigurationsdateien anbieten koennen, ohne fehlende Felder zu
 melden:
@@ -227,13 +229,18 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 }
 ```
 
-Bei einem Schema mit den Abschnitten `server` und `log` schreibt dies
+Mark a nested field with `#[schemars(extend("x-tree-split" = true))]` when it
+should be generated as its own `config/*.yaml` template and
+`schemas/*.schema.json` schema. Unmarked nested fields stay in the parent
+template and parent schema.
+
+Bei einem Schema mit den mit `x-tree-split` markierten Abschnitten `server` und `log` schreibt dies
 `schemas/myapp.schema.json`, `schemas/server.schema.json` und
 `schemas/log.schema.json`. Das Root-Schema enthaelt nur Felder, die in die
 Root-Konfigurationsdatei gehoeren, etwa `include` und skalare Root-Felder. Es
-laesst verschachtelte Abschnittseigenschaften bewusst weg, sodass `server` und
+laesst aufgeteilte Abschnittseigenschaften bewusst weg, sodass `server` und
 `log` nur beim Bearbeiten ihrer eigenen Abschnitts-YAML-Dateien vervollstaendigt
-werden.
+werden. Nicht markierte verschachtelte Abschnitte bleiben im Root-Schema.
 
 Verwende `write_config_templates`, um eine Root-Vorlage und jede ueber ihren
 Include-Baum erreichbare Vorlagendatei zu erzeugen:
@@ -267,7 +274,7 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 ```
 
 Root-Ziele fuer TOML/YAML binden das Root-Schema und vervollstaendigen keine
-untergeordneten Abschnittsfelder. Aufgeteilte YAML-Abschnittsziele binden ihr
+aufgeteilten untergeordneten Abschnittsfelder. Aufgeteilte YAML-Abschnittsziele binden ihr
 passendes Abschnittsschema, zum Beispiel erhaelt `config/log.yaml`
 `# yaml-language-server: $schema=../schemas/log.schema.json`. JSON- und
 JSON5-Ziele erhalten bewusst kein `$schema`-Feld; binde sie ueber
@@ -280,7 +287,7 @@ Die Vorlagenerzeugung waehlt den Quellbaum in dieser Reihenfolge:
 - der Ausgabepfad, behandelt als neuer leerer Vorlagenbaum
 
 Wenn ein Quellknoten keine Include-Liste hat, leitet `rust-config-tree`
-Kind-Vorlagendateien aus verschachtelten `confique`-Abschnitten ab. Mit dem
+Kind-Vorlagendateien aus mit `x-tree-split` markierten verschachtelten `confique`-Abschnitten ab. Mit dem
 obigen Schema erzeugt eine leere Quelle `config.example.yaml`:
 
 ```text
@@ -291,7 +298,8 @@ config/server.yaml
 Die Root-Vorlage erhaelt einen Include-Block fuer `config/server.yaml`.
 YAML-Ziele, die einem verschachtelten Abschnitt entsprechen, etwa
 `config/server.yaml`, enthalten nur diesen Abschnitt. Weitere verschachtelte
-Abschnitte werden ebenso rekursiv aufgeteilt.
+Abschnitte werden nur rekursiv aufgeteilt, wenn diese Felder ebenfalls
+`x-tree-split` tragen.
 
 Ueberschreibe `template_path_for_section`, wenn ein Abschnitt an einem anderen
 Pfad erzeugt werden soll:

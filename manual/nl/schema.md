@@ -10,18 +10,20 @@ uit de tussenliggende `confique`-laag kan ontdekken.
 use std::path::PathBuf;
 
 use confique::Config;
+use schemars::JsonSchema;
 use rust_config_tree::ConfigSchema;
 
-#[derive(Debug, Config)]
+#[derive(Debug, Config, JsonSchema)]
 struct AppConfig {
     #[config(default = [])]
     include: Vec<PathBuf>,
 
     #[config(nested)]
+    #[schemars(extend("x-tree-split" = true))]
     database: DatabaseConfig,
 }
 
-#[derive(Debug, Config)]
+#[derive(Debug, Config, JsonSchema)]
 struct DatabaseConfig {
     #[config(env = "APP_DATABASE_URL")]
     url: String,
@@ -56,13 +58,17 @@ samengevoegd en gevalideerd.
 
 ## Geneste secties
 
-Gebruik `#[config(nested)]` voor gestructureerde secties. Geneste secties zijn
-belangrijk voor zowel runtime laden als sjabloonsplitsing:
+Gebruik `#[config(nested)]` voor gestructureerde secties. Geneste secties
+worden altijd gebruikt voor runtime laden. Voeg
+`#[schemars(extend("x-tree-split" = true))]` toe wanneer een genest veld ook
+als eigen `config/*.yaml`-sjabloon en `schemas/*.schema.json`-schema moet
+worden gegenereerd:
 
 ```rust
-#[derive(Debug, Config)]
+#[derive(Debug, Config, JsonSchema)]
 struct AppConfig {
     #[config(nested)]
+    #[schemars(extend("x-tree-split" = true))]
     server: ServerConfig,
 }
 ```
@@ -78,7 +84,7 @@ server:
 ## Overrides voor sjabloonsecties
 
 Wanneer een sjabloonbron geen includes heeft, kan de crate kind-
-sjabloonbestanden afleiden uit geneste schemaselecties. Het standaardpad op het
+sjabloonbestanden afleiden uit geneste schemaselecties gemarkeerd met `x-tree-split`. Het standaardpad op het
 hoogste niveau is `config/<section>.yaml`.
 
 Overschrijf dat pad met `template_path_for_section`:

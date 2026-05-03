@@ -46,7 +46,7 @@ configuration finale reste une valeur de schema `confique` normale.
 - Generation de modeles YAML, TOML, JSON et JSON5.
 - Directives de schema TOML `#:schema` et modelines YAML Language Server pour
   les modeles generes.
-- Decoupage automatique des modeles YAML pour les sections imbriquees.
+- Decoupage opt-in des modeles YAML pour les sections marquees `x-tree-split`.
 - Sous-commandes clap integrees pour les modeles de configuration, les schemas
   JSON et les completions shell.
 - API d'arbre de plus bas niveau pour les appelants qui n'utilisent pas

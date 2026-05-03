@@ -39,7 +39,7 @@ schema value です。
 - editor completion / validation 向け Draft 7 JSON Schema generation。
 - YAML、TOML、JSON、JSON5 template generation。
 - generated TOML template の `#:schema` と YAML Language Server modeline。
-- nested section に基づく YAML template splitting。
+- `x-tree-split` で mark した nested section の YAML template splitting。
 - config template、JSON Schema、shell completion 向け built-in clap subcommands。
 - `confique` を使わない caller 向けの lower-level tree API。
 

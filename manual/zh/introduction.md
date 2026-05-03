@@ -38,7 +38,7 @@ log:
 - 生成 Draft 7 JSON Schema，供编辑器补全和校验使用。
 - 生成 YAML、TOML、JSON 和 JSON5 配置模板。
 - 为生成的 TOML 模板写入 `#:schema`，为 YAML 模板写入 YAML Language Server modeline。
-- 按嵌套 section 自动拆分 YAML 模板。
+- 按 `x-tree-split` 标记拆分嵌套 section YAML 模板。
 - 内置 config template、JSON Schema 和 shell completion 的 clap 子命令。
 - 面向非 `confique` 调用方的低层 tree API。
 

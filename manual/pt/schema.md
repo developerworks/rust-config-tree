@@ -10,18 +10,20 @@ includes recursivos a partir da camada intermediaria do `confique`.
 use std::path::PathBuf;
 
 use confique::Config;
+use schemars::JsonSchema;
 use rust_config_tree::ConfigSchema;
 
-#[derive(Debug, Config)]
+#[derive(Debug, Config, JsonSchema)]
 struct AppConfig {
     #[config(default = [])]
     include: Vec<PathBuf>,
 
     #[config(nested)]
+    #[schemars(extend("x-tree-split" = true))]
     database: DatabaseConfig,
 }
 
-#[derive(Debug, Config)]
+#[derive(Debug, Config, JsonSchema)]
 struct DatabaseConfig {
     #[config(env = "APP_DATABASE_URL")]
     url: String,
@@ -56,14 +58,17 @@ mesclado e validado.
 
 ## Secoes aninhadas
 
-Use `#[config(nested)]` para secoes estruturadas. Secoes aninhadas sao
-importantes tanto para carregamento em tempo de execucao quanto para divisao de
-modelos:
+Use `#[config(nested)]` para secoes estruturadas. Secoes aninhadas sempre sao
+usadas para carregamento em tempo de execucao. Adicione
+`#[schemars(extend("x-tree-split" = true))]` quando um campo aninhado tambem
+deve ser gerado como seu proprio modelo `config/*.yaml` e schema
+`schemas/*.schema.json`:
 
 ```rust
-#[derive(Debug, Config)]
+#[derive(Debug, Config, JsonSchema)]
 struct AppConfig {
     #[config(nested)]
+    #[schemars(extend("x-tree-split" = true))]
     server: ServerConfig,
 }
 ```
@@ -79,7 +84,7 @@ server:
 ## Sobrescritas de secao de modelo
 
 Quando uma origem de modelo nao tem includes, o crate pode derivar arquivos de
-modelo filhos a partir de secoes de esquema aninhadas. O caminho padrao de
+modelo filhos a partir de secoes de esquema aninhadas marcadas com `x-tree-split`. O caminho padrao de
 primeiro nivel e `config/<section>.yaml`.
 
 Sobrescreva esse caminho com `template_path_for_section`:

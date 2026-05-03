@@ -14,7 +14,7 @@ write_config_templates::<AppConfig>("config.yaml", "config.example.yaml")?;
 # Ok::<(), Box<dyn std::error::Error + Send + Sync>>(())
 ```
 
-为 root config 和嵌套 section 生成 Draft 7 JSON Schema：
+为 root config 和显式拆分的嵌套 section 生成 Draft 7 JSON Schema：
 
 ```rust
 use rust_config_tree::write_config_schemas;
@@ -23,10 +23,14 @@ write_config_schemas::<AppConfig>("schemas/myapp.schema.json")?;
 # Ok::<(), Box<dyn std::error::Error + Send + Sync>>(())
 ```
 
+需要独立生成 `config/*.yaml` 模板和 `schemas/*.schema.json` schema 的
+nested 字段使用 `#[schemars(extend("x-tree-split" = true))]` 标记。没有这个
+标记的 nested 字段会留在父模板和父 schema 中。
+
 生成的 schema 会移除 `required` 约束。IDE 仍然可以补全，但
 `config/log.yaml` 这类局部文件不会因为缺少 root 字段而报错。
-root schema 只补全 root 文件里应该写的字段；嵌套 section 字段会从 root
-schema 中省略，只由各自的 section schema 补全。
+root schema 只补全 root 文件里应该写的字段；被拆分的 section 字段会从
+root schema 中省略，只由各自的 section schema 补全。
 已经出现的字段仍会由 IDE 做 schema 校验。必填字段和最终合并配置的校验由
 `load_config` 或 `config-validate` 处理。
 
@@ -43,8 +47,8 @@ write_config_templates_with_schema::<AppConfig>(
 # Ok::<(), Box<dyn std::error::Error + Send + Sync>>(())
 ```
 
-root TOML/YAML 模板会绑定 root schema，并且不会补全 child section 字段。
-拆分出的 section YAML 模板会绑定对应的 section schema。JSON 和 JSON5 模板
+root TOML/YAML 模板会绑定 root schema，并且不会补全被拆分的 child section
+字段。拆分出的 section YAML 模板会绑定对应的 section schema。JSON 和 JSON5 模板
 保持不变，避免运行时配置里出现 `$schema` 字段。JSON 文件应通过 VS Code
 `json.schemas` 等编辑器设置绑定。
 
@@ -122,11 +126,11 @@ config/server.yaml
 相对 include 目标会镜像到 output 文件父目录下。绝对 include 目标保持
 绝对路径。
 
-## 自动 Section 拆分
+## 显式 Section 拆分
 
-当 source 文件没有 include 时，crate 可以从嵌套 schema section 推导
-include 目标。对于包含 `server` section 的 schema，空 root template source
-可以生成：
+当 source 文件没有 include 时，crate 可以从带 `x-tree-split` 标记的嵌套
+schema section 推导 include 目标。对于包含已标记 `server` section 的
+schema，空 root template source 可以生成：
 
 ```text
 config.example.yaml
@@ -134,4 +138,5 @@ config/server.yaml
 ```
 
 root template 会得到 include block，`config/server.yaml` 只包含 `server`
-section。嵌套 section 会继续递归拆分。
+section。没有标记的 nested section 会内联保留在父模板中；更深层 section
+只有同样带 `x-tree-split` 时才会继续拆分。

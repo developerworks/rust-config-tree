@@ -10,18 +10,20 @@ from the intermediate `confique` layer.
 use std::path::PathBuf;
 
 use confique::Config;
+use schemars::JsonSchema;
 use rust_config_tree::ConfigSchema;
 
-#[derive(Debug, Config)]
+#[derive(Debug, Config, JsonSchema)]
 struct AppConfig {
     #[config(default = [])]
     include: Vec<PathBuf>,
 
     #[config(nested)]
+    #[schemars(extend("x-tree-split" = true))]
     database: DatabaseConfig,
 }
 
-#[derive(Debug, Config)]
+#[derive(Debug, Config, JsonSchema)]
 struct DatabaseConfig {
     #[config(env = "APP_DATABASE_URL")]
     url: String,
@@ -55,13 +57,16 @@ discover child config files before the final schema is merged and validated.
 
 ## Nested Sections
 
-Use `#[config(nested)]` for structured sections. Nested sections are important
-for both runtime loading and template splitting:
+Use `#[config(nested)]` for structured sections. Nested sections are always
+used for runtime loading. Add `#[schemars(extend("x-tree-split" = true))]`
+when a nested field should also be generated as an independent
+`config/*.yaml` template and `schemas/*.schema.json` schema:
 
 ```rust
-#[derive(Debug, Config)]
+#[derive(Debug, Config, JsonSchema)]
 struct AppConfig {
     #[config(nested)]
+    #[schemars(extend("x-tree-split" = true))]
     server: ServerConfig,
 }
 ```
@@ -77,8 +82,8 @@ server:
 ## Template Section Overrides
 
 When a template source has no includes, the crate can derive child template
-files from nested schema sections. The default top-level path is
-`config/<section>.yaml`.
+files from nested schema sections marked with `x-tree-split`. The default
+top-level path is `config/<section>.yaml`.
 
 Override that path with `template_path_for_section`:
 

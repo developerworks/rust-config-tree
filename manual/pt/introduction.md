@@ -44,7 +44,7 @@ configuracao final continua sendo um valor normal de esquema `confique`.
 - Geracao de modelos YAML, TOML, JSON e JSON5.
 - Diretivas TOML `#:schema` e modelines YAML Language Server para modelos
   gerados.
-- Divisao automatica de modelos YAML para secoes aninhadas.
+- Divisao opt-in de modelos YAML para secoes marcadas com `x-tree-split`.
 - Subcomandos clap embutidos para modelos de configuracao, JSON Schema e shell
   completions.
 - Uma API de arvore de nivel mais baixo para chamadores que nao usam

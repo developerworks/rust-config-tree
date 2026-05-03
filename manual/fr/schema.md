@@ -11,18 +11,20 @@ puisse decouvrir les inclusions recursives depuis la couche intermediaire
 use std::path::PathBuf;
 
 use confique::Config;
+use schemars::JsonSchema;
 use rust_config_tree::ConfigSchema;
 
-#[derive(Debug, Config)]
+#[derive(Debug, Config, JsonSchema)]
 struct AppConfig {
     #[config(default = [])]
     include: Vec<PathBuf>,
 
     #[config(nested)]
+    #[schemars(extend("x-tree-split" = true))]
     database: DatabaseConfig,
 }
 
-#[derive(Debug, Config)]
+#[derive(Debug, Config, JsonSchema)]
 struct DatabaseConfig {
     #[config(env = "APP_DATABASE_URL")]
     url: String,
@@ -58,13 +60,16 @@ schema final soit fusionne et valide.
 ## Sections imbriquees
 
 Utilisez `#[config(nested)]` pour les sections structurees. Les sections
-imbriquees sont importantes a la fois pour le chargement d'execution et pour le
-decoupage des modeles :
+imbriquees sont toujours utilisees pour le chargement d'execution. Ajoutez
+`#[schemars(extend("x-tree-split" = true))]` lorsqu'un champ imbrique doit aussi
+etre genere comme son propre modele `config/*.yaml` et schema
+`schemas/*.schema.json` :
 
 ```rust
-#[derive(Debug, Config)]
+#[derive(Debug, Config, JsonSchema)]
 struct AppConfig {
     #[config(nested)]
+    #[schemars(extend("x-tree-split" = true))]
     server: ServerConfig,
 }
 ```
@@ -80,7 +85,7 @@ server:
 ## Remplacements de chemin de section pour les modeles
 
 Lorsqu'une source de modele n'a pas d'inclusions, la crate peut deriver les
-fichiers modeles enfants depuis les sections de schema imbriquees. Le chemin de
+fichiers modeles enfants depuis les sections de schema imbriquees marquees `x-tree-split`. Le chemin de
 premier niveau par defaut est `config/<section>.yaml`.
 
 Remplacez ce chemin avec `template_path_for_section` :

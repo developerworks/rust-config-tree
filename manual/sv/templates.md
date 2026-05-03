@@ -15,7 +15,7 @@ write_config_templates::<AppConfig>("config.yaml", "config.example.yaml")?;
 # Ok::<(), Box<dyn std::error::Error + Send + Sync>>(())
 ```
 
-Generera Draft 7 JSON Schemas for rotkonfigurationen och nastlade sektioner:
+Generera Draft 7 JSON Schemas for rotkonfigurationen och delade nastlade sektioner:
 
 ```rust
 use rust_config_tree::write_config_schemas;
@@ -24,10 +24,15 @@ write_config_schemas::<AppConfig>("schemas/myapp.schema.json")?;
 # Ok::<(), Box<dyn std::error::Error + Send + Sync>>(())
 ```
 
+Mark a nested field with `#[schemars(extend("x-tree-split" = true))]` when it
+should be generated as its own `config/*.yaml` template and
+`schemas/*.schema.json` schema. Unmarked nested fields stay in the parent
+template and parent schema.
+
 Genererade scheman utelamnar `required`-begransningar. IDE:er kan fortfarande
 erbjuda komplettering, men partiella filer som `config/log.yaml` rapporterar
 inte saknade rotfalt. Rotschemat kompletterar bara falt som hor hemma i
-rotfilen; nastlade sektionsfalt utelamnas dar och kompletteras av sina egna
+rotfilen; delade sektionsfalt utelamnas dar och kompletteras av sina egna
 sektionsscheman. Befintliga falt schemakontrolleras fortfarande av IDE:n.
 Obligatoriska falt och slutlig sammanslagen konfigurationsvalidering hanteras
 av `load_config` eller `config-validate`.
@@ -45,7 +50,7 @@ write_config_templates_with_schema::<AppConfig>(
 # Ok::<(), Box<dyn std::error::Error + Send + Sync>>(())
 ```
 
-Rotmallar for TOML/YAML binder rotschemat och kompletterar inte barnsektioners
+Rotmallar for TOML/YAML binder rotschemat och kompletterar inte delade barnsektioners
 falt. Delade YAML-sektionsmallar binder sina sektionsscheman. JSON- och
 JSON5-mallar lamnas oforandrade sa runtime-konfigurationen inte innehaller ett
 `$schema`-falt. Bind JSON-filer med editor-installningar som VS Code
@@ -126,10 +131,10 @@ config/server.yaml
 Relativa include-mal speglas under utdatafilens foraldrakatalog. Absoluta
 include-mal forblir absoluta.
 
-## Automatisk sektionsuppdelning
+## Opt-in-sektionsuppdelning
 
 Nar en kallfil saknar includes kan craten harleda include-mal fran nastlade
-schemasektioner. For ett schema med en `server`-sektion kan en tom rotmallkalla
+schemasektioner markerade med `x-tree-split`. For ett schema med en markerad `server`-sektion kan en tom rotmallkalla
 producera:
 
 ```text
@@ -138,4 +143,4 @@ config/server.yaml
 ```
 
 Rotmallen far ett include-block, och `config/server.yaml` innehaller bara
-`server`-sektionen. Nastlade sektioner delas rekursivt.
+`server`-sektionen. Nastlade sektioner delas rekursivt bara nar de falten ocksa bar `x-tree-split`.

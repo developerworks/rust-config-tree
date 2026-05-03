@@ -15,7 +15,7 @@ write_config_templates::<AppConfig>("config.yaml", "config.example.yaml")?;
 # Ok::<(), Box<dyn std::error::Error + Send + Sync>>(())
 ```
 
-Generate Draft 7 JSON Schemas for the root config and nested sections:
+Generate Draft 7 JSON Schemas for the root config and split nested sections:
 
 ```rust
 use rust_config_tree::write_config_schemas;
@@ -24,9 +24,14 @@ write_config_schemas::<AppConfig>("schemas/myapp.schema.json")?;
 # Ok::<(), Box<dyn std::error::Error + Send + Sync>>(())
 ```
 
+Mark a nested field with `#[schemars(extend("x-tree-split" = true))]` when it
+should be generated as its own `config/*.yaml` template and
+`schemas/*.schema.json` schema. Unmarked nested fields stay in the parent
+template and parent schema.
+
 Generated schemas omit `required` constraints. IDEs can still offer completion,
 but partial files such as `config/log.yaml` do not report missing root fields.
-The root schema only completes fields that belong in the root file; nested
+The root schema only completes fields that belong in the root file; split
 section fields are omitted there and completed by their own section schemas.
 Present fields are still schema-checked by the IDE. Required fields and final
 merged config validation are handled by `load_config` or `config-validate`.
@@ -44,8 +49,8 @@ write_config_templates_with_schema::<AppConfig>(
 # Ok::<(), Box<dyn std::error::Error + Send + Sync>>(())
 ```
 
-Root TOML/YAML templates bind the root schema and do not complete child section
-fields. Split section YAML templates bind their section schema. JSON and JSON5
+Root TOML/YAML templates bind the root schema and do not complete split child
+section fields. Split section YAML templates bind their section schema. JSON and JSON5
 templates are left unchanged so the runtime config does not contain a
 `$schema` field. Bind JSON files with editor settings such as VS Code
 `json.schemas`.
@@ -124,11 +129,11 @@ config/server.yaml
 Relative include targets are mirrored under the output file's parent directory.
 Absolute include targets remain absolute.
 
-## Automatic Section Splitting
+## Opt-in Section Splitting
 
 When a source file has no includes, the crate can derive include targets from
-nested schema sections. For a schema with a `server` section, an empty root
-template source can produce:
+nested schema sections marked with `x-tree-split`. For a schema with a marked
+`server` section, an empty root template source can produce:
 
 ```text
 config.example.yaml
@@ -136,4 +141,6 @@ config/server.yaml
 ```
 
 The root template receives an include block, and `config/server.yaml` contains
-only the `server` section. Nested sections are split recursively.
+only the `server` section. Unmarked nested sections stay inline in their parent
+template. Nested sections are split recursively only when those fields also
+carry `x-tree-split`.

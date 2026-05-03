@@ -11,6 +11,7 @@ use schemars::JsonSchema;
 #[derive(Debug, Config, JsonSchema)]
 struct AppConfig {
     #[config(nested)]
+    #[schemars(extend("x-tree-split" = true))]
     server: ServerConfig,
 }
 ```
@@ -24,7 +25,7 @@ write_config_schemas::<AppConfig>("schemas/myapp.schema.json")?;
 # Ok::<(), Box<dyn std::error::Error + Send + Sync>>(())
 ```
 
-Tama kirjoittaa juuriskeeman ja osioskeemat, kuten `schemas/server.schema.json`. Luodut skeemat jattavat `required`-rajoitteet pois, jotta taydennys toimii osittaisille konfiguraatiotiedostoille ilman puuttuvien kenttien diagnostiikkaa. Juuriskeema jattaa sisakkaisten osioiden ominaisuudet pois, joten lapsiosioiden taydennys on saatavilla vain tiedostoissa, jotka sitovat vastaavan osioskeeman.
+Tama kirjoittaa juuriskeeman ja osioskeemat, kuten `schemas/server.schema.json`. Luodut skeemat jattavat `required`-rajoitteet pois, jotta taydennys toimii osittaisille konfiguraatiotiedostoille ilman puuttuvien kenttien diagnostiikkaa. Juuriskeema jattaa jaettujen osioiden ominaisuudet pois, joten lapsiosioiden taydennys on saatavilla vain tiedostoissa, jotka sitovat vastaavan osioskeeman. Merkitsemattomat sisakkaiset osiot pysyvat juuriskeemassa.
 
 IDE-skeemat validoivat silti paikalla olevat kentat, mukaan lukien tyypit, enumit ja luodun skeeman tukemat tuntemattomien ominaisuuksien tarkistukset. Kayta `config-validate`-komentoa pakollisille kentille ja lopullisen yhdistetyn konfiguraation validointiin.
 

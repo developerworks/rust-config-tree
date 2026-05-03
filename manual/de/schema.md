@@ -10,18 +10,20 @@ aus der zwischengeschalteten `confique`-Schicht entdecken kann.
 use std::path::PathBuf;
 
 use confique::Config;
+use schemars::JsonSchema;
 use rust_config_tree::ConfigSchema;
 
-#[derive(Debug, Config)]
+#[derive(Debug, Config, JsonSchema)]
 struct AppConfig {
     #[config(default = [])]
     include: Vec<PathBuf>,
 
     #[config(nested)]
+    #[schemars(extend("x-tree-split" = true))]
     database: DatabaseConfig,
 }
 
-#[derive(Debug, Config)]
+#[derive(Debug, Config, JsonSchema)]
 struct DatabaseConfig {
     #[config(env = "APP_DATABASE_URL")]
     url: String,
@@ -57,13 +59,16 @@ zusammengefuehrt und validiert wird.
 ## Verschachtelte Abschnitte
 
 Verwende `#[config(nested)]` fuer strukturierte Abschnitte. Verschachtelte
-Abschnitte sind sowohl fuer das Laden zur Laufzeit als auch fuer die
-Vorlagenaufteilung wichtig:
+Abschnitte werden immer fuer das Laden zur Laufzeit genutzt. Fuege
+`#[schemars(extend("x-tree-split" = true))]` hinzu, wenn ein nested Feld
+zusaetzlich als eigenes `config/*.yaml`-Template und `schemas/*.schema.json`-Schema
+erzeugt werden soll:
 
 ```rust
-#[derive(Debug, Config)]
+#[derive(Debug, Config, JsonSchema)]
 struct AppConfig {
     #[config(nested)]
+    #[schemars(extend("x-tree-split" = true))]
     server: ServerConfig,
 }
 ```
@@ -79,7 +84,7 @@ server:
 ## Abschnittspfade fuer Vorlagen ueberschreiben
 
 Wenn eine Vorlagenquelle keine Includes hat, kann die Crate Kind-Vorlagendateien
-aus verschachtelten Schemaabschnitten ableiten. Der Standardpfad auf oberster
+aus mit `x-tree-split` markierten verschachtelten Schemaabschnitten ableiten. Der Standardpfad auf oberster
 Ebene ist `config/<section>.yaml`.
 
 Ueberschreibe diesen Pfad mit `template_path_for_section`:

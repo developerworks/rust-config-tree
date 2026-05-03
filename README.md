@@ -26,7 +26,7 @@ It handles:
 - include cycle detection
 - deterministic traversal order
 - mirrored template target collection
-- automatic YAML template splitting for nested schema sections
+- opt-in YAML template splitting for nested schema sections
 
 Applications provide their schema by deriving `confique::Config` and
 implementing `ConfigSchema` to expose the schema's include field.
@@ -52,9 +52,10 @@ small adapter that extracts includes from the intermediate `confique` layer.
 use std::path::PathBuf;
 
 use confique::Config;
+use schemars::JsonSchema;
 use rust_config_tree::ConfigSchema;
 
-#[derive(Debug, Config)]
+#[derive(Debug, Config, JsonSchema)]
 struct AppConfig {
     #[config(default = [])]
     include: Vec<PathBuf>,
@@ -63,10 +64,11 @@ struct AppConfig {
     mode: String,
 
     #[config(nested)]
+    #[schemars(extend("x-tree-split" = true))]
     server: ServerConfig,
 }
 
-#[derive(Debug, Config)]
+#[derive(Debug, Config, JsonSchema)]
 struct ServerConfig {
     #[config(default = 8080)]
     port: u16,
@@ -202,8 +204,12 @@ output format is inferred from the output path:
 - unknown or missing extensions generate YAML
 
 Use `write_config_schemas` to create Draft 7 JSON Schemas for the root config
-and nested sections. The generated schemas omit `required` constraints so IDEs
-can offer completion for partial config files without reporting missing fields:
+and split nested sections. Mark a nested field with
+`#[schemars(extend("x-tree-split" = true))]` when it should be generated as its
+own `config/*.yaml` and `schemas/*.schema.json` pair. Unmarked nested fields
+stay in the parent template and parent schema. The generated schemas omit
+`required` constraints so IDEs can offer completion for partial config files
+without reporting missing fields:
 
 ```rust
 use rust_config_tree::write_config_schemas;
@@ -215,12 +221,14 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 }
 ```
 
-For a schema with `server` and `log` sections, this writes
+For a schema with `server` and `log` sections marked with `x-tree-split`, this writes
 `schemas/myapp.schema.json`, `schemas/server.schema.json`, and
 `schemas/log.schema.json`. The root schema contains only fields that belong in
 the root config file, such as `include` and root scalar fields. It intentionally
-omits nested section properties, so `server` and `log` are completed only when
-editing their own section YAML files.
+omits split nested section properties, so `server` and `log` are completed only
+when editing their own section YAML files. Nested sections without
+`x-tree-split` remain in the root schema because they do not have independent
+template or schema files.
 
 Use `write_config_templates` to create a root template and every template file
 reachable from its include tree:
@@ -252,8 +260,8 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 }
 ```
 
-Root TOML/YAML targets bind the root schema and do not complete child section
-fields. Split section YAML targets bind their matching section schema, for
+Root TOML/YAML targets bind the root schema and do not complete split child
+section fields. Split section YAML targets bind their matching section schema, for
 example `config/log.yaml` receives
 `# yaml-language-server: $schema=../schemas/log.schema.json`. JSON and JSON5
 targets intentionally do not receive a `$schema` field; bind them with editor
@@ -266,8 +274,8 @@ Template generation chooses its source tree in this order:
 - the output path, treated as a new empty template tree
 
 If a source node has no include list, `rust-config-tree` derives child template
-files from nested `confique` sections. With the schema above, an empty
-`config.example.yaml` source produces:
+files from nested `confique` sections marked with `x-tree-split`. With the
+schema above, an empty `config.example.yaml` source produces:
 
 ```text
 config.example.yaml
@@ -276,7 +284,9 @@ config/server.yaml
 
 The root template receives an include block for `config/server.yaml`. YAML
 targets that map to a nested section, such as `config/server.yaml`, contain only
-that section. Further nested sections are split recursively in the same way.
+that section. Unmarked nested sections stay inline in their parent template.
+Further nested sections are split recursively when those fields also carry
+`x-tree-split`.
 
 Override `template_path_for_section` when a section should be generated at a
 different path:
@@ -285,6 +295,7 @@ different path:
 use std::path::PathBuf;
 
 use confique::Config;
+use schemars::JsonSchema;
 use rust_config_tree::ConfigSchema;
 
 impl ConfigSchema for AppConfig {

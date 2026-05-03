@@ -34,7 +34,7 @@ Jokainen sisallytetty tiedosto voi kayttaa samaa skeemamuotoa, ja suhteelliset i
 - Draft 7 JSON Schema -luonti editorien taydennysta ja validointia varten.
 - YAML-, TOML-, JSON- ja JSON5-mallien luonti.
 - TOML `#:schema`- ja YAML Language Server -skeemamallirivit luoduille malleille.
-- Automaattinen YAML-mallien jakaminen sisakkaisille osioille.
+- Opt-in YAML-mallien jakaminen `x-tree-split`-merkityille osioille.
 - Sisaanrakennetut clap-alikomennot konfiguraatiomalleille, JSON Schemalle ja shell-taydennyksille.
 - Alemman tason puu-API kutsujille, jotka eivat kayta `confique`-kirjastoa.
 

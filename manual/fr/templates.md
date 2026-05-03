@@ -26,6 +26,11 @@ write_config_schemas::<AppConfig>("schemas/myapp.schema.json")?;
 # Ok::<(), Box<dyn std::error::Error + Send + Sync>>(())
 ```
 
+Mark a nested field with `#[schemars(extend("x-tree-split" = true))]` when it
+should be generated as its own `config/*.yaml` template and
+`schemas/*.schema.json` schema. Unmarked nested fields stay in the parent
+template and parent schema.
+
 Les schemas generes omettent les contraintes `required`. Les IDE peuvent
 toujours proposer la completion, mais les fichiers partiels comme
 `config/log.yaml` ne signalent pas de champs racine manquants. Le schema racine
@@ -131,11 +136,11 @@ config/server.yaml
 Les cibles d'inclusion relatives sont reproduites sous le repertoire parent du
 fichier de sortie. Les cibles d'inclusion absolues restent absolues.
 
-## Decoupage automatique des sections
+## Decoupage opt-in des sections
 
 Lorsqu'un fichier source n'a pas d'inclusions, la crate peut deriver les cibles
-d'inclusion depuis les sections de schema imbriquees. Pour un schema avec une
-section `server`, une source de modele racine vide peut produire :
+d'inclusion depuis les sections de schema imbriquees marquees `x-tree-split`. Pour un schema avec une
+section `server` marquee, une source de modele racine vide peut produire :
 
 ```text
 config.example.yaml
@@ -143,5 +148,5 @@ config/server.yaml
 ```
 
 Le modele racine recoit un bloc d'inclusion, et `config/server.yaml` ne contient
-que la section `server`. Les sections imbriquees sont decoupees recursivement.
+que la section `server`. Les sections imbriquees ne sont decoupees recursivement que lorsque ces champs portent aussi `x-tree-split`.
 

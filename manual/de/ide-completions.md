@@ -13,6 +13,7 @@ use schemars::JsonSchema;
 #[derive(Debug, Config, JsonSchema)]
 struct AppConfig {
     #[config(nested)]
+    #[schemars(extend("x-tree-split" = true))]
     server: ServerConfig,
 }
 ```
@@ -30,9 +31,10 @@ Dies schreibt das Root-Schema und Abschnittsschemas wie
 `schemas/server.schema.json`. Erzeugte Schemas lassen `required`-
 Einschraenkungen weg, damit Vervollstaendigung fuer partielle
 Konfigurationsdateien ohne Fehlende-Felder-Diagnosen funktioniert. Das
-Root-Schema laesst verschachtelte Abschnittseigenschaften weg, sodass
+Root-Schema laesst aufgeteilte Abschnittseigenschaften weg, sodass
 Kindabschnitts-Vervollstaendigung nur in Dateien verfuegbar ist, die das
-passende Abschnittsschema binden.
+passende Abschnittsschema binden. Nicht markierte verschachtelte Abschnitte
+bleiben im Root-Schema.
 
 IDE-Schemas validieren weiterhin vorhandene Felder, einschliesslich Typ-,
 Enum- und Unbekannte-Eigenschaft-Pruefungen, soweit sie vom erzeugten Schema

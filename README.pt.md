@@ -29,7 +29,7 @@ Ele lida com:
 - deteccao de ciclos de include
 - ordem de travessia deterministica
 - coleta espelhada de destinos de modelo
-- divisao automatica de modelos YAML para secoes de esquema aninhadas
+- divisao opt-in de modelos YAML para secoes marcadas com `x-tree-split`
 
 As aplicacoes fornecem seu esquema derivando `confique::Config` e implementando
 `ConfigSchema` para expor o campo de include do esquema.
@@ -56,9 +56,10 @@ precisa de um pequeno adaptador que extraia includes da camada intermediaria do
 use std::path::PathBuf;
 
 use confique::Config;
+use schemars::JsonSchema;
 use rust_config_tree::ConfigSchema;
 
-#[derive(Debug, Config)]
+#[derive(Debug, Config, JsonSchema)]
 struct AppConfig {
     #[config(default = [])]
     include: Vec<PathBuf>,
@@ -67,10 +68,11 @@ struct AppConfig {
     mode: String,
 
     #[config(nested)]
+    #[schemars(extend("x-tree-split" = true))]
     server: ServerConfig,
 }
 
-#[derive(Debug, Config)]
+#[derive(Debug, Config, JsonSchema)]
 struct ServerConfig {
     #[config(default = 8080)]
     port: u16,
@@ -211,7 +213,7 @@ includes. O formato de saida e inferido pelo caminho de saida:
 - extensoes desconhecidas ou ausentes geram YAML
 
 Use `write_config_schemas` para criar JSON Schemas Draft 7 para a configuracao
-raiz e secoes aninhadas. Os esquemas gerados omitem restricoes `required` para
+raiz e secoes aninhadas marcadas para divisao. Os esquemas gerados omitem restricoes `required` para
 que IDEs possam oferecer completamento em arquivos de configuracao parciais sem
 relatar campos ausentes:
 
@@ -225,11 +227,16 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 }
 ```
 
-Para um esquema com secoes `server` e `log`, isso grava
+Mark a nested field with `#[schemars(extend("x-tree-split" = true))]` when it
+should be generated as its own `config/*.yaml` template and
+`schemas/*.schema.json` schema. Unmarked nested fields stay in the parent
+template and parent schema.
+
+Para um esquema com secoes `server` e `log` marcadas com `x-tree-split`, isso grava
 `schemas/myapp.schema.json`, `schemas/server.schema.json` e
 `schemas/log.schema.json`. O esquema raiz contem apenas campos que pertencem ao
 arquivo de configuracao raiz, como `include` e campos escalares de raiz. Ele
-omite intencionalmente propriedades de secoes aninhadas, entao `server` e `log`
+omite intencionalmente propriedades de secoes divididas, entao `server` e `log`
 sao completados somente ao editar seus proprios arquivos YAML de secao.
 
 Use `write_config_templates` para criar um modelo raiz e todos os arquivos de
@@ -276,7 +283,7 @@ A geracao de modelos escolhe sua arvore de origem nesta ordem:
 - o caminho de saida, tratado como uma nova arvore de modelo vazia
 
 Se um no de origem nao tiver lista de includes, `rust-config-tree` deriva
-arquivos de modelo filhos a partir de secoes `confique` aninhadas. Com o esquema
+arquivos de modelo filhos a partir de secoes `confique` aninhadas marcadas com `x-tree-split`. Com o esquema
 acima, uma origem `config.example.yaml` vazia produz:
 
 ```text
@@ -286,8 +293,8 @@ config/server.yaml
 
 O modelo raiz recebe um bloco de include para `config/server.yaml`. Destinos YAML
 que mapeiam para uma secao aninhada, como `config/server.yaml`, contem apenas
-essa secao. Secoes ainda mais aninhadas sao divididas recursivamente da mesma
-forma.
+essa secao. Secoes ainda mais aninhadas so sao divididas recursivamente quando esses
+campos tambem carregam `x-tree-split`.
 
 Sobrescreva `template_path_for_section` quando uma secao deve ser gerada em um
 caminho diferente:

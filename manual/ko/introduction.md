@@ -38,7 +38,7 @@ log:
 - 에디터 완성과 검증을 위한 Draft 7 JSON Schema 생성.
 - YAML, TOML, JSON, JSON5 템플릿 생성.
 - 생성된 템플릿을 위한 TOML `#:schema` 및 YAML Language Server 스키마 modeline.
-- 중첩 섹션을 위한 자동 YAML 템플릿 분할.
+- `x-tree-split`로 표시한 중첩 섹션의 YAML 템플릿 분할.
 - 설정 템플릿, JSON Schema, 셸 완성을 위한 내장 clap 하위 명령.
 - `confique`를 사용하지 않는 호출자를 위한 낮은 수준의 트리 API.
 

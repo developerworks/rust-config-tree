@@ -12,6 +12,7 @@ use schemars::JsonSchema;
 #[derive(Debug, Config, JsonSchema)]
 struct AppConfig {
     #[config(nested)]
+    #[schemars(extend("x-tree-split" = true))]
     server: ServerConfig,
 }
 ```
@@ -28,10 +29,10 @@ write_config_schemas::<AppConfig>("schemas/myapp.schema.json")?;
 Esto escribe el esquema raíz y esquemas de sección como
 `schemas/server.schema.json`. Los esquemas generados omiten restricciones
 `required` para que el completado funcione en archivos de configuración
-parciales sin diagnósticos de campos faltantes. El esquema raíz omite
-propiedades de secciones anidadas, por lo que el completado de secciones hijas
-solo está disponible en archivos que enlazan el esquema de sección
-correspondiente.
+parciales sin diagnósticos de campos faltantes. El esquema raíz omite propiedades de secciones divididas, por lo que el
+completado de secciones hijas solo está disponible en archivos que enlazan el
+esquema de sección correspondiente. Las secciones anidadas sin marca permanecen
+en el esquema raíz.
 
 Los esquemas del IDE siguen validando campos presentes, incluidas comprobaciones
 de tipo, enum y propiedades desconocidas admitidas por el esquema generado. Usa

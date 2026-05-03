@@ -15,7 +15,7 @@ write_config_templates::<AppConfig>("config.yaml", "config.example.yaml")?;
 # Ok::<(), Box<dyn std::error::Error + Send + Sync>>(())
 ```
 
-Genereer Draft 7 JSON Schemas voor de rootconfiguratie en geneste secties:
+Genereer Draft 7 JSON Schemas voor de rootconfiguratie en gesplitste geneste secties:
 
 ```rust
 use rust_config_tree::write_config_schemas;
@@ -24,10 +24,15 @@ write_config_schemas::<AppConfig>("schemas/myapp.schema.json")?;
 # Ok::<(), Box<dyn std::error::Error + Send + Sync>>(())
 ```
 
+Mark a nested field with `#[schemars(extend("x-tree-split" = true))]` when it
+should be generated as its own `config/*.yaml` template and
+`schemas/*.schema.json` schema. Unmarked nested fields stay in the parent
+template and parent schema.
+
 Gegenereerde schema's laten `required`-constraints weg. IDE's kunnen nog steeds
 completion bieden, maar gedeeltelijke bestanden zoals `config/log.yaml`
 rapporteren geen ontbrekende rootvelden. Het rootschema vult alleen velden aan
-die in het rootbestand thuishoren; geneste sectievelden worden daar weggelaten
+die in het rootbestand thuishoren; gesplitste sectievelden worden daar weggelaten
 en door hun eigen sectieschema's aangevuld. Aanwezige velden worden nog steeds
 door het schema gecontroleerd in de IDE. Verplichte velden en uiteindelijke
 samengevoegde configuratievalidatie worden afgehandeld door `load_config` of
@@ -47,7 +52,7 @@ write_config_templates_with_schema::<AppConfig>(
 ```
 
 Root-TOML/YAML-sjablonen koppelen het rootschema en vullen geen velden van
-kindsecties aan. Gesplitste sectie-YAML-sjablonen koppelen hun sectieschema.
+gesplitste kindsecties aan. Gesplitste sectie-YAML-sjablonen koppelen hun sectieschema.
 JSON- en JSON5-sjablonen blijven ongewijzigd zodat de runtimeconfiguratie geen
 `$schema`-veld bevat. Koppel JSON-bestanden met editorinstellingen zoals VS Code
 `json.schemas`.
@@ -128,10 +133,10 @@ config/server.yaml
 Relatieve include-doelen worden gespiegeld onder de parentdirectory van het
 uitvoerbestand. Absolute include-doelen blijven absoluut.
 
-## Automatische sectiesplitsing
+## Opt-in sectiesplitsing
 
 Wanneer een bronbestand geen includes heeft, kan de crate include-doelen
-afleiden uit geneste schemaselecties. Voor een schema met een `server`-sectie
+afleiden uit geneste schemaselecties gemarkeerd met `x-tree-split`. Voor een schema met een gemarkeerde `server`-sectie
 kan een leeg rootsjabloon bijvoorbeeld produceren:
 
 ```text
@@ -140,4 +145,4 @@ config/server.yaml
 ```
 
 Het rootsjabloon krijgt een include-blok en `config/server.yaml` bevat alleen
-de `server`-sectie. Geneste secties worden recursief gesplitst.
+de `server`-sectie. Geneste secties worden alleen recursief gesplitst wanneer die velden ook `x-tree-split` dragen.

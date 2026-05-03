@@ -10,18 +10,20 @@
 use std::path::PathBuf;
 
 use confique::Config;
+use schemars::JsonSchema;
 use rust_config_tree::ConfigSchema;
 
-#[derive(Debug, Config)]
+#[derive(Debug, Config, JsonSchema)]
 struct AppConfig {
     #[config(default = [])]
     include: Vec<PathBuf>,
 
     #[config(nested)]
+    #[schemars(extend("x-tree-split" = true))]
     database: DatabaseConfig,
 }
 
-#[derive(Debug, Config)]
+#[derive(Debug, Config, JsonSchema)]
 struct DatabaseConfig {
     #[config(env = "APP_DATABASE_URL")]
     url: String,
@@ -55,13 +57,16 @@ include: Vec<PathBuf>,
 
 ## 嵌套 Section
 
-使用 `#[config(nested)]` 表示结构化 section。嵌套 section 同时影响运行时
-加载和模板拆分：
+使用 `#[config(nested)]` 表示结构化 section。嵌套 section 一定会影响运行时
+加载。需要把某个 nested 字段生成独立的 `config/*.yaml` 模板和
+`schemas/*.schema.json` schema 时，再加
+`#[schemars(extend("x-tree-split" = true))]`：
 
 ```rust
-#[derive(Debug, Config)]
+#[derive(Debug, Config, JsonSchema)]
 struct AppConfig {
     #[config(nested)]
+    #[schemars(extend("x-tree-split" = true))]
     server: ServerConfig,
 }
 ```
@@ -76,8 +81,8 @@ server:
 
 ## 模板 Section 路径覆盖
 
-当模板 source 没有 include 时，crate 可以从嵌套 schema section 推导子模板
-文件。默认顶层路径是 `config/<section>.yaml`。
+当模板 source 没有 include 时，crate 可以从带 `x-tree-split` 标记的嵌套
+schema section 推导子模板文件。默认顶层路径是 `config/<section>.yaml`。
 
 使用 `template_path_for_section` 覆盖路径：
 

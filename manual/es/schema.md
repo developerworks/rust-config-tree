@@ -10,18 +10,20 @@ descubrir includes recursivos desde la capa intermedia de `confique`.
 use std::path::PathBuf;
 
 use confique::Config;
+use schemars::JsonSchema;
 use rust_config_tree::ConfigSchema;
 
-#[derive(Debug, Config)]
+#[derive(Debug, Config, JsonSchema)]
 struct AppConfig {
     #[config(default = [])]
     include: Vec<PathBuf>,
 
     #[config(nested)]
+    #[schemars(extend("x-tree-split" = true))]
     database: DatabaseConfig,
 }
 
-#[derive(Debug, Config)]
+#[derive(Debug, Config, JsonSchema)]
 struct DatabaseConfig {
     #[config(env = "APP_DATABASE_URL")]
     url: String,
@@ -56,14 +58,17 @@ el esquema final.
 
 ## Secciones anidadas
 
-Usa `#[config(nested)]` para secciones estructuradas. Las secciones anidadas son
-importantes tanto para la carga en tiempo de ejecución como para la división de
-plantillas:
+Usa `#[config(nested)]` para secciones estructuradas. Las secciones anidadas
+siempre se usan para la carga en tiempo de ejecución. Agrega
+`#[schemars(extend("x-tree-split" = true))]` cuando un campo anidado tambien
+deba generarse como su propio template `config/*.yaml` y schema
+`schemas/*.schema.json`:
 
 ```rust
-#[derive(Debug, Config)]
+#[derive(Debug, Config, JsonSchema)]
 struct AppConfig {
     #[config(nested)]
+    #[schemars(extend("x-tree-split" = true))]
     server: ServerConfig,
 }
 ```
@@ -79,7 +84,7 @@ server:
 ## Overrides de sección de plantilla
 
 Cuando una fuente de plantilla no tiene includes, el crate puede derivar
-archivos de plantilla hijos desde secciones anidadas del esquema. La ruta de
+archivos de plantilla hijos desde secciones anidadas del esquema marcadas con `x-tree-split`. La ruta de
 primer nivel por defecto es `config/<section>.yaml`.
 
 Sobrescribe esa ruta con `template_path_for_section`:

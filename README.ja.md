@@ -27,7 +27,7 @@
 - include cycle 検出
 - 決定的な走査順
 - mirror された template target の収集
-- nested schema section に基づく YAML template の自動分割
+- `x-tree-split` で mark した nested schema section の YAML template 分割
 
 アプリケーションは `confique::Config` を derive し、`ConfigSchema` を実装して
 include field を公開します。
@@ -54,9 +54,10 @@ adapter だけを必要とします。
 use std::path::PathBuf;
 
 use confique::Config;
+use schemars::JsonSchema;
 use rust_config_tree::ConfigSchema;
 
-#[derive(Debug, Config)]
+#[derive(Debug, Config, JsonSchema)]
 struct AppConfig {
     #[config(default = [])]
     include: Vec<PathBuf>,
@@ -65,10 +66,11 @@ struct AppConfig {
     mode: String,
 
     #[config(nested)]
+    #[schemars(extend("x-tree-split" = true))]
     server: ServerConfig,
 }
 
-#[derive(Debug, Config)]
+#[derive(Debug, Config, JsonSchema)]
 struct ServerConfig {
     #[config(default = 8080)]
     port: u16,
@@ -196,7 +198,7 @@ output path から推定されます。
 - `.json` と `.json5` は JSON5-compatible template
 - unknown extension または extension なしは YAML
 
-`write_config_schemas` は root config と nested section の Draft 7 JSON Schema
+`write_config_schemas` は root config と split nested section の Draft 7 JSON Schema
 を生成します。生成 schema は `required` constraint を省略するため、IDE は
 partial config file に補完を出しながら missing field diagnostic を出しません。
 
@@ -210,11 +212,16 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 }
 ```
 
-`server` と `log` section を持つ schema では
+Mark a nested field with `#[schemars(extend("x-tree-split" = true))]` when it
+should be generated as its own `config/*.yaml` template and
+`schemas/*.schema.json` schema. Unmarked nested fields stay in the parent
+template and parent schema.
+
+`server` と `log` section を `x-tree-split` で mark した schema では
 `schemas/myapp.schema.json`、`schemas/server.schema.json`、
 `schemas/log.schema.json` が生成されます。root schema は root config file に
-属する field のみを含み、child section の補完は各 section YAML ファイルで
-のみ有効になります。
+属する field のみを含み、split child section の補完は各 section YAML ファイルで
+のみ有効になります。mark していない nested section は root schema に残ります。
 
 `write_config_templates` は root template と include tree から到達できる
 template file を作成します。
@@ -246,7 +253,7 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 }
 ```
 
-root TOML/YAML target は root schema に bind され、child section field は補完
+root TOML/YAML target は root schema に bind され、split child section field は補完
 しません。split section YAML target は対応する section schema に bind されます。
 JSON / JSON5 target には `$schema` field を追加しません。
 

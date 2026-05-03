@@ -10,18 +10,20 @@
 use std::path::PathBuf;
 
 use confique::Config;
+use schemars::JsonSchema;
 use rust_config_tree::ConfigSchema;
 
-#[derive(Debug, Config)]
+#[derive(Debug, Config, JsonSchema)]
 struct AppConfig {
     #[config(default = [])]
     include: Vec<PathBuf>,
 
     #[config(nested)]
+    #[schemars(extend("x-tree-split" = true))]
     database: DatabaseConfig,
 }
 
-#[derive(Debug, Config)]
+#[derive(Debug, Config, JsonSchema)]
 struct DatabaseConfig {
     #[config(env = "APP_DATABASE_URL")]
     url: String,
@@ -55,13 +57,16 @@ include: Vec<PathBuf>,
 
 ## 중첩 섹션
 
-구조화된 섹션에는 `#[config(nested)]`를 사용하세요. 중첩 섹션은 런타임 로딩과
-템플릿 분할 모두에 중요합니다.
+구조화된 섹션에는 `#[config(nested)]`를 사용하세요. 중첩 섹션은 런타임
+로딩에는 항상 사용됩니다. 중첩 필드를 독립적인 `config/*.yaml` 템플릿과
+`schemas/*.schema.json` 스키마로도 생성해야 할 때
+`#[schemars(extend("x-tree-split" = true))]`를 추가하세요.
 
 ```rust
-#[derive(Debug, Config)]
+#[derive(Debug, Config, JsonSchema)]
 struct AppConfig {
     #[config(nested)]
+    #[schemars(extend("x-tree-split" = true))]
     server: ServerConfig,
 }
 ```
@@ -76,7 +81,7 @@ server:
 
 ## 템플릿 섹션 override
 
-템플릿 소스에 include가 없으면 crate는 중첩 스키마 섹션에서 자식 템플릿 파일을
+템플릿 소스에 include가 없으면 crate는 `x-tree-split`로 표시한 중첩 스키마 섹션에서 자식 템플릿 파일을
 derive할 수 있습니다. 기본 최상위 경로는 `config/<section>.yaml`입니다.
 
 그 경로를 `template_path_for_section`으로 override합니다.

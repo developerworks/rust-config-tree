@@ -12,6 +12,7 @@ use schemars::JsonSchema;
 #[derive(Debug, Config, JsonSchema)]
 struct AppConfig {
     #[config(nested)]
+    #[schemars(extend("x-tree-split" = true))]
     server: ServerConfig,
 }
 ```
@@ -27,8 +28,9 @@ write_config_schemas::<AppConfig>("schemas/myapp.schema.json")?;
 
 이는 루트 스키마와 `schemas/server.schema.json` 같은 섹션 스키마를 씁니다. 생성된
 스키마는 `required` 제약을 생략하므로 누락 필드 진단 없이 부분 설정 파일에서
-완성이 동작합니다. 루트 스키마는 중첩 섹션 프로퍼티를 생략하므로, 자식 섹션
-완성은 대응하는 섹션 스키마를 바인딩한 파일에서만 사용할 수 있습니다.
+완성이 동작합니다. 루트 스키마는 분할된 섹션 프로퍼티를 생략하므로, 자식 섹션 완성은 대응하는
+섹션 스키마를 바인딩한 파일에서만 사용할 수 있습니다. 표시하지 않은 중첩 섹션은
+루트 스키마에 남습니다.
 
 IDE 스키마는 타입, enum, 알 수 없는 프로퍼티 검사 등 생성된 스키마가 지원하는
 현재 필드 검증을 계속 수행합니다. 필수 필드와 최종 병합 설정 검증에는
