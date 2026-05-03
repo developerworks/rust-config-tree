@@ -471,6 +471,41 @@ fn template_targets_use_schema_default_includes_when_source_has_none() {
 }
 
 #[test]
+fn template_targets_append_missing_schema_default_includes() {
+    let root = temp_dir_path("append-default-template-includes");
+    fs::create_dir_all(root.join("config")).unwrap();
+    let output_path = root.join("config.example.yaml");
+    fs::write(
+        &output_path,
+        concat!("include:\n", "  - config/custom-branch.yaml\n",),
+    )
+    .unwrap();
+    fs::write(root.join("config").join("custom-branch.yaml"), "").unwrap();
+
+    let targets = template_targets_for_paths::<RenderedTemplateConfig>(
+        root.join("config.yaml"),
+        &output_path,
+    )
+    .unwrap();
+
+    assert_eq!(targets.len(), 4);
+    assert_eq!(targets[0].path, output_path);
+    assert!(targets[0].content.contains("\"config/custom-branch.yaml\""));
+    assert!(targets[0].content.contains("\"config/outer.yaml\""));
+    assert_eq!(
+        targets[1].path,
+        root.join("config").join("custom-branch.yaml")
+    );
+    assert_eq!(targets[2].path, root.join("config").join("outer.yaml"));
+    assert_eq!(
+        targets[3].path,
+        root.join("config").join("outer").join("inner.yaml")
+    );
+
+    let _ = fs::remove_dir_all(root);
+}
+
+#[test]
 fn template_targets_auto_split_nested_schema_sections() {
     let root = temp_dir_path("rendered-template-config");
     fs::create_dir_all(&root).unwrap();

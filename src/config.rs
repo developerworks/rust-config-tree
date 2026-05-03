@@ -851,11 +851,10 @@ where
         output_path,
         |node_source_path| -> ConfigResult<Vec<PathBuf>> {
             let mut include_paths = template_source_include_paths::<S>(node_source_path)?;
-
-            if include_paths.is_empty() {
-                include_paths =
-                    default_child_include_paths::<S>(&root_source_path, node_source_path);
-            }
+            append_missing_include_paths(
+                &mut include_paths,
+                default_child_include_paths::<S>(&root_source_path, node_source_path),
+            );
 
             Ok(include_paths)
         },
@@ -1194,6 +1193,14 @@ where
             path_relative_to(&child_path, source_base_dir)
         })
         .collect()
+}
+
+fn append_missing_include_paths(include_paths: &mut Vec<PathBuf>, defaults: Vec<PathBuf>) {
+    for default_path in defaults {
+        if !include_paths.contains(&default_path) {
+            include_paths.push(default_path);
+        }
+    }
 }
 
 fn collect_env_mapping(
