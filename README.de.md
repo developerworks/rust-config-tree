@@ -13,8 +13,9 @@ Es unterstuetzt:
 
 - Laden eines `confique`-Schemas ueber Figment-Laufzeitprovider in ein direkt
   nutzbares Konfigurationsobjekt
-- Handler fuer die Befehle `config-template`, `completions` und
-  `install-completions`
+- Handler fuer die Befehle `config-template`, `config-schema`,
+  `config-validate`, `completions`, `install-completions` und
+  `uninstall-completions`
 - Erzeugung von Draft-7-JSON-Schemas fuer Root- und Abschnittsschemas zur
   Editor-Vervollstaendigung und Validierung
 - Erzeugung von Konfigurationsvorlagen fuer YAML, TOML, JSON und JSON5
@@ -40,7 +41,7 @@ und `ConfigSchema` implementieren, um das Include-Feld des Schemas offenzulegen.
 [dependencies]
 rust-config-tree = "0.1"
 confique = { version = "0.4", features = ["yaml", "toml", "json5"] }
-figment = { version = "0.10", features = ["yaml", "env"] }
+figment = { version = "0.10", features = ["yaml", "toml", "json", "env"] }
 schemars = { version = "1", features = ["derive"] }
 serde = { version = "1", features = ["derive"] }
 clap = { version = "4", features = ["derive"] }
@@ -234,6 +235,8 @@ should be generated as its own `config/*.yaml` template and
 `schemas/*.schema.json` schema. Unmarked nested fields stay in the parent
 template and parent schema.
 
+Markiere ein Blattfeld mit `#[schemars(extend("x-env-only" = true))]`, wenn der Wert nur aus Umgebungsvariablen kommen darf. Generierte Vorlagen und JSON-Schemas lassen env-only-Felder weg, und dadurch leere Elternobjekte werden entfernt.
+
 Bei einem Schema mit den mit `x-tree-split` markierten Abschnitten `server` und `log` schreibt dies
 `schemas/myapp.schema.json`, `schemas/server.schema.json` und
 `schemas/log.schema.json`. Das Root-Schema enthaelt nur Felder, die in die
@@ -338,6 +341,7 @@ Befehle hinzuzufuegen:
 - `config-validate`
 - `completions`
 - `install-completions`
+- `uninstall-completions`
 
 Die konsumierende Anwendung behaelt ihren eigenen `Parser`-Typ und ihr eigenes
 Befehls-Enum. `rust-config-tree` steuert nur wiederverwendbare Unterbefehle
@@ -414,16 +418,19 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 }
 ```
 
-`config-template --output <path>` schreibt Vorlagen an den gewaehlten Pfad. Wird
-kein Ausgabepfad angegeben, schreibt der Befehl `config.example.yaml` in das
-aktuelle Verzeichnis. Fuege `--schema <path>` hinzu, um TOML- und YAML-Vorlagen
-an ein erzeugtes JSON-Schema-Set zu binden, ohne ein Laufzeitfeld `$schema`
-hinzuzufuegen. Dabei werden auch das Root-Schema und Abschnittsschemas an den
-gewaehlten Schemapfad geschrieben.
+`config-template --output <file-name>` schreibt Vorlagen unter
+`config/<root_config_name>/` mit dem gewaehlten Dateinamen. Wenn ein Pfad
+angegeben wird, wird nur dessen Dateiname verwendet. Wird kein Ausgabe-Dateiname
+angegeben, schreibt der Befehl
+`config/<root_config_name>/<root_config_name>.example.yaml`. Fuege
+`--schema <path>` hinzu, um TOML- und YAML-Vorlagen an ein erzeugtes
+JSON-Schema-Set zu binden, ohne ein Laufzeitfeld `$schema` hinzuzufuegen. Dabei
+werden auch das Root-Schema und Abschnittsschemas an den gewaehlten Schemapfad
+geschrieben.
 
 `config-schema --output <path>` schreibt das Root-Draft-7-JSON-Schema und
 Abschnittsschemas. Wird kein Ausgabepfad angegeben, wird das Root-Schema nach
-`schemas/config.schema.json` geschrieben.
+`config/<root_config_name>/<root_config_name>.schema.json` geschrieben.
 
 `config-validate` laedt den vollstaendigen Laufzeit-Konfigurationsbaum und
 fuehrt `confique`-Defaults und Validierung aus. Verwende Editor-Schemas fuer
@@ -437,6 +444,10 @@ erfolgreicher Validierung gibt er `Configuration is ok` aus.
 Home-Verzeichnis des Benutzers und aktualisiert die Shell-Startdatei, wenn die
 Shell dies benoetigt. Bash, Elvish, Fish, PowerShell und Zsh werden
 unterstuetzt.
+
+`uninstall-completions <shell>` entfernt die Completion-Datei des aktuellen
+Binaers und entfernt den verwalteten Shell-Startblock, wenn diese Shell einen
+verwendet.
 
 ## Untergeordnete Tree-API
 

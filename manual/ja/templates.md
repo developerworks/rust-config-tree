@@ -29,6 +29,8 @@ should be generated as its own `config/*.yaml` template and
 `schemas/*.schema.json` schema. Unmarked nested fields stay in the parent
 template and parent schema.
 
+`#[schemars(extend("x-env-only" = true))]` を leaf field に付けると、その値は環境変数からだけ渡すものとして扱われます。生成される template と JSON Schema は env-only field を省略し、その結果空になった parent object も削除します.
+
 generated schemas は `required` constraint を省略します。IDE は補完を提供
 できますが、`config/log.yaml` のような partial file で missing root field を
 報告しません。root schema は root file に属する field だけを補完し、nested

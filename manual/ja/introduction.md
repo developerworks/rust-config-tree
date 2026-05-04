@@ -36,7 +36,9 @@ schema value です。
 - delimiter splitting を使わない schema-declared environment variables。
 - runtime source tracking 向け Figment metadata。
 - `tracing` による TRACE-level source tracking event。
-- editor completion / validation 向け Draft 7 JSON Schema generation。
+- editor completion と基本的な schema check 向け Draft 7 JSON Schema generation。
+- application code で `#[config(validate = Self::validate)]` として実装し、
+  `load_config` または `config-validate` で実行する field value validation。
 - YAML、TOML、JSON、JSON5 template generation。
 - generated TOML template の `#:schema` と YAML Language Server modeline。
 - `x-tree-split` で mark した nested section の YAML template splitting。
@@ -59,4 +61,3 @@ schema value です。
 
 `confique` なしで traversal primitive だけが必要な場合は `load_config_tree`
 を使います。
-

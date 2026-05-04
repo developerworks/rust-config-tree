@@ -13,7 +13,9 @@ use crate::{
     absolutize_lexical, collect_template_targets,
     config::{ConfigResult, ConfigSchema},
     config_output::write_template,
-    config_schema::{nested_section_paths, root_config_schema, split_section_paths},
+    config_schema::{
+        env_only_field_paths, nested_section_paths, root_config_schema, split_section_paths,
+    },
     select_template_source,
 };
 
@@ -99,6 +101,7 @@ where
     let full_schema = root_config_schema::<S>()?;
     let all_section_paths = nested_section_paths(&S::META);
     let split_paths = split_section_paths::<S>(&full_schema);
+    let env_only_paths = env_only_field_paths::<S>(&full_schema);
 
     // First collect from the source tree. Existing include entries are kept
     // when they target split sections, and missing schema-derived child
@@ -148,6 +151,7 @@ where
                     &include_paths,
                     &section_path,
                     &split_paths,
+                    &env_only_paths,
                 )?,
                 path: target_path,
             })

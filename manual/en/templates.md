@@ -29,12 +29,18 @@ should be generated as its own `config/*.yaml` template and
 `schemas/*.schema.json` schema. Unmarked nested fields stay in the parent
 template and parent schema.
 
+Mark a leaf field with `#[schemars(extend("x-env-only" = true))]` when the value must come only from environment variables. Generated templates and JSON Schemas omit env-only fields, and empty parent objects left behind by those omissions are pruned.
+
 Generated schemas omit `required` constraints. IDEs can still offer completion,
 but partial files such as `config/log.yaml` do not report missing root fields.
 The root schema only completes fields that belong in the root file; split
 section fields are omitted there and completed by their own section schemas.
-Present fields are still schema-checked by the IDE. Required fields and final
-merged config validation are handled by `load_config` or `config-validate`.
+Present fields can still receive basic editor checks, such as type, enum, and
+unknown property checks supported by the generated schema. Generated
+`*.schema.json` files do not decide whether a concrete field value is legal for
+the application. Implement field value validation in code with
+`#[config(validate = Self::validate)]`; `load_config` and `config-validate`
+execute that runtime validation.
 
 Bind those schemas from generated TOML and YAML templates:
 

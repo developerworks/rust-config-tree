@@ -27,6 +27,8 @@ write_config_schemas::<AppConfig>("schemas/myapp.schema.json")?;
 
 Tama kirjoittaa juuriskeeman ja osioskeemat, kuten `schemas/server.schema.json`. Luodut skeemat jattavat `required`-rajoitteet pois, jotta taydennys toimii osittaisille konfiguraatiotiedostoille ilman puuttuvien kenttien diagnostiikkaa. Juuriskeema jattaa jaettujen osioiden ominaisuudet pois, joten lapsiosioiden taydennys on saatavilla vain tiedostoissa, jotka sitovat vastaavan osioskeeman. Merkitsemattomat sisakkaiset osiot pysyvat juuriskeemassa.
 
+`x-env-only`-merkityt kentat jatetaan pois luoduista skeemoista, joten IDEt eivat ehdota salaisuuksia tai muita arvoja, joiden tulee tulla vain ymparistomuuttujista.
+
 IDE-skeemat validoivat silti paikalla olevat kentat, mukaan lukien tyypit, enumit ja luodun skeeman tukemat tuntemattomien ominaisuuksien tarkistukset. Kayta `config-validate`-komentoa pakollisille kentille ja lopullisen yhdistetyn konfiguraation validointiin.
 
 ## TOML

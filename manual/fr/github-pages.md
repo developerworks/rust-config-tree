@@ -4,9 +4,9 @@
 
 Ce depot publie le manuel avec mdBook et GitHub Pages.
 
-Les manuels anglais, chinois et japonais sont des projets mdBook independants.
-Chaque langue a son propre `SUMMARY.md`, donc la barre laterale gauche ne
-contient que les pages de la langue courante :
+Les manuels de chaque langue sont des projets mdBook independants. Chaque
+langue a son propre `SUMMARY.md`, donc la barre laterale gauche ne contient que
+les pages de la langue courante :
 
 ```text
 manual/
@@ -84,4 +84,3 @@ scripts/publish-crate.sh --execute
 ```
 
 L'utilisation des scripts est resumee dans `scripts/README.md`.
-

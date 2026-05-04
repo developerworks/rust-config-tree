@@ -5,15 +5,15 @@
 `rust-config-tree`는 계층형 설정 파일을 사용하는 Rust 애플리케이션을 위한
 설정 트리 로딩과 CLI 헬퍼를 제공합니다.
 
-프로젝트 매뉴얼: <https://developerworks.github.io/rust-config-tree/>. 영어,
-중국어, 일본어, 한국어 매뉴얼은 언어 전환 링크가 있는 독립 mdBook 사이트로
-게시됩니다.
+프로젝트 매뉴얼: <https://developerworks.github.io/rust-config-tree/>.
+언어별 매뉴얼은 언어 전환 링크가 있는 독립 mdBook 사이트로 게시됩니다.
 
 처리하는 기능:
 
 - Figment 런타임 프로바이더를 통해 `confique` 스키마를 바로 사용할 수 있는 설정 객체로 로드
-- `config-template`, `completions`, `install-completions` 명령 핸들러
-- 에디터 완성과 검증을 위한 Draft 7 루트 및 섹션 JSON Schema 생성
+- `config-template`, `config-schema`, `config-validate`, `completions`,
+  `install-completions`, `uninstall-completions` 명령 핸들러
+- 에디터 완성과 기본 schema 검사를 위한 Draft 7 루트 및 섹션 JSON Schema 생성
 - YAML, TOML, JSON, JSON5 설정 템플릿 생성
 - 런타임 필드를 추가하지 않는 TOML 및 YAML 템플릿용 스키마 지시문
 - 재귀 include 순회
@@ -36,7 +36,7 @@
 [dependencies]
 rust-config-tree = "0.1"
 confique = { version = "0.4", features = ["yaml", "toml", "json5"] }
-figment = { version = "0.10", features = ["yaml", "env"] }
+figment = { version = "0.10", features = ["yaml", "toml", "json", "env"] }
 schemars = { version = "1", features = ["derive"] }
 serde = { version = "1", features = ["derive"] }
 clap = { version = "4", features = ["derive"] }
@@ -203,6 +203,10 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 `write_config_schemas`를 사용해 루트 설정과 분할된 중첩 섹션의 Draft 7 JSON Schema를
 생성합니다. 생성된 스키마는 `required` 제약을 생략하므로, IDE가 부분 설정 파일에
 대해 누락 필드 오류를 보고하지 않고 완성을 제공할 수 있습니다.
+생성된 `*.schema.json` 파일은 IDE 완성과 기본 에디터 검사 전용이며, 구체적인
+필드 값이 애플리케이션에서 유효한지는 판단하지 않습니다. 필드 값 유효성 검사는
+코드에서 `#[config(validate = Self::validate)]`로 구현하고, `load_config` 또는
+`config-validate`로 실행합니다.
 
 ```rust
 use rust_config_tree::write_config_schemas;
@@ -218,6 +222,8 @@ Mark a nested field with `#[schemars(extend("x-tree-split" = true))]` when it
 should be generated as its own `config/*.yaml` template and
 `schemas/*.schema.json` schema. Unmarked nested fields stay in the parent
 template and parent schema.
+
+값을 환경 변수로만 제공해야 하는 leaf 필드에는 `#[schemars(extend("x-env-only" = true))]`를 붙입니다. 생성된 템플릿과 JSON Schema는 env-only 필드를 생략하며, 이 생략으로 비게 된 부모 객체도 함께 제거합니다.
 
 `server`와 `log` 섹션이 `x-tree-split`로 표시된 스키마라면 `schemas/myapp.schema.json`,
 `schemas/server.schema.json`, `schemas/log.schema.json`을 씁니다. 루트 스키마에는
@@ -238,7 +244,7 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 }
 ```
 
-생성된 TOML 및 YAML 템플릿이 IDE 완성과 검증을 위해 해당 스키마에 바인딩되어야
+생성된 TOML 및 YAML 템플릿이 IDE 완성과 기본 schema 검사를 위해 해당 스키마에 바인딩되어야
 한다면 `write_config_templates_with_schema`를 사용하세요.
 
 ```rust
@@ -315,6 +321,7 @@ impl ConfigSchema for AppConfig {
 - `config-validate`
 - `completions`
 - `install-completions`
+- `uninstall-completions`
 
 사용 애플리케이션은 자체 `Parser` 타입과 자체 명령 enum을 유지합니다.
 `rust-config-tree`는 재사용 가능한 하위 명령만 제공합니다.
@@ -385,18 +392,21 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 }
 ```
 
-`config-template --output <path>`는 선택한 경로에 템플릿을 씁니다. 출력 경로를
-제공하지 않으면 현재 디렉터리에 `config.example.yaml`을 씁니다. 런타임 `$schema`
-필드를 추가하지 않고 TOML 및 YAML 템플릿을 생성된 JSON Schema 집합에
-바인딩하려면 `--schema <path>`를 추가하세요. 이 옵션은 선택한 스키마 경로에 루트
-스키마와 섹션 스키마도 씁니다.
+`config-template --output <file-name>`은 `config/<root_config_name>/` 아래에
+템플릿을 쓰고 선택한 파일 이름을 사용합니다. 경로를 제공하면 파일 이름만
+사용합니다. 출력 파일 이름을 제공하지 않으면
+`config/<root_config_name>/<root_config_name>.example.yaml`을 씁니다. 런타임
+`$schema` 필드를 추가하지 않고 TOML 및 YAML 템플릿을 생성된 JSON Schema 집합에
+바인딩하려면 `--schema <path>`를 추가하세요. 이 옵션은 선택한 스키마 경로에
+루트 스키마와 섹션 스키마도 씁니다.
 
 `config-schema --output <path>`는 루트 Draft 7 JSON Schema와 섹션 스키마를
 씁니다. 출력 경로를 제공하지 않으면 루트 스키마는
-`schemas/config.schema.json`에 쓰입니다.
+`config/<root_config_name>/<root_config_name>.schema.json`에 쓰입니다.
 
 `config-validate`는 전체 런타임 설정 트리를 로드하고 `confique` 기본값과 검증을
-실행합니다. 분할 파일 편집 중에는 노이즈 없는 완성을 위해 에디터 스키마를
+실행합니다. 여기에는 `#[config(validate = Self::validate)]`로 선언한 validator도
+포함됩니다. 분할 파일 편집 중에는 노이즈 없는 완성을 위해 에디터 스키마를
 사용하고, 필수 필드와 최종 설정 검증에는 이 명령을 사용하세요. 검증이 성공하면
 `Configuration is ok`를 출력합니다.
 
@@ -405,6 +415,9 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 `install-completions <shell>`은 사용자 홈 디렉터리 아래에 완성 파일을 쓰고,
 필요한 셸에서는 시작 파일을 업데이트합니다. Bash, Elvish, Fish, PowerShell,
 Zsh가 지원됩니다.
+
+`uninstall-completions <shell>`은 현재 binary의 completion 파일을 삭제하고,
+해당 shell이 managed startup block을 사용하는 경우 그 block도 삭제합니다.
 
 ## Lower-Level Tree API
 

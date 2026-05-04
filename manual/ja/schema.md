@@ -79,6 +79,16 @@ server:
   port: 8080
 ```
 
+## 環境変数専用フィールド
+
+値を環境変数からだけ渡し、生成される config file には出したくない leaf field には `#[schemars(extend("x-env-only" = true))]` を付けます。生成される YAML template と JSON Schema は env-only field を省略し、その結果空になった parent object も削除します.
+
+```rust
+#[config(env = "APP_SECRET")]
+#[schemars(extend("x-env-only" = true))]
+secret: String,
+```
+
 ## Template Section Overrides
 
 template source に include がない場合、crate は `x-tree-split` で mark した nested schema section から child

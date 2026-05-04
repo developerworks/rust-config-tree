@@ -37,7 +37,10 @@ resolved from the file that declared them. The final config is still a normal
 - Schema-declared environment variables without delimiter splitting.
 - Figment metadata for runtime source tracking.
 - TRACE-level source tracking events through `tracing`.
-- Draft 7 JSON Schema generation for editor completion and validation.
+- Draft 7 JSON Schema generation for editor completion and basic schema checks.
+- Field value validation in application code through
+  `#[config(validate = Self::validate)]`, executed by `load_config` or
+  `config-validate`.
 - YAML, TOML, JSON, and JSON5 template generation.
 - TOML `#:schema` and YAML Language Server schema modelines for generated templates.
 - Opt-in YAML template splitting for nested sections marked with `x-tree-split`.

@@ -30,6 +30,8 @@ should be generated as its own `config/*.yaml` template and
 `schemas/*.schema.json` schema. Unmarked nested fields stay in the parent
 template and parent schema.
 
+Marque um campo folha com `#[schemars(extend("x-env-only" = true))]` quando o valor deve vir somente de variaveis de ambiente. Os modelos gerados e os JSON Schemas omitem campos env-only, e objetos pai que ficarem vazios tambem sao removidos.
+
 Os esquemas gerados omitem restricoes `required`. IDEs ainda podem oferecer
 completamento, mas arquivos parciais como `config/log.yaml` nao relatam campos
 raiz ausentes. O esquema raiz completa apenas campos que pertencem ao arquivo

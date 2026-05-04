@@ -33,9 +33,14 @@ The root schema omits split nested section properties, so split child section
 completion is available only in files that bind the matching section schema.
 Unmarked nested sections remain in the root schema.
 
-IDE schemas still validate present fields, including type, enum, and unknown
-property checks supported by the generated schema. Use `config-validate` for
-required fields and final merged config validation.
+Fields marked with `x-env-only` are omitted from generated schemas, so IDEs do not suggest secrets or other values that must come only from environment variables.
+
+IDE schemas are for completion and basic editor checks, such as type, enum, and
+unknown property checks supported by the generated schema. They do not decide
+whether a concrete field value is legal for the application. Implement field
+value validation in code with `#[config(validate = Self::validate)]`, then run
+it through `load_config` or `config-validate`. Required fields and final merged
+config validation also use those runtime paths.
 
 ## TOML
 

@@ -31,6 +31,8 @@ should be generated as its own `config/*.yaml` template and
 `schemas/*.schema.json` schema. Unmarked nested fields stay in the parent
 template and parent schema.
 
+Markiere ein Blattfeld mit `#[schemars(extend("x-env-only" = true))]`, wenn der Wert nur aus Umgebungsvariablen kommen darf. Generierte Vorlagen und JSON-Schemas lassen env-only-Felder weg, und dadurch leere Elternobjekte werden entfernt.
+
 Erzeugte Schemas lassen `required`-Einschraenkungen weg. IDEs koennen weiterhin
 Vervollstaendigung anbieten, aber partielle Dateien wie `config/log.yaml`
 melden keine fehlenden Root-Felder. Das Root-Schema vervollstaendigt nur

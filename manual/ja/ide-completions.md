@@ -32,6 +32,8 @@ config file に completion を出しながら missing-field diagnostic を出し
 root schema は nested section property を省略するため、child section completion
 は matching section schema を bind した file でだけ使えます。
 
+`x-env-only` で mark した field は generated schema から省略されるため、環境変数だけで渡す secret などは IDE 補完に出ません。
+
 IDE schema は present field の type、enum、unknown property check を引き続き
 行います。required field と final merged config validation には
 `config-validate` を使います。

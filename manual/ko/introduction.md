@@ -35,7 +35,9 @@ log:
 - delimiter 분할 없는 스키마 선언 환경 변수.
 - 런타임 소스 추적을 위한 Figment 메타데이터.
 - `tracing`을 통한 TRACE 레벨 소스 추적 이벤트.
-- 에디터 완성과 검증을 위한 Draft 7 JSON Schema 생성.
+- 에디터 완성과 기본 schema 검사를 위한 Draft 7 JSON Schema 생성.
+- 애플리케이션 코드에서 `#[config(validate = Self::validate)]`로 구현하고
+  `load_config` 또는 `config-validate`로 실행하는 필드 값 유효성 검사.
 - YAML, TOML, JSON, JSON5 템플릿 생성.
 - 생성된 템플릿을 위한 TOML `#:schema` 및 YAML Language Server 스키마 modeline.
 - `x-tree-split`로 표시한 중첩 섹션의 YAML 템플릿 분할.

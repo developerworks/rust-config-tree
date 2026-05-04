@@ -81,6 +81,16 @@ server:
   port: 8080
 ```
 
+## Campos somente de ambiente
+
+Marque um campo folha com `#[schemars(extend("x-env-only" = true))]` quando seu valor deve vir somente de uma variavel de ambiente e nao deve aparecer em arquivos de configuracao gerados. Modelos YAML e JSON Schemas gerados omitem campos env-only, e objetos pai que ficarem vazios tambem sao removidos.
+
+```rust
+#[config(env = "APP_SECRET")]
+#[schemars(extend("x-env-only" = true))]
+secret: String,
+```
+
 ## Sobrescritas de secao de modelo
 
 Quando uma origem de modelo nao tem includes, o crate pode derivar arquivos de

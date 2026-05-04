@@ -13,9 +13,9 @@ It handles:
 
 - loading a `confique` schema into a directly usable config object through
   Figment runtime providers
-- `config-template`, `completions`, `install-completions`, and
-  `uninstall-completions` command handlers
-- Draft 7 root and section JSON Schema generation for editor completion and validation
+- `config-template`, `config-schema`, `config-validate`, `completions`,
+  `install-completions`, and `uninstall-completions` command handlers
+- Draft 7 root and section JSON Schema generation for editor completion and basic schema checks
 - config template generation for YAML, TOML, JSON, and JSON5
 - schema directives for TOML and YAML templates without adding runtime fields
 - recursive include traversal
@@ -38,7 +38,7 @@ implementing `ConfigSchema` to expose the schema's include field.
 [dependencies]
 rust-config-tree = "0.1"
 confique = { version = "0.4", features = ["yaml", "toml", "json5"] }
-figment = { version = "0.10", features = ["yaml", "env"] }
+figment = { version = "0.10", features = ["yaml", "toml", "json", "env"] }
 schemars = { version = "1", features = ["derive"] }
 serde = { version = "1", features = ["derive"] }
 clap = { version = "4", features = ["derive"] }
@@ -208,9 +208,19 @@ Use `write_config_schemas` to create Draft 7 JSON Schemas for the root config
 and split nested sections. Mark a nested field with
 `#[schemars(extend("x-tree-split" = true))]` when it should be generated as its
 own `config/*.yaml` and `schemas/*.schema.json` pair. Unmarked nested fields
-stay in the parent template and parent schema. The generated schemas omit
-`required` constraints so IDEs can offer completion for partial config files
-without reporting missing fields:
+stay in the parent template and parent schema.
+
+Mark a leaf field with `#[schemars(extend("x-env-only" = true))]` when the value
+must come only from environment variables. Generated templates and JSON Schemas
+omit env-only fields, and empty parent objects left behind by those omissions
+are pruned.
+
+The generated schemas omit `required` constraints so IDEs can offer completion
+for partial config files without reporting missing fields. The generated
+`*.schema.json` files are for IDE completion and basic editor checks only; they
+do not decide whether a concrete field value is legal for the application.
+Implement field value validation in code with `#[config(validate = Self::validate)]`,
+then run it through `load_config` or `config-validate`:
 
 ```rust
 use rust_config_tree::write_config_schemas;
@@ -245,7 +255,7 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 ```
 
 Use `write_config_templates_with_schema` when generated TOML and YAML templates
-should bind those schemas for IDE completion and validation:
+should bind those schemas for IDE completion and basic schema checks:
 
 ```rust
 use rust_config_tree::write_config_templates_with_schema;
@@ -399,20 +409,24 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 }
 ```
 
-`config-template --output <path>` writes templates to the selected path. If no
-output path is provided, it writes `config.example.yaml` in the current
-directory. Add `--schema <path>` to bind TOML and YAML templates to a generated
-JSON Schema set without adding a runtime `$schema` field. This also writes the
-root schema and section schemas to the selected schema path.
+`config-template --output <file-name>` writes templates under
+`config/<root_config_name>/` using the selected file name. If a path is
+provided, only its file name is used. If no output file name is provided, it
+writes `config/<root_config_name>/<root_config_name>.example.yaml`. Add
+`--schema <path>` to bind TOML and YAML templates to a generated JSON Schema
+set without adding a runtime `$schema` field. This also writes the root schema
+and section schemas to the selected schema path.
 
 `config-schema --output <path>` writes the root Draft 7 JSON Schema and
 section schemas. If no output path is provided, the root schema is written to
-`schemas/config.schema.json`.
+`config/<root_config_name>/<root_config_name>.schema.json`.
 
 `config-validate` loads the full runtime config tree and runs `confique`
-defaults and validation. Use editor schemas for non-noisy completion while
-editing split files; use this command for required fields and final config
-validation. It prints `Configuration is ok` when validation succeeds.
+defaults and validation, including validators declared with
+`#[config(validate = Self::validate)]`. Use editor schemas for non-noisy
+completion while editing split files; use this command for required fields and
+final config validation. It prints `Configuration is ok` when validation
+succeeds.
 
 `completions <shell>` prints completions to stdout.
 

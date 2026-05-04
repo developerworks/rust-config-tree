@@ -18,6 +18,7 @@ use crate::config_util::ensure_single_trailing_newline;
 /// - `include_paths`: Include paths to emit at the top of the template.
 /// - `section_path`: Empty for the root template, or the split section path.
 /// - `split_paths`: Section paths split into separate templates.
+/// - `env_only_paths`: Leaf field paths omitted from generated config files.
 ///
 /// # Returns
 ///
@@ -33,6 +34,7 @@ pub(super) fn render_yaml_template(
     include_paths: &[PathBuf],
     section_path: &[&'static str],
     split_paths: &[Vec<&'static str>],
+    env_only_paths: &[Vec<&'static str>],
 ) -> String {
     let mut output = String::new();
     if !include_paths.is_empty() {
@@ -45,12 +47,13 @@ pub(super) fn render_yaml_template(
             meta,
             &mut Vec::new(),
             split_paths,
+            env_only_paths,
             0,
             !include_paths.is_empty(),
             &mut output,
         );
     } else {
-        render_yaml_section(meta, section_path, split_paths, &mut output);
+        render_yaml_section(meta, section_path, split_paths, env_only_paths, &mut output);
     }
 
     ensure_single_trailing_newline(&mut output);
@@ -64,6 +67,7 @@ pub(super) fn render_yaml_template(
 /// - `meta`: Root config metadata used to find the section metadata.
 /// - `section_path`: Split section path represented by the template.
 /// - `split_paths`: Section paths split into separate templates.
+/// - `env_only_paths`: Leaf field paths omitted from generated config files.
 /// - `output`: Output string receiving rendered YAML.
 ///
 /// # Returns
@@ -79,6 +83,7 @@ fn render_yaml_section(
     meta: &'static Meta,
     section_path: &[&'static str],
     split_paths: &[Vec<&'static str>],
+    env_only_paths: &[Vec<&'static str>],
     output: &mut String,
 ) {
     let mut current_meta = meta;
@@ -103,6 +108,7 @@ fn render_yaml_section(
         current_meta,
         &mut current_path,
         split_paths,
+        env_only_paths,
         section_path.len(),
         false,
         output,
@@ -116,6 +122,7 @@ fn render_yaml_section(
 /// - `meta`: Metadata node whose fields should be rendered.
 /// - `current_path`: Mutable section path for `meta`.
 /// - `split_paths`: Section paths split into separate templates.
+/// - `env_only_paths`: Leaf field paths omitted from generated config files.
 /// - `depth`: YAML indentation depth.
 /// - `skip_include_field`: Whether to omit the root include field.
 /// - `output`: Output string receiving rendered YAML.
@@ -133,6 +140,7 @@ fn render_yaml_fields(
     meta: &'static Meta,
     current_path: &mut Vec<&'static str>,
     split_paths: &[Vec<&'static str>],
+    env_only_paths: &[Vec<&'static str>],
     depth: usize,
     skip_include_field: bool,
     output: &mut String,
@@ -145,6 +153,10 @@ fn render_yaml_fields(
         };
 
         if skip_include_field && current_path.is_empty() && field.name == "include" {
+            continue;
+        }
+
+        if is_env_only_field(current_path, field.name, env_only_paths) {
             continue;
         }
 
@@ -171,6 +183,13 @@ fn render_yaml_fields(
             continue;
         }
 
+        let child_split_paths = if split_descendant { split_paths } else { &[] };
+        if !has_renderable_yaml_fields(meta, current_path, child_split_paths, env_only_paths, false)
+        {
+            current_path.pop();
+            continue;
+        }
+
         if emitted_anything {
             output.push('\n');
         }
@@ -187,17 +206,112 @@ fn render_yaml_fields(
         output.push_str(field.name);
         output.push_str(":\n");
 
-        let child_split_paths = if split_descendant { split_paths } else { &[] };
         render_yaml_fields(
             meta,
             current_path,
             child_split_paths,
+            env_only_paths,
             depth + 1,
             false,
             output,
         );
         current_path.pop();
     }
+}
+
+/// Returns whether `meta` has any fields that should be rendered.
+///
+/// # Arguments
+///
+/// - `meta`: Metadata node to inspect.
+/// - `current_path`: Section path for `meta`.
+/// - `split_paths`: Section paths split into separate templates.
+/// - `env_only_paths`: Leaf field paths omitted from generated config files.
+/// - `skip_include_field`: Whether to omit the root include field.
+///
+/// # Returns
+///
+/// Returns `true` when at least one leaf or nested section is renderable.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
+fn has_renderable_yaml_fields(
+    meta: &'static Meta,
+    current_path: &[&'static str],
+    split_paths: &[Vec<&'static str>],
+    env_only_paths: &[Vec<&'static str>],
+    skip_include_field: bool,
+) -> bool {
+    for field in meta.fields {
+        let FieldKind::Leaf { .. } = field.kind else {
+            continue;
+        };
+
+        if skip_include_field && current_path.is_empty() && field.name == "include" {
+            continue;
+        }
+
+        if !is_env_only_field(current_path, field.name, env_only_paths) {
+            return true;
+        }
+    }
+
+    for field in meta.fields {
+        let FieldKind::Nested { meta } = field.kind else {
+            continue;
+        };
+
+        let mut child_path = current_path.to_vec();
+        child_path.push(field.name);
+
+        let split_exact = split_paths.iter().any(|path| path == &child_path);
+        if split_exact {
+            continue;
+        }
+
+        let split_descendant = split_paths
+            .iter()
+            .any(|path| path.starts_with(&child_path) && path.len() > child_path.len());
+        let child_split_paths = if split_descendant { split_paths } else { &[] };
+
+        if has_renderable_yaml_fields(meta, &child_path, child_split_paths, env_only_paths, false) {
+            return true;
+        }
+    }
+
+    false
+}
+
+/// Returns whether a leaf field path is marked env-only.
+///
+/// # Arguments
+///
+/// - `current_path`: Section path for the field.
+/// - `field_name`: Leaf field name.
+/// - `env_only_paths`: Leaf field paths omitted from generated config files.
+///
+/// # Returns
+///
+/// Returns `true` when the full field path is in `env_only_paths`.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
+fn is_env_only_field(
+    current_path: &[&'static str],
+    field_name: &'static str,
+    env_only_paths: &[Vec<&'static str>],
+) -> bool {
+    env_only_paths.iter().any(|path| {
+        path.len() == current_path.len() + 1
+            && path.starts_with(current_path)
+            && path.last() == Some(&field_name)
+    })
 }
 
 /// Renders one leaf field with docs, environment hint, and default value.

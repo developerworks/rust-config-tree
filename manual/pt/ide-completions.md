@@ -34,6 +34,8 @@ diagnosticos de campos ausentes. O esquema raiz omite propriedades de secoes
 aninhadas, entao o completamento de secoes filhas fica disponivel apenas em
 arquivos que vinculam o esquema de secao correspondente.
 
+Campos marcados com `x-env-only` sao omitidos dos esquemas gerados, entao IDEs nao sugerem secrets ou outros valores que devem vir somente de variaveis de ambiente.
+
 Esquemas de IDE ainda validam campos presentes, incluindo tipo, enum e
 verificacoes de propriedades desconhecidas suportadas pelo esquema gerado. Use
 `config-validate` para campos obrigatorios e validacao final da configuracao

@@ -11,7 +11,9 @@ publiceras som fristaende mdBook-webbplatser med spraklankar.
 Det hanterar:
 
 - laddning av ett `confique`-schema till ett direkt anvandbart konfigurationsobjekt via Figment-runtime providers
-- kommandohanterare for `config-template`, `completions` och `install-completions`
+- kommandohanterare for `config-template`, `config-schema`,
+  `config-validate`, `completions`, `install-completions` och
+  `uninstall-completions`
 - generering av Draft 7 JSON Schema for rot och sektioner for editor-komplettering och validering
 - generering av konfigurationsmallar for YAML, TOML, JSON och JSON5
 - schemadirektiv for TOML- och YAML-mallar utan att lagga till runtime-falt
@@ -35,7 +37,7 @@ implementera `ConfigSchema` for att exponera schemats include-falt.
 [dependencies]
 rust-config-tree = "0.1"
 confique = { version = "0.4", features = ["yaml", "toml", "json5"] }
-figment = { version = "0.10", features = ["yaml", "env"] }
+figment = { version = "0.10", features = ["yaml", "toml", "json", "env"] }
 schemars = { version = "1", features = ["derive"] }
 serde = { version = "1", features = ["derive"] }
 clap = { version = "4", features = ["derive"] }
@@ -223,6 +225,8 @@ should be generated as its own `config/*.yaml` template and
 `schemas/*.schema.json` schema. Unmarked nested fields stay in the parent
 template and parent schema.
 
+Markera ett bladfalt med `#[schemars(extend("x-env-only" = true))]` nar vardet bara ska komma fran miljovariabler. Genererade mallar och JSON Schemas utelamnar env-only-falt, och foralderobjekt som blir tomma tas bort.
+
 For ett schema med sektionerna `server` och `log` markerade med `x-tree-split` skriver detta
 `schemas/myapp.schema.json`, `schemas/server.schema.json` och
 `schemas/log.schema.json`. Rotschemat innehaller bara falt som hor hemma i
@@ -323,6 +327,7 @@ lagga till:
 - `config-validate`
 - `completions`
 - `install-completions`
+- `uninstall-completions`
 
 Det konsumerande programmet behaller sin egen `Parser`-typ och sin egen
 kommandoenum. `rust-config-tree` bidrar bara med ateranvandbara underkommandon:
@@ -395,15 +400,17 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 }
 ```
 
-`config-template --output <path>` skriver mallar till den valda sokvagen. Om
-ingen utdatasokvag anges skriver det `config.example.yaml` i aktuell katalog.
-Lagg till `--schema <path>` for att binda TOML- och YAML-mallar till en
-genererad JSON Schema-uppsattning utan att lagga till ett runtime-`$schema`-falt.
-Detta skriver ocksa rotschemat och sektionsscheman till den valda schemasokvagen.
+`config-template --output <file-name>` skriver mallar under
+`config/<root_config_name>/` med det valda filnamnet. Om en sokvag anges anvands
+bara filnamnet. Om inget utdatafilnamn anges skriver det
+`config/<root_config_name>/<root_config_name>.example.yaml`. Lagg till
+`--schema <path>` for att binda TOML- och YAML-mallar till en genererad JSON
+Schema-uppsattning utan att lagga till ett runtime-`$schema`-falt. Detta skriver
+ocksa rotschemat och sektionsscheman till den valda schemasokvagen.
 
 `config-schema --output <path>` skriver rotens Draft 7 JSON Schema och
 sektionsscheman. Om ingen utdatasokvag anges skrivs rotschemat till
-`schemas/config.schema.json`.
+`config/<root_config_name>/<root_config_name>.schema.json`.
 
 `config-validate` laddar hela runtime-konfigurationstradet och kor `confique`
 standardvarden och validering. Anvand editorscheman for tyst komplettering medan
@@ -416,6 +423,9 @@ lyckas.
 `install-completions <shell>` skriver kompletteringar under anvandarens
 hemkatalog och uppdaterar skalets startfil nar skalet kraver det. Bash, Elvish,
 Fish, PowerShell och Zsh stods.
+
+`uninstall-completions <shell>` tar bort den aktuella binarens completion-fil
+och tar bort det hanterade shell-startblocket nar skalet anvander ett.
 
 ## Lagre niva: trad-API
 

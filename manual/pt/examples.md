@@ -15,7 +15,7 @@ Execute exemplos a partir da raiz do repositorio:
 ```bash
 cargo run --example basic_loading
 cargo run --example cli_overrides -- --server-port 9000
-cargo run --example config_commands -- config-template --output /tmp/config.example.yaml
+cargo run --example config_commands -- config-template --output app_config.example.yaml
 cargo run --example config_commands -- config-schema --output /tmp/myapp.schema.json
 cargo run --example config_commands -- config-validate
 cargo run --example generate_templates

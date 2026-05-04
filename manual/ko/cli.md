@@ -85,17 +85,19 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 ## 설정 템플릿
 
 ```bash
-demo config-template --output config.example.yaml
+demo config-template --output app_config.example.yaml
 ```
 
-출력 경로를 제공하지 않으면 명령은 현재 디렉터리에 `config.example.yaml`을 씁니다.
-생성된 TOML 및 YAML 템플릿을 생성된 JSON Schema에 바인딩하려면
+명령은 `config/<root_config_name>/` 아래에 템플릿을 씁니다. `--output`이 경로를
+받으면 파일 이름만 사용합니다. 출력 파일 이름을 제공하지 않으면
+`config/<root_config_name>/<root_config_name>.example.yaml`을 씁니다. 생성된
+TOML 및 YAML 템플릿을 생성된 JSON Schema에 바인딩하려면
 `--schema schemas/myapp.schema.json`를 추가하세요. 분할 YAML 템플릿은 대응하는
-섹션 스키마를 바인딩합니다. 이 명령은 루트 및 섹션 스키마도 선택한 스키마 경로에
-씁니다.
+섹션 스키마를 바인딩합니다. 이 명령은 루트 및 섹션 스키마도 선택한 스키마
+경로에 씁니다.
 
 ```bash
-demo config-template --output config.example.toml --schema schemas/myapp.schema.json
+demo config-template --output app_config.example.toml --schema schemas/myapp.schema.json
 ```
 
 루트 및 섹션 JSON Schema를 생성합니다.
@@ -103,6 +105,9 @@ demo config-template --output config.example.toml --schema schemas/myapp.schema.
 ```bash
 demo config-schema --output schemas/myapp.schema.json
 ```
+
+`--output`이 없으면 `config-schema`는 루트 스키마를
+`config/<root_config_name>/<root_config_name>.schema.json`에 씁니다.
 
 전체 런타임 설정 트리를 검증합니다.
 

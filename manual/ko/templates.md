@@ -29,6 +29,8 @@ should be generated as its own `config/*.yaml` template and
 `schemas/*.schema.json` schema. Unmarked nested fields stay in the parent
 template and parent schema.
 
+값을 환경 변수로만 제공해야 하는 leaf 필드에는 `#[schemars(extend("x-env-only" = true))]`를 붙입니다. 생성된 템플릿과 JSON Schema는 env-only 필드를 생략하며, 이 생략으로 비게 된 부모 객체도 함께 제거합니다.
+
 생성된 스키마는 `required` 제약을 생략합니다. IDE는 여전히 완성을 제공하지만
 `config/log.yaml` 같은 부분 파일에 대해 빠진 루트 필드를 보고하지 않습니다. 루트
 스키마는 루트 파일에 속하는 필드만 완성합니다. 분할된 섹션 필드는 여기서 생략되고

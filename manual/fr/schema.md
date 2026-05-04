@@ -82,6 +82,16 @@ server:
   port: 8080
 ```
 
+## Champs reserves aux variables d environnement
+
+Marquez un champ feuille avec `#[schemars(extend("x-env-only" = true))]` lorsque sa valeur doit venir uniquement d une variable d environnement et ne doit pas apparaitre dans les fichiers de configuration generes. Les modeles YAML et schemas JSON generes omettent les champs env-only, et les objets parents devenus vides sont supprimes.
+
+```rust
+#[config(env = "APP_SECRET")]
+#[schemars(extend("x-env-only" = true))]
+secret: String,
+```
+
 ## Remplacements de chemin de section pour les modeles
 
 Lorsqu'une source de modele n'a pas d'inclusions, la crate peut deriver les

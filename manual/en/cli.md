@@ -87,17 +87,20 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 ## Config Templates
 
 ```bash
-demo config-template --output config.example.yaml
+demo config-template --output app_config.example.yaml
 ```
 
-If no output path is provided, the command writes `config.example.yaml` in the
-current directory. Add `--schema schemas/myapp.schema.json` to bind generated
-TOML and YAML templates to generated JSON Schemas. Split YAML templates bind the
-matching section schema. The command also writes the root and section schemas to
-the selected schema path.
+The command writes templates under `config/<root_config_name>/`. If `--output`
+receives a path, only the file name is used. If no output file name is provided,
+the command writes
+`config/<root_config_name>/<root_config_name>.example.yaml`. Add
+`--schema schemas/myapp.schema.json` to bind generated TOML and YAML templates
+to generated JSON Schemas. Split YAML templates bind the matching section
+schema. The command also writes the root and section schemas to the selected
+schema path.
 
 ```bash
-demo config-template --output config.example.toml --schema schemas/myapp.schema.json
+demo config-template --output app_config.example.toml --schema schemas/myapp.schema.json
 ```
 
 Generate root and section JSON Schemas:
@@ -105,6 +108,9 @@ Generate root and section JSON Schemas:
 ```bash
 demo config-schema --output schemas/myapp.schema.json
 ```
+
+Without `--output`, `config-schema` writes the root schema to
+`config/<root_config_name>/<root_config_name>.schema.json`.
 
 Validate the complete runtime config tree:
 
@@ -114,8 +120,10 @@ demo config-validate
 
 Generated editor schemas intentionally avoid required-field diagnostics for
 split files. `config-validate` loads includes, applies defaults, and runs final
-`confique` validation. It prints `Configuration is ok` when validation
-succeeds.
+`confique` validation, including validators declared with
+`#[config(validate = Self::validate)]`. Generated `*.schema.json` files remain
+for IDE completion and basic editor checks, not field value legality. It prints
+`Configuration is ok` when validation succeeds.
 
 ## Shell Completions
 

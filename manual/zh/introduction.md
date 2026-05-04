@@ -35,7 +35,9 @@ log:
 - 基于 schema 声明的环境变量，不使用分隔符拆分。
 - 通过 Figment metadata 追踪运行时来源。
 - 通过 `tracing` 输出 TRACE 级别的来源追踪事件。
-- 生成 Draft 7 JSON Schema，供编辑器补全和校验使用。
+- 生成 Draft 7 JSON Schema，供编辑器补全和基础 schema 检查使用。
+- 字段值合法性在应用代码中通过 `#[config(validate = Self::validate)]` 实现，并由
+  `load_config` 或 `config-validate` 执行。
 - 生成 YAML、TOML、JSON 和 JSON5 配置模板。
 - 为生成的 TOML 模板写入 `#:schema`，为 YAML 模板写入 YAML Language Server modeline。
 - 按 `x-tree-split` 标记拆分嵌套 section YAML 模板。

@@ -13,8 +13,9 @@ Gestiona:
 
 - cargar un esquema `confique` en un objeto de configuración directamente
   utilizable mediante proveedores de Figment en tiempo de ejecución
-- manejadores de comandos `config-template`, `completions` e
-  `install-completions`
+- manejadores de comandos `config-template`, `config-schema`,
+  `config-validate`, `completions`, `install-completions` y
+  `uninstall-completions`
 - generación de JSON Schema Draft 7 para la raíz y las secciones, útil para
   completado y validación en editores
 - generación de plantillas de configuración para YAML, TOML, JSON y JSON5
@@ -40,7 +41,7 @@ implementando `ConfigSchema` para exponer el campo de includes del esquema.
 [dependencies]
 rust-config-tree = "0.1"
 confique = { version = "0.4", features = ["yaml", "toml", "json5"] }
-figment = { version = "0.10", features = ["yaml", "env"] }
+figment = { version = "0.10", features = ["yaml", "toml", "json", "env"] }
 schemars = { version = "1", features = ["derive"] }
 serde = { version = "1", features = ["derive"] }
 clap = { version = "4", features = ["derive"] }
@@ -235,6 +236,8 @@ should be generated as its own `config/*.yaml` template and
 `schemas/*.schema.json` schema. Unmarked nested fields stay in the parent
 template and parent schema.
 
+Marca un campo hoja con `#[schemars(extend("x-env-only" = true))]` cuando el valor debe venir solo de variables de entorno. Las plantillas generadas y los JSON Schemas omiten los campos env-only, y tambien se eliminan los objetos padre que queden vacios.
+
 Para un esquema con secciones `server` y `log` marcadas con `x-tree-split`, esto escribe
 `schemas/myapp.schema.json`, `schemas/server.schema.json` y
 `schemas/log.schema.json`. El esquema raíz contiene solo campos que pertenecen
@@ -335,6 +338,7 @@ Aplana `ConfigCommand` dentro de tu enum de comandos clap existente para añadir
 - `config-validate`
 - `completions`
 - `install-completions`
+- `uninstall-completions`
 
 La aplicación consumidora conserva su propio tipo `Parser` y su propio enum de
 comandos. `rust-config-tree` solo aporta subcomandos reutilizables:
@@ -409,16 +413,19 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 }
 ```
 
-`config-template --output <path>` escribe plantillas en la ruta seleccionada.
-Si no se proporciona ruta de salida, escribe `config.example.yaml` en el
-directorio actual. Añade `--schema <path>` para enlazar plantillas TOML y YAML
-a un conjunto de JSON Schema generado sin añadir un campo `$schema` en tiempo
-de ejecución. Esto también escribe el esquema raíz y los esquemas de sección en
-la ruta de esquema seleccionada.
+`config-template --output <file-name>` escribe plantillas bajo
+`config/<root_config_name>/` usando el nombre de archivo seleccionado. Si se
+proporciona una ruta, solo se usa su nombre de archivo. Si no se proporciona un
+nombre de archivo de salida, escribe
+`config/<root_config_name>/<root_config_name>.example.yaml`. Añade
+`--schema <path>` para enlazar plantillas TOML y YAML a un conjunto de JSON
+Schema generado sin añadir un campo `$schema` en tiempo de ejecución. Esto
+también escribe el esquema raíz y los esquemas de sección en la ruta de esquema
+seleccionada.
 
 `config-schema --output <path>` escribe el JSON Schema Draft 7 raíz y los
 esquemas de sección. Si no se proporciona ruta de salida, el esquema raíz se
-escribe en `schemas/config.schema.json`.
+escribe en `config/<root_config_name>/<root_config_name>.schema.json`.
 
 `config-validate` carga el árbol completo de configuración en tiempo de
 ejecución y ejecuta los valores por defecto y la validación de `confique`. Usa
@@ -431,6 +438,10 @@ configuración. Imprime `Configuration is ok` cuando la validación tiene éxito
 `install-completions <shell>` escribe completions bajo el directorio home del
 usuario y actualiza el archivo de inicio del shell cuando el shell lo requiere.
 Se admiten Bash, Elvish, Fish, PowerShell y Zsh.
+
+`uninstall-completions <shell>` elimina el archivo de completion del binario
+actual y elimina el bloque administrado del archivo de inicio cuando ese shell
+usa uno.
 
 ## API de árbol de bajo nivel
 

@@ -81,13 +81,13 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 ## Konfiguraatiomallit
 
 ```bash
-demo config-template --output config.example.yaml
+demo config-template --output app_config.example.yaml
 ```
 
-Jos tulostepolkua ei anneta, komento kirjoittaa `config.example.yaml` nykyiseen hakemistoon. Lisaa `--schema schemas/myapp.schema.json`, jotta luodut TOML- ja YAML-mallit sidotaan luotuihin JSON Schema -skeemoihin. Jaetut YAML-mallit sitovat vastaavan osioskeeman. Komento kirjoittaa myos juuri- ja osioskeemat valittuun skeemapolkuun.
+Komento kirjoittaa mallit hakemistoon `config/<root_config_name>/`. Jos `--output` saa polun, vain tiedostonimi kaytetaan. Jos tulostetiedoston nimea ei anneta, komento kirjoittaa `config/<root_config_name>/<root_config_name>.example.yaml`. Lisaa `--schema schemas/myapp.schema.json`, jotta luodut TOML- ja YAML-mallit sidotaan luotuihin JSON Schema -skeemoihin. Jaetut YAML-mallit sitovat vastaavan osioskeeman. Komento kirjoittaa myos juuri- ja osioskeemat valittuun skeemapolkuun.
 
 ```bash
-demo config-template --output config.example.toml --schema schemas/myapp.schema.json
+demo config-template --output app_config.example.toml --schema schemas/myapp.schema.json
 ```
 
 Luo juuri- ja osio-JSON Schema -skeemat:
@@ -95,6 +95,8 @@ Luo juuri- ja osio-JSON Schema -skeemat:
 ```bash
 demo config-schema --output schemas/myapp.schema.json
 ```
+
+Ilman `--output`-arvoa `config-schema` kirjoittaa juuriskeeman tiedostoon `config/<root_config_name>/<root_config_name>.schema.json`.
 
 Validoi koko runtime-konfiguraatiopuu:
 

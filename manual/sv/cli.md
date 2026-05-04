@@ -87,17 +87,19 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 ## Konfigurationsmallar
 
 ```bash
-demo config-template --output config.example.yaml
+demo config-template --output app_config.example.yaml
 ```
 
-Om ingen utdatasokvag anges skriver kommandot `config.example.yaml` i aktuell
-katalog. Lagg till `--schema schemas/myapp.schema.json` for att binda
-genererade TOML- och YAML-mallar till genererade JSON Schemas. Delade
-YAML-mallar binder matchande sektionsschema. Kommandot skriver ocksa rot- och
-sektionsscheman till den valda schemasokvagen.
+Kommandot skriver mallar under `config/<root_config_name>/`. Om `--output` far
+en sokvag anvands bara filnamnet. Om inget utdatafilnamn anges skriver
+kommandot `config/<root_config_name>/<root_config_name>.example.yaml`. Lagg till
+`--schema schemas/myapp.schema.json` for att binda genererade TOML- och
+YAML-mallar till genererade JSON Schemas. Delade YAML-mallar binder matchande
+sektionsschema. Kommandot skriver ocksa rot- och sektionsscheman till den valda
+schemasokvagen.
 
 ```bash
-demo config-template --output config.example.toml --schema schemas/myapp.schema.json
+demo config-template --output app_config.example.toml --schema schemas/myapp.schema.json
 ```
 
 Generera rot- och sektions-JSON Schemas:
@@ -105,6 +107,9 @@ Generera rot- och sektions-JSON Schemas:
 ```bash
 demo config-schema --output schemas/myapp.schema.json
 ```
+
+Utan `--output` skriver `config-schema` rotschemat till
+`config/<root_config_name>/<root_config_name>.schema.json`.
 
 Validera hela runtime-konfigurationstradet:
 

@@ -13,8 +13,9 @@ Ele lida com:
 
 - carregamento de um esquema `confique` em um objeto de configuracao diretamente
   utilizavel por meio de provedores Figment em tempo de execucao
-- manipuladores dos comandos `config-template`, `completions` e
-  `install-completions`
+- manipuladores dos comandos `config-template`, `config-schema`,
+  `config-validate`, `completions`, `install-completions` e
+  `uninstall-completions`
 - geracao de JSON Schema Draft 7 para a raiz e para secoes, para completamento e
   validacao no editor
 - geracao de modelos de configuracao para YAML, TOML, JSON e JSON5
@@ -40,7 +41,7 @@ As aplicacoes fornecem seu esquema derivando `confique::Config` e implementando
 [dependencies]
 rust-config-tree = "0.1"
 confique = { version = "0.4", features = ["yaml", "toml", "json5"] }
-figment = { version = "0.10", features = ["yaml", "env"] }
+figment = { version = "0.10", features = ["yaml", "toml", "json", "env"] }
 schemars = { version = "1", features = ["derive"] }
 serde = { version = "1", features = ["derive"] }
 clap = { version = "4", features = ["derive"] }
@@ -232,6 +233,8 @@ should be generated as its own `config/*.yaml` template and
 `schemas/*.schema.json` schema. Unmarked nested fields stay in the parent
 template and parent schema.
 
+Marque um campo folha com `#[schemars(extend("x-env-only" = true))]` quando o valor deve vir somente de variaveis de ambiente. Os modelos gerados e os JSON Schemas omitem campos env-only, e objetos pai que ficarem vazios tambem sao removidos.
+
 Para um esquema com secoes `server` e `log` marcadas com `x-tree-split`, isso grava
 `schemas/myapp.schema.json`, `schemas/server.schema.json` e
 `schemas/log.schema.json`. O esquema raiz contem apenas campos que pertencem ao
@@ -332,6 +335,7 @@ Achate `ConfigCommand` no enum de comandos clap existente para adicionar:
 - `config-validate`
 - `completions`
 - `install-completions`
+- `uninstall-completions`
 
 A aplicacao consumidora mantem seu proprio tipo `Parser` e seu proprio enum de
 comandos. `rust-config-tree` contribui apenas subcomandos reutilizaveis:
@@ -405,16 +409,19 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 }
 ```
 
-`config-template --output <path>` grava modelos no caminho selecionado. Se
-nenhum caminho de saida for fornecido, ele grava `config.example.yaml` no
-diretorio atual. Adicione `--schema <path>` para vincular modelos TOML e YAML a
-um conjunto de JSON Schema gerado sem adicionar um campo `$schema` em tempo de
-execucao. Isso tambem grava o esquema raiz e os esquemas de secao no caminho de
-esquema selecionado.
+`config-template --output <file-name>` grava modelos em
+`config/<root_config_name>/` usando o nome de arquivo selecionado. Se um caminho
+for fornecido, somente o nome do arquivo e usado. Se nenhum nome de arquivo de
+saida for fornecido, ele grava
+`config/<root_config_name>/<root_config_name>.example.yaml`. Adicione
+`--schema <path>` para vincular modelos TOML e YAML a um conjunto de JSON
+Schema gerado sem adicionar um campo `$schema` em tempo de execucao. Isso
+tambem grava o esquema raiz e os esquemas de secao no caminho de esquema
+selecionado.
 
 `config-schema --output <path>` grava o JSON Schema Draft 7 raiz e esquemas de
 secao. Se nenhum caminho de saida for fornecido, o esquema raiz e gravado em
-`schemas/config.schema.json`.
+`config/<root_config_name>/<root_config_name>.schema.json`.
 
 `config-validate` carrega a arvore de configuracao completa em tempo de
 execucao e executa padroes e validacao do `confique`. Use esquemas de editor
@@ -427,6 +434,9 @@ campos obrigatorios e validacao final da configuracao. Ele imprime
 `install-completions <shell>` grava completions sob o diretorio home do usuario
 e atualiza o arquivo de inicializacao do shell quando o shell exige isso. Bash,
 Elvish, Fish, PowerShell e Zsh sao suportados.
+
+`uninstall-completions <shell>` remove o arquivo de completion do binario atual
+e remove o bloco gerenciado de inicializacao quando esse shell usa um.
 
 ## API de arvore de nivel mais baixo
 
@@ -470,4 +480,3 @@ Licenciado sob uma das seguintes, a sua escolha:
 
 - Apache License, Version 2.0
 - MIT license
-

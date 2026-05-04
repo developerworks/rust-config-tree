@@ -35,6 +35,8 @@ proprietes de sections imbriquees, donc la completion des sections enfants
 n'est disponible que dans les fichiers qui lient le schema de section
 correspondant.
 
+Les champs marques `x-env-only` sont omis des schemas generes, donc les IDE ne suggerent pas les secrets ou autres valeurs qui doivent venir uniquement de variables d environnement.
+
 Les schemas IDE valident toujours les champs presents, y compris les types, les
 enums et les controles de proprietes inconnues pris en charge par le schema
 genere. Utilisez `config-validate` pour les champs obligatoires et la validation

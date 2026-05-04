@@ -79,6 +79,26 @@ server:
   port: 8080
 ```
 
+## Environment-Only Fields
+
+Mark a leaf field with `#[schemars(extend("x-env-only" = true))]` when the value must be supplied only by an environment variable and should not appear in generated config files. Generated YAML templates and JSON Schemas omit env-only fields, and empty parent objects left behind by those omissions are pruned.
+
+```rust
+#[config(env = "APP_SECRET")]
+#[schemars(extend("x-env-only" = true))]
+secret: String,
+```
+
+## Field Value Validation
+
+Generated `*.schema.json` files are for IDE completion and basic editor checks
+only. They do not decide whether a concrete field value is legal for the
+application.
+
+Implement field value validation in code with
+`#[config(validate = Self::validate)]`. The validator runs when the final config
+is loaded through `load_config` or checked through `config-validate`.
+
 ## Template Section Overrides
 
 When a template source has no includes, the crate can derive child template

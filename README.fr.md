@@ -14,8 +14,9 @@ Il gere :
 
 - le chargement d'un schema `confique` dans un objet de configuration
   directement utilisable via des fournisseurs Figment d'execution ;
-- les gestionnaires de commandes `config-template`, `completions` et
-  `install-completions` ;
+- les gestionnaires de commandes `config-template`, `config-schema`,
+  `config-validate`, `completions`, `install-completions` et
+  `uninstall-completions` ;
 - la generation de schemas JSON Draft 7 pour la racine et les sections, pour la
   completion et la validation dans l'editeur ;
 - la generation de modeles de configuration YAML, TOML, JSON et JSON5 ;
@@ -43,7 +44,7 @@ implementant `ConfigSchema` pour exposer le champ d'inclusion du schema.
 [dependencies]
 rust-config-tree = "0.1"
 confique = { version = "0.4", features = ["yaml", "toml", "json5"] }
-figment = { version = "0.10", features = ["yaml", "env"] }
+figment = { version = "0.10", features = ["yaml", "toml", "json", "env"] }
 schemars = { version = "1", features = ["derive"] }
 serde = { version = "1", features = ["derive"] }
 clap = { version = "4", features = ["derive"] }
@@ -238,6 +239,8 @@ should be generated as its own `config/*.yaml` template and
 `schemas/*.schema.json` schema. Unmarked nested fields stay in the parent
 template and parent schema.
 
+Marquez un champ feuille avec `#[schemars(extend("x-env-only" = true))]` lorsque la valeur doit venir uniquement de variables d environnement. Les modeles generes et les schemas JSON omettent les champs env-only, et les objets parents devenus vides sont supprimes.
+
 Pour un schema avec les sections `server` et `log` marquees `x-tree-split`, cela ecrit
 `schemas/myapp.schema.json`, `schemas/server.schema.json` et
 `schemas/log.schema.json`. Le schema racine ne contient que les champs qui
@@ -340,6 +343,7 @@ ajouter :
 - `config-validate`
 - `completions`
 - `install-completions`
+- `uninstall-completions`
 
 L'application consommatrice garde son propre type `Parser` et sa propre enum de
 commandes. `rust-config-tree` ne fournit que des sous-commandes reutilisables :
@@ -414,16 +418,18 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 }
 ```
 
-`config-template --output <path>` ecrit les modeles vers le chemin choisi. Si
-aucun chemin de sortie n'est fourni, il ecrit `config.example.yaml` dans le
-repertoire courant. Ajoutez `--schema <path>` pour lier les modeles TOML et YAML
-a un ensemble de schemas JSON generes sans ajouter de champ `$schema`
-d'execution. Cela ecrit aussi le schema racine et les schemas de section au
-chemin de schema choisi.
+`config-template --output <file-name>` ecrit les modeles sous
+`config/<root_config_name>/` avec le nom de fichier choisi. Si un chemin est
+fourni, seul son nom de fichier est utilise. Si aucun nom de fichier de sortie
+n'est fourni, il ecrit
+`config/<root_config_name>/<root_config_name>.example.yaml`. Ajoutez
+`--schema <path>` pour lier les modeles TOML et YAML a un ensemble de schemas
+JSON generes sans ajouter de champ `$schema` d'execution. Cela ecrit aussi le
+schema racine et les schemas de section au chemin de schema choisi.
 
 `config-schema --output <path>` ecrit le schema JSON Draft 7 racine et les
 schemas de section. Les sections imbriquees non marquees restent dans le schema racine. Si aucun chemin de sortie n'est fourni, le schema racine est
-ecrit dans `schemas/config.schema.json`.
+ecrit dans `config/<root_config_name>/<root_config_name>.schema.json`.
 
 `config-validate` charge l'arbre complet de configuration d'execution et lance
 les valeurs par defaut et la validation `confique`. Utilisez les schemas
@@ -437,6 +443,9 @@ validation reussit.
 `install-completions <shell>` ecrit les completions sous le repertoire home de
 l'utilisateur et met a jour le fichier de demarrage du shell lorsque le shell le
 requiert. Bash, Elvish, Fish, PowerShell et Zsh sont pris en charge.
+
+`uninstall-completions <shell>` supprime le fichier de completion du binaire
+courant et supprime le bloc de demarrage gere quand ce shell en utilise un.
 
 ## API d'arbre de plus bas niveau
 
@@ -480,4 +489,3 @@ Sous licence, au choix :
 
 - Apache License, Version 2.0
 - MIT license
-

@@ -14,8 +14,8 @@
 - Figment の runtime provider を通して `confique` schema を実用可能な
   config オブジェクトへ読み込む
 - `config-template`、`config-schema`、`config-validate`、`completions`、
-  `install-completions` のコマンド処理
-- エディタ補完と検証向けの Draft 7 root / section JSON Schema 生成
+  `install-completions`、`uninstall-completions` のコマンド処理
+- エディタ補完と基本的な schema check 向けの Draft 7 root / section JSON Schema 生成
 - YAML、TOML、JSON、JSON5 の設定テンプレート生成
 - TOML / YAML テンプレートへ runtime field を追加せず schema directive を生成
 - 再帰的な include 走査
@@ -38,7 +38,7 @@ include field を公開します。
 [dependencies]
 rust-config-tree = "0.1"
 confique = { version = "0.4", features = ["yaml", "toml", "json5"] }
-figment = { version = "0.10", features = ["yaml", "env"] }
+figment = { version = "0.10", features = ["yaml", "toml", "json", "env"] }
 schemars = { version = "1", features = ["derive"] }
 serde = { version = "1", features = ["derive"] }
 clap = { version = "4", features = ["derive"] }
@@ -201,6 +201,10 @@ output path から推定されます。
 `write_config_schemas` は root config と split nested section の Draft 7 JSON Schema
 を生成します。生成 schema は `required` constraint を省略するため、IDE は
 partial config file に補完を出しながら missing field diagnostic を出しません。
+生成された `*.schema.json` は IDE 補完と基本的な editor check のためのもので、
+具体的な field value が application として合法かどうかは判断しません。
+field value validation は code 側で `#[config(validate = Self::validate)]` として
+実装し、`load_config` または `config-validate` で実行します。
 
 ```rust
 use rust_config_tree::write_config_schemas;
@@ -216,6 +220,8 @@ Mark a nested field with `#[schemars(extend("x-tree-split" = true))]` when it
 should be generated as its own `config/*.yaml` template and
 `schemas/*.schema.json` schema. Unmarked nested fields stay in the parent
 template and parent schema.
+
+`#[schemars(extend("x-env-only" = true))]` を leaf field に付けると、その値は環境変数からだけ渡すものとして扱われます。生成される template と JSON Schema は env-only field を省略し、その結果空になった parent object も削除します.
 
 `server` と `log` section を `x-tree-split` で mark した schema では
 `schemas/myapp.schema.json`、`schemas/server.schema.json`、
@@ -267,9 +273,12 @@ subcommand を追加できます。
 - `config-validate`
 - `completions`
 - `install-completions`
+- `uninstall-completions`
 
 `config-validate` は完全な runtime config tree を読み込み、`confique` defaults
-と validation を実行します。成功時は `Configuration is ok` を出力します。
+と validation を実行します。これには
+`#[config(validate = Self::validate)]` で宣言した validator も含まれます。
+成功時は `Configuration is ok` を出力します。
 
 ## Lower-Level Tree API
 

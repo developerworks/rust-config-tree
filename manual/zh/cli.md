@@ -85,16 +85,18 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 ## 配置模板
 
 ```bash
-demo config-template --output config.example.yaml
+demo config-template --output app_config.example.yaml
 ```
 
-如果未提供 output path，命令会在当前目录写入 `config.example.yaml`。添加
-`--schema schemas/myapp.schema.json` 后，生成的 TOML 和 YAML 模板会绑定
-生成的 JSON Schema。拆分出的 YAML 模板会绑定对应的 section schema。该命令
-也会把 root 和 section schemas 写入指定的 schema path。
+命令会在 `config/<root_config_name>/` 下写入模板。如果 `--output` 接收到
+路径，只使用其中的文件名。未提供 output file name 时，命令写入
+`config/<root_config_name>/<root_config_name>.example.yaml`。添加
+`--schema schemas/myapp.schema.json` 后，生成的 TOML 和 YAML 模板会绑定生成的
+JSON Schema。拆分出的 YAML 模板会绑定对应的 section schema。该命令也会把
+root 和 section schemas 写入指定的 schema path。
 
 ```bash
-demo config-template --output config.example.toml --schema schemas/myapp.schema.json
+demo config-template --output app_config.example.toml --schema schemas/myapp.schema.json
 ```
 
 生成 root 和 section JSON Schema：
@@ -103,6 +105,9 @@ demo config-template --output config.example.toml --schema schemas/myapp.schema.
 demo config-schema --output schemas/myapp.schema.json
 ```
 
+未提供 `--output` 时，`config-schema` 会把 root schema 写入
+`config/<root_config_name>/<root_config_name>.schema.json`。
+
 校验完整 runtime config tree：
 
 ```bash
@@ -110,7 +115,9 @@ demo config-validate
 ```
 
 生成的 editor schema 会刻意避免在拆分文件里触发必填字段诊断。
-`config-validate` 会加载 includes、应用默认值，并执行最终 `confique` 校验。
+`config-validate` 会加载 includes、应用默认值，并执行最终 `confique` 校验，
+包括通过 `#[config(validate = Self::validate)]` 声明的校验。生成的
+`*.schema.json` 仍然只用于 IDE 补全和基础编辑期检查，不负责字段值合法性判断。
 校验成功时会输出 `Configuration is ok`。
 
 ## Shell Completions

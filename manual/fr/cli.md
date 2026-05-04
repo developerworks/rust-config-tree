@@ -90,18 +90,20 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 ## Modeles de configuration
 
 ```bash
-demo config-template --output config.example.yaml
+demo config-template --output app_config.example.yaml
 ```
 
-Si aucun chemin de sortie n'est fourni, la commande ecrit
-`config.example.yaml` dans le repertoire courant. Ajoutez
+La commande ecrit les modeles sous `config/<root_config_name>/`. Si `--output`
+recoit un chemin, seul le nom de fichier est utilise. Si aucun nom de fichier de
+sortie n'est fourni, la commande ecrit
+`config/<root_config_name>/<root_config_name>.example.yaml`. Ajoutez
 `--schema schemas/myapp.schema.json` pour lier les modeles TOML et YAML generes
 aux schemas JSON generes. Les modeles YAML separes lient le schema de section
 correspondant. La commande ecrit aussi les schemas racine et de section au
 chemin de schema choisi.
 
 ```bash
-demo config-template --output config.example.toml --schema schemas/myapp.schema.json
+demo config-template --output app_config.example.toml --schema schemas/myapp.schema.json
 ```
 
 Generer les schemas JSON racine et de section :
@@ -109,6 +111,9 @@ Generer les schemas JSON racine et de section :
 ```bash
 demo config-schema --output schemas/myapp.schema.json
 ```
+
+Sans `--output`, `config-schema` ecrit le schema racine dans
+`config/<root_config_name>/<root_config_name>.schema.json`.
 
 Valider l'arbre complet de configuration d'execution :
 

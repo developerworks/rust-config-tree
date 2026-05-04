@@ -10,7 +10,8 @@ Kielikohtaiset oppaat julkaistaan itsenaisina mdBook-sivustoina, joissa on kiele
 Se kasittelee:
 
 - `confique`-skeeman lataamisen suoraan kaytettavaksi konfiguraatio-olioksi Figmentin runtime provider -lahteiden kautta
-- `config-template`-, `completions`- ja `install-completions`-komentojen kasittelijat
+- `config-template`-, `config-schema`-, `config-validate`-, `completions`-,
+  `install-completions`- ja `uninstall-completions`-komentojen kasittelijat
 - Draft 7 -juuri- ja osio-JSON Schema -skeemojen luonnin editorien taydennysta ja validointia varten
 - konfiguraatiomallien luonnin YAML-, TOML-, JSON- ja JSON5-muodoissa
 - TOML- ja YAML-mallien skeemadirektiivit ilman runtime-kenttien lisaamista
@@ -33,7 +34,7 @@ Sovellukset tarjoavat skeemansa johtamalla `confique::Config`-traitin ja toteutt
 [dependencies]
 rust-config-tree = "0.1"
 confique = { version = "0.4", features = ["yaml", "toml", "json5"] }
-figment = { version = "0.10", features = ["yaml", "env"] }
+figment = { version = "0.10", features = ["yaml", "toml", "json", "env"] }
 schemars = { version = "1", features = ["derive"] }
 serde = { version = "1", features = ["derive"] }
 clap = { version = "4", features = ["derive"] }
@@ -195,6 +196,8 @@ should be generated as its own `config/*.yaml` template and
 `schemas/*.schema.json` schema. Unmarked nested fields stay in the parent
 template and parent schema.
 
+Merkitse lehtikentta `#[schemars(extend("x-env-only" = true))]`, kun arvon tulee tulla vain ymparistomuuttujista. Luodut mallit ja JSON Schema -skeemat jattavat env-only-kentat pois, ja niiden takia tyhjiksi jaavat ylaobjektit poistetaan.
+
 Skeemalle, jossa `server`- ja `log`-osiot on merkitty `x-tree-split`illa, tama kirjoittaa tiedostot `schemas/myapp.schema.json`, `schemas/server.schema.json` ja `schemas/log.schema.json`. Juuriskeema sisaltaa vain juurikonfiguraatiotiedostoon kuuluvat kentat, kuten `include` ja juuritason skalaarikentat. Se jattaa jaettujen osioiden ominaisuudet tarkoituksella pois, joten `server` ja `log` taydentyvat vain niiden omia osio-YAML-tiedostoja muokattaessa.
 
 Kayta `write_config_templates`-funktiota juurimallin ja kaikkien sen include-puusta loytyvien mallitiedostojen luontiin:
@@ -275,6 +278,7 @@ Litista `ConfigCommand` olemassa olevaan clap-komentoenumiin, jolloin saat:
 - `config-validate`
 - `completions`
 - `install-completions`
+- `uninstall-completions`
 
 Kayttava sovellus sailyttaa oman `Parser`-tyyppinsa ja oman komentoenuminsa. `rust-config-tree` tarjoaa vain uudelleenkaytettavat alikomennot:
 
@@ -341,15 +345,17 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 }
 ```
 
-`config-template --output <path>` kirjoittaa mallit valittuun polkuun. Jos tulostepolkua ei anneta, se kirjoittaa `config.example.yaml` nykyiseen hakemistoon. Lisaa `--schema <path>`, jotta TOML- ja YAML-mallit sidotaan luotuun JSON Schema -joukkoon ilman runtime-`$schema`-kenttaa. Tama kirjoittaa myos juuriskeeman ja osioskeemat valittuun skeemapolkuun.
+`config-template --output <file-name>` kirjoittaa mallit hakemistoon `config/<root_config_name>/` valitulla tiedostonimella. Jos polku annetaan, vain sen tiedostonimi kaytetaan. Jos tulostetiedoston nimea ei anneta, komento kirjoittaa `config/<root_config_name>/<root_config_name>.example.yaml`. Lisaa `--schema <path>`, jotta TOML- ja YAML-mallit sidotaan luotuun JSON Schema -joukkoon ilman runtime-`$schema`-kenttaa. Tama kirjoittaa myos juuriskeeman ja osioskeemat valittuun skeemapolkuun.
 
-`config-schema --output <path>` kirjoittaa Draft 7 -juuri-JSON Schema -skeeman ja osioskeemat. Jos tulostepolkua ei anneta, juuriskeema kirjoitetaan tiedostoon `schemas/config.schema.json`.
+`config-schema --output <path>` kirjoittaa Draft 7 -juuri-JSON Schema -skeeman ja osioskeemat. Jos tulostepolkua ei anneta, juuriskeema kirjoitetaan tiedostoon `config/<root_config_name>/<root_config_name>.schema.json`.
 
 `config-validate` lataa koko runtime-konfiguraatiopuun ja ajaa `confique`-oletukset seka validoinnin. Kayta editoriskeemoja hiljaiseen taydennykseen jaettujen tiedostojen muokkauksessa; kayta tata komentoa pakollisille kentille ja lopulliselle konfiguraation validoinnille. Onnistuessaan se tulostaa `Configuration is ok`.
 
 `completions <shell>` tulostaa taydennykset stdoutiin.
 
 `install-completions <shell>` kirjoittaa taydennykset kayttajan kotihakemiston alle ja paivittaa shellin kaynnistystiedoston, kun shell sita vaatii. Bash, Elvish, Fish, PowerShell ja Zsh ovat tuettuja.
+
+`uninstall-completions <shell>` poistaa nykyisen binaarin completion-tiedoston ja poistaa hallitun shellin kaynnistyslohkon, kun kyseinen shell kayttaa sellaista.
 
 ## Alemman tason puu-API
 

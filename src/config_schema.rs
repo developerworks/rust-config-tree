@@ -1,9 +1,9 @@
 //! JSON Schema generation and section-schema splitting.
 //!
 //! `schemars` produces one full schema for the root config type. This module
-//! removes constraints that do not fit partial config files, strips
-//! `x-tree-split` marker metadata from the emitted JSON, and optionally emits
-//! separate schemas for marked nested sections.
+//! removes constraints that do not fit partial config files, strips internal
+//! marker metadata from the emitted JSON, and optionally emits separate schemas
+//! for marked nested sections.
 
 use std::{
     collections::BTreeSet,
@@ -21,6 +21,7 @@ use crate::{
 };
 
 const TREE_SPLIT_SCHEMA_EXTENSION: &str = "x-tree-split";
+const ENV_ONLY_SCHEMA_EXTENSION: &str = "x-env-only";
 
 /// Generated JSON Schema content for one output path.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -365,8 +366,10 @@ fn schema_for_output_path(
     // Each generated file owns only its direct fields. Split child sections are
     // completed by their own schema files, so remove them from the parent.
     remove_child_section_properties(&mut schema, section_path, split_paths);
+    remove_env_only_properties(&mut schema);
+    remove_empty_object_properties(&mut schema);
     prune_unused_schema_maps(&mut schema);
-    remove_tree_split_extensions(&mut schema);
+    remove_schema_extensions(&mut schema);
 
     Ok(schema)
 }
@@ -402,6 +405,158 @@ fn remove_child_section_properties(
             properties.remove(*child_name);
         }
     }
+}
+
+/// Removes properties marked with `x-env-only`.
+///
+/// # Arguments
+///
+/// - `value`: Schema subtree to edit in place.
+///
+/// # Returns
+///
+/// Returns no value; `value` is updated directly.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
+fn remove_env_only_properties(value: &mut Value) {
+    match value {
+        Value::Object(object) => {
+            if let Some(properties) = object.get_mut("properties").and_then(Value::as_object_mut) {
+                properties.retain(|_, schema| {
+                    !schema
+                        .get(ENV_ONLY_SCHEMA_EXTENSION)
+                        .and_then(Value::as_bool)
+                        .unwrap_or(false)
+                });
+
+                for schema in properties.values_mut() {
+                    remove_env_only_properties(schema);
+                }
+            }
+
+            for (key, child) in object.iter_mut() {
+                if key != "properties" {
+                    remove_env_only_properties(child);
+                }
+            }
+        }
+        Value::Array(items) => {
+            for item in items {
+                remove_env_only_properties(item);
+            }
+        }
+        Value::Null | Value::Bool(_) | Value::Number(_) | Value::String(_) => {}
+    }
+}
+
+/// Removes object properties whose schema became empty after env-only pruning.
+///
+/// # Arguments
+///
+/// - `schema`: Schema subtree to edit in place.
+///
+/// # Returns
+///
+/// Returns no value; `schema` is updated directly.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
+fn remove_empty_object_properties(schema: &mut Value) {
+    loop {
+        let root_schema = schema.clone();
+        if !remove_empty_object_properties_with_root(schema, &root_schema) {
+            break;
+        }
+    }
+}
+
+/// Removes empty object properties using `root_schema` for local `$ref` lookup.
+///
+/// # Arguments
+///
+/// - `value`: Schema subtree to edit in place.
+/// - `root_schema`: Root schema used to resolve local references.
+///
+/// # Returns
+///
+/// Returns `true` when at least one property was removed.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
+fn remove_empty_object_properties_with_root(value: &mut Value, root_schema: &Value) -> bool {
+    let mut changed = false;
+
+    match value {
+        Value::Object(object) => {
+            if let Some(properties) = object.get_mut("properties").and_then(Value::as_object_mut) {
+                let before_len = properties.len();
+                properties.retain(|_, schema| !is_empty_object_schema(root_schema, schema));
+                changed |= properties.len() != before_len;
+
+                for schema in properties.values_mut() {
+                    changed |= remove_empty_object_properties_with_root(schema, root_schema);
+                }
+            }
+
+            for (key, child) in object.iter_mut() {
+                if key != "properties" {
+                    changed |= remove_empty_object_properties_with_root(child, root_schema);
+                }
+            }
+        }
+        Value::Array(items) => {
+            for item in items {
+                changed |= remove_empty_object_properties_with_root(item, root_schema);
+            }
+        }
+        Value::Null | Value::Bool(_) | Value::Number(_) | Value::String(_) => {}
+    }
+
+    changed
+}
+
+/// Returns whether a schema resolves to an empty object schema.
+///
+/// # Arguments
+///
+/// - `root_schema`: Root schema used to resolve local references.
+/// - `schema`: Candidate schema to inspect.
+///
+/// # Returns
+///
+/// Returns `true` when the schema is an object with no properties.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
+fn is_empty_object_schema(root_schema: &Value, schema: &Value) -> bool {
+    let schema = resolve_schema_reference(root_schema, schema).unwrap_or(schema);
+    let Some(object) = schema.as_object() else {
+        return false;
+    };
+
+    let is_object = object.get("type").and_then(Value::as_str) == Some("object")
+        || object.contains_key("properties");
+    let has_properties = object
+        .get("properties")
+        .and_then(Value::as_object)
+        .is_some_and(|properties| !properties.is_empty());
+    let has_dynamic_properties =
+        object.contains_key("additionalProperties") || object.contains_key("patternProperties");
+
+    is_object && !has_properties && !has_dynamic_properties
 }
 
 /// Drops unused `definitions` and `$defs` entries after section pruning.
@@ -645,7 +800,7 @@ fn retain_schema_map(schema: &mut Value, key: &str, used_names: &BTreeSet<String
     }
 }
 
-/// Removes internal `x-tree-split` markers before writing public schemas.
+/// Removes internal extension markers before writing public schemas.
 ///
 /// # Arguments
 ///
@@ -660,18 +815,19 @@ fn retain_schema_map(schema: &mut Value, key: &str, used_names: &BTreeSet<String
 /// ```no_run
 /// let _ = ();
 /// ```
-fn remove_tree_split_extensions(value: &mut Value) {
+fn remove_schema_extensions(value: &mut Value) {
     match value {
         Value::Object(object) => {
             object.remove(TREE_SPLIT_SCHEMA_EXTENSION);
+            object.remove(ENV_ONLY_SCHEMA_EXTENSION);
 
             for child in object.values_mut() {
-                remove_tree_split_extensions(child);
+                remove_schema_extensions(child);
             }
         }
         Value::Array(items) => {
             for item in items {
-                remove_tree_split_extensions(item);
+                remove_schema_extensions(item);
             }
         }
         Value::Null | Value::Bool(_) | Value::Number(_) | Value::String(_) => {}
@@ -732,7 +888,10 @@ where
     S: JsonSchema,
 {
     let mut schema = root_config_schema::<S>()?;
-    remove_tree_split_extensions(&mut schema);
+    remove_env_only_properties(&mut schema);
+    remove_empty_object_properties(&mut schema);
+    prune_unused_schema_maps(&mut schema);
+    remove_schema_extensions(&mut schema);
     let json = schema_json(&schema)?;
 
     write_template(output_path.as_ref(), &json)
@@ -927,6 +1086,34 @@ where
         .collect()
 }
 
+/// Finds leaf fields whose schema opts out of template and schema output.
+///
+/// # Type Parameters
+///
+/// - `S`: Config schema type whose metadata supplies field paths.
+///
+/// # Arguments
+///
+/// - `full_schema`: Full root schema containing `x-env-only` markers.
+///
+/// # Returns
+///
+/// Returns leaf field paths marked with `x-env-only = true`.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
+pub(crate) fn env_only_field_paths<S>(full_schema: &Value) -> Vec<Vec<&'static str>>
+where
+    S: ConfigSchema,
+{
+    let mut paths = Vec::new();
+    collect_env_only_field_paths(&S::META, full_schema, &mut Vec::new(), &mut paths);
+    paths
+}
+
 /// Checks whether a section property carries the split marker extension.
 ///
 /// # Arguments
@@ -944,18 +1131,41 @@ where
 /// let _ = ();
 /// ```
 fn section_has_tree_split_marker(root_schema: &Value, section_path: &[&str]) -> bool {
-    section_property_schema_for_path(root_schema, section_path)
+    property_schema_for_path(root_schema, section_path)
         .and_then(|schema| schema.get(TREE_SPLIT_SCHEMA_EXTENSION))
         .and_then(Value::as_bool)
         .unwrap_or(false)
 }
 
-/// Returns the original property schema for a nested section path.
+/// Checks whether a field property carries the env-only marker extension.
+///
+/// # Arguments
+///
+/// - `root_schema`: Full root schema to inspect.
+/// - `field_path`: Field path to check.
+///
+/// # Returns
+///
+/// Returns `true` when the field schema carries `x-env-only = true`.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
+fn field_has_env_only_marker(root_schema: &Value, field_path: &[&str]) -> bool {
+    property_schema_for_path(root_schema, field_path)
+        .and_then(|schema| schema.get(ENV_ONLY_SCHEMA_EXTENSION))
+        .and_then(Value::as_bool)
+        .unwrap_or(false)
+}
+
+/// Returns the original property schema for a field path.
 ///
 /// # Arguments
 ///
 /// - `root_schema`: Full root schema to traverse.
-/// - `section_path`: Nested section field path to locate.
+/// - `path`: Field path to locate.
 ///
 /// # Returns
 ///
@@ -966,15 +1176,12 @@ fn section_has_tree_split_marker(root_schema: &Value, section_path: &[&str]) -> 
 /// ```no_run
 /// let _ = ();
 /// ```
-fn section_property_schema_for_path<'a>(
-    root_schema: &'a Value,
-    section_path: &[&str],
-) -> Option<&'a Value> {
+fn property_schema_for_path<'a>(root_schema: &'a Value, path: &[&str]) -> Option<&'a Value> {
     let mut current = root_schema;
 
-    for (index, section) in section_path.iter().enumerate() {
+    for (index, section) in path.iter().enumerate() {
         let property = current.get("properties")?.get(*section)?;
-        if index + 1 == section_path.len() {
+        if index + 1 == path.len() {
             return Some(property);
         }
 
@@ -1013,6 +1220,48 @@ fn collect_nested_section_paths(
             collect_nested_section_paths(meta, prefix, paths);
             prefix.pop();
         }
+    }
+}
+
+/// Recursively appends env-only leaf field paths to `paths`.
+///
+/// # Arguments
+///
+/// - `meta`: Current `confique` metadata node.
+/// - `root_schema`: Full root schema containing marker extensions.
+/// - `prefix`: Mutable field path prefix for `meta`.
+/// - `paths`: Output list receiving discovered leaf paths.
+///
+/// # Returns
+///
+/// Returns no value; `paths` and `prefix` are updated during traversal.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
+fn collect_env_only_field_paths(
+    meta: &'static Meta,
+    root_schema: &Value,
+    prefix: &mut Vec<&'static str>,
+    paths: &mut Vec<Vec<&'static str>>,
+) {
+    for field in meta.fields {
+        prefix.push(field.name);
+
+        match field.kind {
+            FieldKind::Leaf { .. } => {
+                if field_has_env_only_marker(root_schema, prefix) {
+                    paths.push(prefix.clone());
+                }
+            }
+            FieldKind::Nested { meta } => {
+                collect_env_only_field_paths(meta, root_schema, prefix, paths);
+            }
+        }
+
+        prefix.pop();
     }
 }
 

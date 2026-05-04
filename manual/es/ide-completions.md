@@ -34,6 +34,8 @@ completado de secciones hijas solo está disponible en archivos que enlazan el
 esquema de sección correspondiente. Las secciones anidadas sin marca permanecen
 en el esquema raíz.
 
+Los campos marcados con `x-env-only` se omiten de los esquemas generados, por lo que los IDE no sugieren secrets u otros valores que deben venir solo de variables de entorno.
+
 Los esquemas del IDE siguen validando campos presentes, incluidas comprobaciones
 de tipo, enum y propiedades desconocidas admitidas por el esquema generado. Usa
 `config-validate` para campos obligatorios y validación final de la

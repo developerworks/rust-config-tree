@@ -27,6 +27,8 @@ should be generated as its own `config/*.yaml` template and
 `schemas/*.schema.json` schema. Unmarked nested fields stay in the parent
 template and parent schema.
 
+Merkitse lehtikentta `#[schemars(extend("x-env-only" = true))]`, kun arvon tulee tulla vain ymparistomuuttujista. Luodut mallit ja JSON Schema -skeemat jattavat env-only-kentat pois, ja niiden takia tyhjiksi jaavat ylaobjektit poistetaan.
+
 Luodut skeemat jattavat `required`-rajoitteet pois. IDEt voivat silti tarjota taydennysta, mutta osittaiset tiedostot kuten `config/log.yaml` eivat ilmoita puuttuvista juurikentista. Juuriskeema taydentaa vain juuritiedostoon kuuluvat kentat; sisakkaisten osioiden kentat jatetaan siella pois ja taydennetaan niiden omilla osioskeemoilla. Paikalla olevat kentat tarkistetaan yha skeemalla IDEssa. Pakolliset kentat ja lopullinen yhdistetyn konfiguraation validointi hoidetaan `load_config`-funktiolla tai `config-validate`-komennolla.
 
 Sido nama skeemat luoduista TOML- ja YAML-malleista:

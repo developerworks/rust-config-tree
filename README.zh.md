@@ -12,8 +12,9 @@
 
 - 通过 Figment runtime provider 将 `confique` schema 加载成可直接使用的
   config 对象
-- `config-template`、`completions` 和 `install-completions` 命令处理
-- 生成 Draft 7 root 和 section JSON Schema，供编辑器补全和校验使用
+- `config-template`、`config-schema`、`config-validate`、`completions`、
+  `install-completions` 和 `uninstall-completions` 命令处理
+- 生成 Draft 7 root 和 section JSON Schema，供编辑器补全和基础 schema 检查使用
 - YAML、TOML、JSON 和 JSON5 配置模板生成
 - 为 TOML 和 YAML 模板生成 schema directive，不写入运行时字段
 - 递归 include 遍历
@@ -36,7 +37,7 @@
 [dependencies]
 rust-config-tree = "0.1"
 confique = { version = "0.4", features = ["yaml", "toml", "json5"] }
-figment = { version = "0.10", features = ["yaml", "env"] }
+figment = { version = "0.10", features = ["yaml", "toml", "json", "env"] }
 schemars = { version = "1", features = ["derive"] }
 serde = { version = "1", features = ["derive"] }
 clap = { version = "4", features = ["derive"] }
@@ -177,8 +178,17 @@ command-line overrides
 Draft 7 JSON Schema。需要独立生成 `config/*.yaml` 和
 `schemas/*.schema.json` 的 nested 字段使用
 `#[schemars(extend("x-tree-split" = true))]` 标记。没有这个标记的 nested
-字段会留在父模板和父 schema 中。生成的 schema 会移除 `required` 约束，这样
-IDE 可以为局部配置文件提供补全，同时不会因为缺少字段而报错：
+字段会留在父模板和父 schema 中。
+
+当某个 leaf 字段只能从环境变量提供时，可以加
+`#[schemars(extend("x-env-only" = true))]`。生成的模板和 JSON Schema 会省略
+env-only 字段；如果父对象因此变空，也会一并裁剪。
+
+生成的 schema 会移除 `required` 约束，这样 IDE 可以为局部配置文件提供补全，
+同时不会因为缺少字段而报错。生成的 `*.schema.json` 文件只用于 IDE 补全和
+基础编辑期检查，不负责判断具体字段值对应用是否合法。字段值合法性应在代码中
+通过 `#[config(validate = Self::validate)]` 实现，并由 `load_config` 或
+`config-validate` 触发：
 
 ```rust
 use rust_config_tree::write_config_schemas;
@@ -250,6 +260,7 @@ root TOML/YAML 目标会绑定 root schema，并且不会补全被拆分的 chil
 - `config-validate`
 - `completions`
 - `install-completions`
+- `uninstall-completions`
 
 合并方式如下：
 
@@ -320,23 +331,30 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 }
 ```
 
-`config-template --output <path>` 将模板写入指定路径。未提供 output path 时，
-写入当前目录下的 `config.example.yaml`。添加 `--schema <path>` 后，TOML 和
-YAML 模板会绑定生成的 JSON Schema 集合，但不会加入运行时 `$schema` 字段。
-这也会把 root schema 和 section schemas 写入指定的 schema path。
+`config-template --output <file-name>` 会在 `config/<root_config_name>/`
+下写入模板，并使用指定的文件名。如果传入的是路径，只取它的文件名。未提供
+output file name 时，写入
+`config/<root_config_name>/<root_config_name>.example.yaml`。添加
+`--schema <path>` 后，TOML 和 YAML 模板会绑定生成的 JSON Schema 集合，但
+不会加入运行时 `$schema` 字段。这也会把 root schema 和 section schemas
+写入指定的 schema path。
 
 `config-schema --output <path>` 写入 root Draft 7 JSON Schema 和 section
 schema。未提供 output path 时，root schema 写入
-`schemas/config.schema.json`。
+`config/<root_config_name>/<root_config_name>.schema.json`。
 
 `config-validate` 会加载完整 runtime config tree，并执行 `confique` 默认值和
-校验。编辑拆分文件时用 editor schema 获得不误报的补全；必填项和最终配置
-校验交给这个命令。校验成功时会输出 `Configuration is ok`。
+校验，包括通过 `#[config(validate = Self::validate)]` 声明的校验。编辑拆分
+文件时用 editor schema 获得不误报的补全；必填项和最终配置校验交给这个命令。
+校验成功时会输出 `Configuration is ok`。
 
 `completions <shell>` 将 completions 输出到 stdout。
 
 `install-completions <shell>` 将 completions 写入用户 home 目录，并在 shell
 需要时更新启动文件。支持 Bash、Elvish、Fish、PowerShell 和 Zsh。
+
+`uninstall-completions <shell>` 会删除当前 binary 的 completion 文件，并在 shell
+使用 managed startup block 时删除该 block。
 
 ## 低层 Tree API
 

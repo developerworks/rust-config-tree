@@ -29,6 +29,8 @@ should be generated as its own `config/*.yaml` template and
 `schemas/*.schema.json` schema. Unmarked nested fields stay in the parent
 template and parent schema.
 
+Markeer een leafveld met `#[schemars(extend("x-env-only" = true))]` wanneer de waarde alleen uit omgevingsvariabelen mag komen. Gegenereerde sjablonen en JSON Schemas laten env-only velden weg, en lege bovenliggende objecten die daardoor overblijven worden verwijderd.
+
 Gegenereerde schema's laten `required`-constraints weg. IDE's kunnen nog steeds
 completion bieden, maar gedeeltelijke bestanden zoals `config/log.yaml`
 rapporteren geen ontbrekende rootvelden. Het rootschema vult alleen velden aan

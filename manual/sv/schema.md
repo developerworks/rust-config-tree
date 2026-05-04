@@ -80,6 +80,16 @@ server:
   port: 8080
 ```
 
+## Endast miljo-falt
+
+Markera ett bladfalt med `#[schemars(extend("x-env-only" = true))]` nar vardet bara ska komma fran en miljovariabel och inte ska visas i genererade konfigurationsfiler. Genererade YAML-mallar och JSON Schemas utelamnar env-only-falt, och foralderobjekt som blir tomma tas bort.
+
+```rust
+#[config(env = "APP_SECRET")]
+#[schemars(extend("x-env-only" = true))]
+secret: String,
+```
+
 ## Overstyrning av mallsektioner
 
 Nar en mallkalla saknar includes kan craten harleda barnmallfiler fran nastlade

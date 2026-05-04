@@ -32,6 +32,8 @@ write_config_schemas::<AppConfig>("schemas/myapp.schema.json")?;
 섹션 스키마를 바인딩한 파일에서만 사용할 수 있습니다. 표시하지 않은 중첩 섹션은
 루트 스키마에 남습니다.
 
+`x-env-only`로 표시한 필드는 생성된 스키마에서 생략되므로, 환경 변수로만 제공해야 하는 secret이나 기타 값은 IDE가 완성하지 않습니다.
+
 IDE 스키마는 타입, enum, 알 수 없는 프로퍼티 검사 등 생성된 스키마가 지원하는
 현재 필드 검증을 계속 수행합니다. 필수 필드와 최종 병합 설정 검증에는
 `config-validate`를 사용하세요.

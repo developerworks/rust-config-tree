@@ -75,6 +75,16 @@ server:
   port: 8080
 ```
 
+## Vain ymparistomuuttujista tulevat kentat
+
+Merkitse lehtikentta `#[schemars(extend("x-env-only" = true))]`, kun arvon tulee tulla vain ymparistomuuttujasta eika sen pidä nakya luoduissa konfiguraatiotiedostoissa. Luodut YAML-mallit ja JSON Schema -skeemat jattavat env-only-kentat pois, ja niiden takia tyhjiksi jaavat ylaobjektit poistetaan.
+
+```rust
+#[config(env = "APP_SECRET")]
+#[schemars(extend("x-env-only" = true))]
+secret: String,
+```
+
 ## Malliosioiden ohitukset
 
 Kun mallilahteella ei ole includeja, crate voi johtaa lapsimallitiedostot `x-tree-split`-merkityista sisakkaisista skeemaosioista. Oletuspolku ylatasolla on `config/<section>.yaml`.

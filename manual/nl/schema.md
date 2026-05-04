@@ -81,6 +81,16 @@ server:
   port: 8080
 ```
 
+## Omgevings-only velden
+
+Markeer een leafveld met `#[schemars(extend("x-env-only" = true))]` wanneer de waarde alleen uit een omgevingsvariabele mag komen en niet in gegenereerde configuratiebestanden mag verschijnen. Gegenereerde YAML-sjablonen en JSON Schemas laten env-only velden weg, en lege bovenliggende objecten die daardoor overblijven worden verwijderd.
+
+```rust
+#[config(env = "APP_SECRET")]
+#[schemars(extend("x-env-only" = true))]
+secret: String,
+```
+
 ## Overrides voor sjabloonsecties
 
 Wanneer een sjabloonbron geen includes heeft, kan de crate kind-

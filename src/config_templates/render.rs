@@ -74,6 +74,7 @@ where
 /// - `include_paths`: Include paths to place in the generated template.
 /// - `section_path`: Section path represented by this target.
 /// - `split_paths`: Section paths split out of the root template.
+/// - `env_only_paths`: Leaf field paths omitted from generated config files.
 ///
 /// # Returns
 ///
@@ -89,11 +90,14 @@ pub(super) fn template_for_target<S>(
     include_paths: &[PathBuf],
     section_path: &[&'static str],
     split_paths: &[Vec<&'static str>],
+    env_only_paths: &[Vec<&'static str>],
 ) -> ConfigResult<String>
 where
     S: ConfigSchema,
 {
-    if ConfigFormat::from_path(path) != ConfigFormat::Yaml || split_paths.is_empty() {
+    if ConfigFormat::from_path(path) != ConfigFormat::Yaml
+        || (split_paths.is_empty() && env_only_paths.is_empty())
+    {
         return template_for_path_with_includes::<S>(path, include_paths);
     }
 
@@ -102,6 +106,7 @@ where
         include_paths,
         section_path,
         split_paths,
+        env_only_paths,
     ))
 }
 

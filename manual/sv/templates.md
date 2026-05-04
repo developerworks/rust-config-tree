@@ -29,6 +29,8 @@ should be generated as its own `config/*.yaml` template and
 `schemas/*.schema.json` schema. Unmarked nested fields stay in the parent
 template and parent schema.
 
+Markera ett bladfalt med `#[schemars(extend("x-env-only" = true))]` nar vardet bara ska komma fran miljovariabler. Genererade mallar och JSON Schemas utelamnar env-only-falt, och foralderobjekt som blir tomma tas bort.
+
 Genererade scheman utelamnar `required`-begransningar. IDE:er kan fortfarande
 erbjuda komplettering, men partiella filer som `config/log.yaml` rapporterar
 inte saknade rotfalt. Rotschemat kompletterar bara falt som hor hemma i

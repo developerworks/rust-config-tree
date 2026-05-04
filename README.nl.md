@@ -13,7 +13,9 @@ Het ondersteunt:
 
 - het laden van een `confique`-schema naar een direct bruikbaar configuratieobject
   via Figment-runtimeproviders
-- opdrachtverwerkers voor `config-template`, `completions` en `install-completions`
+- opdrachtverwerkers voor `config-template`, `config-schema`,
+  `config-validate`, `completions`, `install-completions` en
+  `uninstall-completions`
 - Draft 7 JSON Schema-generatie voor root- en sectieschema's voor editorcompletion en validatie
 - configuratiesjabloongeneratie voor YAML, TOML, JSON en JSON5
 - schemadirectives voor TOML- en YAML-sjablonen zonder runtimevelden toe te voegen
@@ -38,7 +40,7 @@ maken.
 [dependencies]
 rust-config-tree = "0.1"
 confique = { version = "0.4", features = ["yaml", "toml", "json5"] }
-figment = { version = "0.10", features = ["yaml", "env"] }
+figment = { version = "0.10", features = ["yaml", "toml", "json", "env"] }
 schemars = { version = "1", features = ["derive"] }
 serde = { version = "1", features = ["derive"] }
 clap = { version = "4", features = ["derive"] }
@@ -231,6 +233,8 @@ should be generated as its own `config/*.yaml` template and
 `schemas/*.schema.json` schema. Unmarked nested fields stay in the parent
 template and parent schema.
 
+Markeer een leafveld met `#[schemars(extend("x-env-only" = true))]` wanneer de waarde alleen uit omgevingsvariabelen mag komen. Gegenereerde sjablonen en JSON Schemas laten env-only velden weg, en lege bovenliggende objecten die daardoor overblijven worden verwijderd.
+
 Voor een schema met `server`- en `log`-secties gemarkeerd met `x-tree-split` schrijft dit
 `schemas/myapp.schema.json`, `schemas/server.schema.json` en
 `schemas/log.schema.json`. Het rootschema bevat alleen velden die in het
@@ -331,6 +335,7 @@ Flatten `ConfigCommand` in de bestaande clap-opdrachtenenum om toe te voegen:
 - `config-validate`
 - `completions`
 - `install-completions`
+- `uninstall-completions`
 
 De consumerende toepassing behoudt haar eigen `Parser`-type en eigen
 opdrachtenenum. `rust-config-tree` levert alleen herbruikbare subcommands:
@@ -403,16 +408,19 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 }
 ```
 
-`config-template --output <path>` schrijft sjablonen naar het gekozen pad. Als
-geen uitvoerpad is opgegeven, schrijft het `config.example.yaml` in de huidige
-directory. Voeg `--schema <path>` toe om TOML- en YAML-sjablonen te koppelen aan
-een gegenereerde JSON Schema-set zonder een runtimeveld `$schema` toe te voegen.
+`config-template --output <file-name>` schrijft sjablonen onder
+`config/<root_config_name>/` met de gekozen bestandsnaam. Als een pad is
+opgegeven, wordt alleen de bestandsnaam gebruikt. Als geen uitvoerbestandsnaam
+is opgegeven, schrijft het
+`config/<root_config_name>/<root_config_name>.example.yaml`. Voeg
+`--schema <path>` toe om TOML- en YAML-sjablonen te koppelen aan een
+gegenereerde JSON Schema-set zonder een runtimeveld `$schema` toe te voegen.
 Dit schrijft ook het rootschema en de sectieschema's naar het gekozen
 schemapad.
 
 `config-schema --output <path>` schrijft het root-Draft 7 JSON Schema en de
 sectieschema's. Als geen uitvoerpad is opgegeven, wordt het rootschema naar
-`schemas/config.schema.json` geschreven.
+`config/<root_config_name>/<root_config_name>.schema.json` geschreven.
 
 `config-validate` laadt de volledige runtimeconfiguratieboom en voert
 `confique`-standaardwaarden en validatie uit. Gebruik editorschema's voor
@@ -425,6 +433,10 @@ opdracht voor vereiste velden en uiteindelijke configuratievalidatie. Het print
 `install-completions <shell>` schrijft completions onder de home-directory van
 de gebruiker en werkt het shellstartbestand bij wanneer de shell dat vereist.
 Bash, Elvish, Fish, PowerShell en Zsh worden ondersteund.
+
+`uninstall-completions <shell>` verwijdert het completionbestand van de huidige
+binary en verwijdert het beheerde shell-startblok wanneer die shell er een
+gebruikt.
 
 ## Lagere Tree API
 

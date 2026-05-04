@@ -243,6 +243,50 @@ impl ConfigSchema for InlineTemplateConfig {
     }
 }
 
+#[derive(Debug, Config, JsonSchema)]
+#[allow(dead_code)]
+struct EnvOnlyTemplateConfig {
+    #[config(default = [])]
+    include: Vec<PathBuf>,
+    #[config(default = "visible")]
+    mode: String,
+    #[config(env = "APP_SECRET")]
+    #[schemars(extend("x-env-only" = true))]
+    secret: String,
+    #[config(nested)]
+    wallet: EnvOnlyWalletConfig,
+}
+
+#[derive(Debug, Config, JsonSchema)]
+#[allow(dead_code)]
+struct EnvOnlyWalletConfig {
+    #[config(env = "APP_WALLET_PRIVATE_KEY")]
+    #[schemars(extend("x-env-only" = true))]
+    private_key: String,
+}
+
+/// Exposes fixture includes for env-only template tests.
+impl ConfigSchema for EnvOnlyTemplateConfig {
+    /// Returns include paths declared by the env-only fixture layer.
+    ///
+    /// # Arguments
+    ///
+    /// - `layer`: Partially loaded fixture layer.
+    ///
+    /// # Returns
+    ///
+    /// Returns include paths or an empty list when omitted.
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// let _ = ();
+    /// ```
+    fn include_paths(layer: &<Self as Config>::Layer) -> Vec<PathBuf> {
+        layer.include.clone().unwrap_or_default()
+    }
+}
+
 /// Verifies a root config and included child load into the final schema.
 ///
 /// # Arguments
@@ -687,10 +731,7 @@ fn split_yaml_templates_bind_nested_section_schemas() {
 
     let inner = targets
         .iter()
-        .find(|target| {
-            target.path
-                == root.join("outer").join("inner.yaml")
-        })
+        .find(|target| target.path == root.join("outer").join("inner.yaml"))
         .unwrap();
     assert!(
         inner
@@ -878,6 +919,59 @@ fn unmarked_nested_sections_stay_in_root_template_and_schema() {
     let _ = fs::remove_dir_all(root);
 }
 
+/// Verifies env-only fields are omitted from generated YAML templates and schemas.
+///
+/// # Arguments
+///
+/// This test has no arguments.
+///
+/// # Returns
+///
+/// Returns no value; failed assertions panic.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
+#[test]
+fn env_only_fields_are_omitted_from_yaml_templates_and_schemas() {
+    let root = temp_dir_path("env-only-template-config");
+    fs::create_dir_all(&root).unwrap();
+    let output_path = root.join("config.example.yaml");
+
+    let template_targets =
+        template_targets_for_paths::<EnvOnlyTemplateConfig>(root.join("config.yaml"), &output_path)
+            .unwrap();
+
+    assert_eq!(template_targets.len(), 1);
+    assert_eq!(template_targets[0].path, output_path);
+    assert!(template_targets[0].content.contains("mode"));
+    assert!(!template_targets[0].content.contains("secret"));
+    assert!(!template_targets[0].content.contains("wallet:"));
+    assert!(!template_targets[0].content.contains("private_key"));
+    assert!(!template_targets[0].content.contains("APP_SECRET"));
+    assert!(
+        !template_targets[0]
+            .content
+            .contains("APP_WALLET_PRIVATE_KEY")
+    );
+
+    let schema_path = root.join("schemas").join("config.schema.json");
+    let schema_targets =
+        config_schema_targets_for_path::<EnvOnlyTemplateConfig>(&schema_path).unwrap();
+
+    assert_eq!(schema_targets.len(), 1);
+    assert_eq!(schema_targets[0].path, schema_path);
+    assert!(schema_targets[0].content.contains("\"mode\""));
+    assert!(!schema_targets[0].content.contains("\"secret\""));
+    assert!(!schema_targets[0].content.contains("\"wallet\""));
+    assert!(!schema_targets[0].content.contains("\"private_key\""));
+    assert!(!schema_targets[0].content.contains("x-env-only"));
+
+    let _ = fs::remove_dir_all(root);
+}
+
 /// Verifies missing schema-derived includes are appended to existing includes.
 ///
 /// # Arguments
@@ -914,21 +1008,13 @@ fn template_targets_append_missing_schema_default_includes() {
     assert_eq!(targets.len(), 4);
     assert_eq!(targets[0].path, output_path);
     assert!(targets[0].content.contains("\"config/custom-branch.yaml\""));
-    assert!(
-        targets[0].content.contains("\"outer.yaml\"")
-    );
+    assert!(targets[0].content.contains("\"outer.yaml\""));
     assert_eq!(
         targets[1].path,
         root.join("config").join("custom-branch.yaml")
     );
-    assert_eq!(
-        targets[2].path,
-        root.join("outer.yaml")
-    );
-    assert_eq!(
-        targets[3].path,
-        root.join("outer").join("inner.yaml")
-    );
+    assert_eq!(targets[2].path, root.join("outer.yaml"));
+    assert_eq!(targets[3].path, root.join("outer").join("inner.yaml"));
 
     let _ = fs::remove_dir_all(root);
 }
@@ -963,9 +1049,7 @@ fn template_targets_auto_split_nested_schema_sections() {
     assert_eq!(targets.len(), 4);
     assert_eq!(targets[0].path, output_path);
     assert!(targets[0].content.contains("\"config/custom-branch.yaml\""));
-    assert!(
-        targets[0].content.contains("\"outer.yaml\"")
-    );
+    assert!(targets[0].content.contains("\"outer.yaml\""));
     assert!(targets[0].content.contains("root_value"));
     assert!(!targets[0].content.contains("branch:"));
     assert!(!targets[0].content.contains("outer:"));
@@ -980,10 +1064,7 @@ fn template_targets_auto_split_nested_schema_sections() {
     assert!(!targets[1].content.contains("root_value"));
     assert!(!targets[1].content.contains("outer:"));
 
-    assert_eq!(
-        targets[2].path,
-        root.join("outer.yaml")
-    );
+    assert_eq!(targets[2].path, root.join("outer.yaml"));
     assert!(targets[2].content.contains("\"outer/inner.yaml\""));
     assert!(targets[2].content.contains("outer:"));
     assert!(!targets[2].content.contains("\nouter:"));
@@ -991,10 +1072,7 @@ fn template_targets_auto_split_nested_schema_sections() {
     assert!(!targets[2].content.contains("inner:"));
     assert!(!targets[2].content.contains("branch:"));
 
-    assert_eq!(
-        targets[3].path,
-        root.join("outer").join("inner.yaml")
-    );
+    assert_eq!(targets[3].path, root.join("outer").join("inner.yaml"));
     assert!(targets[3].content.contains("outer:"));
     assert!(targets[3].content.contains("inner:"));
     assert!(!targets[3].content.contains("\nouter:"));

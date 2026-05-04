@@ -34,7 +34,9 @@ zonder diagnostics voor ontbrekende velden. Het rootschema laat geneste
 sectie-eigenschappen weg, zodat completion voor kindsecties alleen beschikbaar
 is in bestanden die het passende sectieschema koppelen.
 
-IDE-schema's valideren nog steeds aanwezige velden, inclusief type-, enum- en
+Velden gemarkeerd met `x-env-only` worden uit gegenereerde schemas weggelaten, zodat IDEs geen secrets of andere waarden voorstellen die alleen uit omgevingsvariabelen mogen komen.
+
+IDE-schema.s valideren nog steeds aanwezige velden, inclusief type-, enum- en
 onbekende-eigenschapcontroles die door het gegenereerde schema worden
 ondersteund. Gebruik `config-validate` voor verplichte velden en uiteindelijke
 samengevoegde configuratievalidatie.

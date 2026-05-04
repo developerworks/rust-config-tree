@@ -79,6 +79,25 @@ server:
   port: 8080
 ```
 
+## 环境变量专用字段
+
+当 leaf 字段只能由环境变量提供，且不应该出现在生成的配置文件中时，可以使用 `#[schemars(extend("x-env-only" = true))]`。生成的 YAML 模板和 JSON Schema 会省略 env-only 字段；如果父对象因此变空，也会一并裁剪。
+
+```rust
+#[config(env = "APP_SECRET")]
+#[schemars(extend("x-env-only" = true))]
+secret: String,
+```
+
+## 字段值合法性校验
+
+生成的 `*.schema.json` 文件只用于 IDE 补全和基础编辑期检查，不负责判断具体
+字段值对应用是否合法。
+
+字段值合法性应在代码中通过 `#[config(validate = Self::validate)]` 实现。
+最终配置通过 `load_config` 加载，或通过 `config-validate` 检查时，会执行这个
+运行时校验。
+
 ## 模板 Section 路径覆盖
 
 当模板 source 没有 include 时，crate 可以从带 `x-tree-split` 标记的嵌套

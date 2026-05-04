@@ -35,6 +35,8 @@ delade sektionsproperties, sa barnsektionskomplettering ar bara tillganglig i
 filer som binder matchande sektionsschema. Omarkerade nastlade sektioner stannar
 i rotschemat.
 
+Falt markerade med `x-env-only` utelamnas fran genererade scheman, sa IDE:er foreslar inte secrets eller andra varden som bara ska komma fran miljovariabler.
+
 IDE-scheman validerar fortfarande befintliga falt, inklusive typ, enum och
 kontroller for okanda properties som stods av det genererade schemat. Anvand
 `config-validate` for obligatoriska falt och slutlig sammanslagen

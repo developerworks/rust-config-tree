@@ -36,6 +36,8 @@ Kindabschnitts-Vervollstaendigung nur in Dateien verfuegbar ist, die das
 passende Abschnittsschema binden. Nicht markierte verschachtelte Abschnitte
 bleiben im Root-Schema.
 
+Mit `x-env-only` markierte Felder werden aus erzeugten Schemas weggelassen, sodass IDEs keine Secrets oder andere Werte vorschlagen, die nur aus Umgebungsvariablen kommen duerfen.
+
 IDE-Schemas validieren weiterhin vorhandene Felder, einschliesslich Typ-,
 Enum- und Unbekannte-Eigenschaft-Pruefungen, soweit sie vom erzeugten Schema
 unterstuetzt werden. Verwende `config-validate` fuer Pflichtfelder und finale

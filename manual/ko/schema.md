@@ -79,6 +79,16 @@ server:
   port: 8080
 ```
 
+## 환경 변수 전용 필드
+
+값을 환경 변수로만 제공해야 하고 생성된 설정 파일에는 나타나면 안 되는 leaf 필드는 `#[schemars(extend("x-env-only" = true))]`로 표시합니다. 생성된 YAML 템플릿과 JSON Schema는 env-only 필드를 생략하며, 이 생략으로 비게 된 부모 객체도 함께 제거합니다.
+
+```rust
+#[config(env = "APP_SECRET")]
+#[schemars(extend("x-env-only" = true))]
+secret: String,
+```
+
 ## 템플릿 섹션 override
 
 템플릿 소스에 include가 없으면 crate는 `x-tree-split`로 표시한 중첩 스키마 섹션에서 자식 템플릿 파일을

@@ -91,17 +91,20 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 ## Plantillas de configuración
 
 ```bash
-demo config-template --output config.example.yaml
+demo config-template --output app_config.example.yaml
 ```
 
-Si no se proporciona ruta de salida, el comando escribe `config.example.yaml` en
-el directorio actual. Añade `--schema schemas/myapp.schema.json` para enlazar
-plantillas TOML y YAML generadas a JSON Schemas generados. Las plantillas YAML
-divididas enlazan el esquema de sección correspondiente. El comando también
-escribe los esquemas raíz y de sección en la ruta de esquema seleccionada.
+El comando escribe plantillas bajo `config/<root_config_name>/`. Si `--output`
+recibe una ruta, solo se usa el nombre de archivo. Si no se proporciona un
+nombre de archivo de salida, el comando escribe
+`config/<root_config_name>/<root_config_name>.example.yaml`. Añade
+`--schema schemas/myapp.schema.json` para enlazar plantillas TOML y YAML
+generadas a JSON Schemas generados. Las plantillas YAML divididas enlazan el
+esquema de sección correspondiente. El comando también escribe los esquemas
+raíz y de sección en la ruta de esquema seleccionada.
 
 ```bash
-demo config-template --output config.example.toml --schema schemas/myapp.schema.json
+demo config-template --output app_config.example.toml --schema schemas/myapp.schema.json
 ```
 
 Genera JSON Schemas raíz y de sección:
@@ -109,6 +112,9 @@ Genera JSON Schemas raíz y de sección:
 ```bash
 demo config-schema --output schemas/myapp.schema.json
 ```
+
+Sin `--output`, `config-schema` escribe el esquema raíz en
+`config/<root_config_name>/<root_config_name>.schema.json`.
 
 Valida el árbol completo de configuración en tiempo de ejecución:
 

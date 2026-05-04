@@ -32,8 +32,12 @@ write_config_schemas::<AppConfig>("schemas/myapp.schema.json")?;
 root schema 会省略被拆分的 nested section 属性，所以 child section 的补全只会出现在
 绑定对应 section schema 的文件里。没有标记的 nested section 会保留在 root schema 中。
 
-IDE schema 仍会校验已经出现的字段，包括生成 schema 支持的类型、枚举和未知
-属性检查。必填字段和最终合并配置的校验使用 `config-validate`。
+带 `x-env-only` 标记的字段会从生成的 schema 中省略，因此 IDE 不会补全必须只来自环境变量的 secret 或其他值。
+
+IDE schema 只用于补全和基础编辑期检查，例如生成 schema 支持的类型、枚举和未知
+属性检查。它不负责判断具体字段值对应用是否合法。字段值合法性应在代码中通过
+`#[config(validate = Self::validate)]` 实现，并由 `load_config` 或
+`config-validate` 触发。必填字段和最终合并配置的校验也使用这些运行时路径。
 
 ## TOML
 

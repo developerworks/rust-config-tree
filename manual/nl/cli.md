@@ -88,17 +88,20 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 ## Configuratiesjablonen
 
 ```bash
-demo config-template --output config.example.yaml
+demo config-template --output app_config.example.yaml
 ```
 
-Als geen uitvoerpad is opgegeven, schrijft de opdracht `config.example.yaml` in
-de huidige directory. Voeg `--schema schemas/myapp.schema.json` toe om
-gegenereerde TOML- en YAML-sjablonen te koppelen aan gegenereerde JSON Schemas.
-Gesplitste YAML-sjablonen koppelen het passende sectieschema. De opdracht
-schrijft ook het root- en de sectieschema's naar het gekozen schemapad.
+De opdracht schrijft sjablonen onder `config/<root_config_name>/`. Als
+`--output` een pad ontvangt, wordt alleen de bestandsnaam gebruikt. Als geen
+uitvoerbestandsnaam is opgegeven, schrijft de opdracht
+`config/<root_config_name>/<root_config_name>.example.yaml`. Voeg
+`--schema schemas/myapp.schema.json` toe om gegenereerde TOML- en YAML-sjablonen
+te koppelen aan gegenereerde JSON Schemas. Gesplitste YAML-sjablonen koppelen
+het passende sectieschema. De opdracht schrijft ook het root- en de
+sectieschema's naar het gekozen schemapad.
 
 ```bash
-demo config-template --output config.example.toml --schema schemas/myapp.schema.json
+demo config-template --output app_config.example.toml --schema schemas/myapp.schema.json
 ```
 
 Genereer root- en sectie-JSON Schemas:
@@ -106,6 +109,9 @@ Genereer root- en sectie-JSON Schemas:
 ```bash
 demo config-schema --output schemas/myapp.schema.json
 ```
+
+Zonder `--output` schrijft `config-schema` het rootschema naar
+`config/<root_config_name>/<root_config_name>.schema.json`.
 
 Valideer de volledige runtimeconfiguratieboom:
 

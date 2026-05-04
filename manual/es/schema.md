@@ -81,6 +81,16 @@ server:
   port: 8080
 ```
 
+## Campos solo de entorno
+
+Marca un campo hoja con `#[schemars(extend("x-env-only" = true))]` cuando su valor debe venir solo de una variable de entorno y no debe aparecer en archivos de configuración generados. Las plantillas YAML y los JSON Schemas generados omiten los campos env-only, y también se eliminan los objetos padre que queden vacíos.
+
+```rust
+#[config(env = "APP_SECRET")]
+#[schemars(extend("x-env-only" = true))]
+secret: String,
+```
+
 ## Overrides de sección de plantilla
 
 Cuando una fuente de plantilla no tiene includes, el crate puede derivar

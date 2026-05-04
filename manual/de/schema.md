@@ -81,6 +81,16 @@ server:
   port: 8080
 ```
 
+## Nur-Umgebung-Felder
+
+Markiere ein Blattfeld mit `#[schemars(extend("x-env-only" = true))]`, wenn sein Wert nur aus einer Umgebungsvariable kommen soll und nicht in generierten Konfigurationsdateien erscheinen darf. Generierte YAML-Vorlagen und JSON-Schemas lassen env-only-Felder weg, und dadurch leere Elternobjekte werden entfernt.
+
+```rust
+#[config(env = "APP_SECRET")]
+#[schemars(extend("x-env-only" = true))]
+secret: String,
+```
+
 ## Abschnittspfade fuer Vorlagen ueberschreiben
 
 Wenn eine Vorlagenquelle keine Includes hat, kann die Crate Kind-Vorlagendateien
