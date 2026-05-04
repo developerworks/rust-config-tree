@@ -36,7 +36,7 @@ pub enum ConfigCommand {
         #[arg(long)]
         output: Option<PathBuf>,
 
-        /// Root JSON Schema path to write and bind from TOML/YAML templates.
+        /// Root JSON Schema path to write and bind from generated templates.
         #[arg(long)]
         schema: Option<PathBuf>,
     },

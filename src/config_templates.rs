@@ -2,8 +2,8 @@
 //!
 //! The public entry points collect the template tree, preserve existing include
 //! structure when regenerating templates, append schema-declared default child
-//! includes for newly split sections, and optionally bind TOML/YAML output to
-//! generated JSON Schemas.
+//! includes for newly split sections, and optionally bind generated templates
+//! to JSON Schemas.
 
 use std::path::{Path, PathBuf};
 
@@ -159,13 +159,12 @@ where
         .collect()
 }
 
-/// Collects template targets and binds TOML/YAML templates to JSON Schemas.
+/// Collects template targets and binds generated templates to JSON Schemas.
 ///
 /// TOML targets receive a `#:schema` directive. YAML targets receive a YAML
-/// Language Server modeline. JSON and JSON5 targets are left unchanged so the
-/// runtime configuration is not polluted with a `$schema` field. Root targets
-/// bind `schema_path`; nested section targets bind their generated section
-/// schema path.
+/// Language Server modeline. JSON and JSON5 targets receive a top-level
+/// `$schema` property. Root targets bind `schema_path`; nested section targets
+/// bind their generated section schema path.
 ///
 /// # Type Parameters
 ///
@@ -176,8 +175,7 @@ where
 /// - `config_path`: Root config path preferred as the template source when it
 ///   exists.
 /// - `output_path`: Root output path for generated templates.
-/// - `schema_path`: Root JSON Schema path to reference from root TOML/YAML
-///   templates.
+/// - `schema_path`: Root JSON Schema path to reference from root templates.
 ///
 /// # Returns
 ///
@@ -306,10 +304,10 @@ where
 /// Writes all generated config templates with editor schema bindings.
 ///
 /// TOML targets receive `#:schema <path>`, YAML targets receive
-/// `# yaml-language-server: $schema=<path>`, and JSON targets are left
-/// unchanged. The schema path is rendered relative to each template file. Root
-/// targets bind `schema_path`; nested section targets bind their generated
-/// section schema path.
+/// `# yaml-language-server: $schema=<path>`, and JSON/JSON5 targets receive a
+/// top-level `$schema` property. The schema path is rendered relative to each
+/// template file. Root targets bind `schema_path`; nested section targets bind
+/// their generated section schema path.
 ///
 /// # Type Parameters
 ///
@@ -320,8 +318,7 @@ where
 /// - `config_path`: Root config path preferred as the template source when it
 ///   exists.
 /// - `output_path`: Root output path for generated templates.
-/// - `schema_path`: Root JSON Schema path to reference from root TOML/YAML
-///   templates.
+/// - `schema_path`: Root JSON Schema path to reference from root templates.
 ///
 /// # Returns
 ///

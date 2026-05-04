@@ -78,9 +78,9 @@ pub trait ConfigSchema: Config + Sized {
     /// A nested section is split only when its field schema has
     /// `x-tree-split = true`, for example
     /// `#[schemars(extend("x-tree-split" = true))]`. By default, top-level
-    /// split sections are generated as `config/<field>.yaml` and nested split
-    /// sections as children of their parent section file stem, e.g.
-    /// `app_config/trading/risk.yaml`.
+    /// split sections are generated as `<field>.yaml` relative to the root
+    /// template directory and nested split sections as children of their
+    /// parent section file stem, e.g. `trading/risk.yaml`.
     ///
     /// # Arguments
     ///

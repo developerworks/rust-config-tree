@@ -836,12 +836,12 @@ fn remove_schema_extensions(value: &mut Value) {
 
 /// Writes a Draft 7 JSON Schema for the root config type.
 ///
-/// The same generated schema can be referenced from TOML, YAML, and JSON
-/// configuration files. TOML and YAML templates can bind it with editor
-/// directives. JSON files should usually be bound through editor settings
-/// rather than a runtime `$schema` field. Generated schemas omit JSON Schema
-/// `required` constraints so editors provide completion without requiring every
-/// config field to exist in each partial config file.
+/// The same generated schema can be referenced from TOML, YAML, JSON, and JSON5
+/// configuration files. TOML and YAML templates bind it with editor directives.
+/// JSON and JSON5 templates bind it with a top-level `$schema` property.
+/// Generated schemas omit JSON Schema `required` constraints so editors provide
+/// completion without requiring every config field to exist in each partial
+/// config file.
 ///
 /// # Type Parameters
 ///

@@ -742,7 +742,7 @@ fn split_yaml_templates_bind_nested_section_schemas() {
     let _ = fs::remove_dir_all(root);
 }
 
-/// Verifies JSON templates are not modified with schema directives.
+/// Verifies JSON and JSON5 templates receive a top-level schema property.
 ///
 /// # Arguments
 ///
@@ -758,22 +758,29 @@ fn split_yaml_templates_bind_nested_section_schemas() {
 /// let _ = ();
 /// ```
 #[test]
-fn schema_binding_keeps_json_templates_unmodified() {
+fn schema_binding_adds_json_schema_property() {
     let root = temp_dir_path("json-template-schema-binding");
     fs::create_dir_all(&root).unwrap();
-    let output_path = root.join("config.example.json");
     let schema_path = root.join("schemas").join("myapp.schema.json");
 
-    let targets = template_targets_for_paths_with_schema::<TestConfig>(
-        root.join("config.json"),
-        &output_path,
-        &schema_path,
-    )
-    .unwrap();
+    for extension in ["json", "json5"] {
+        let output_path = root.join(format!("config.example.{extension}"));
 
-    assert_eq!(targets[0].path, output_path);
-    assert!(!targets[0].content.contains("$schema"));
-    assert!(!targets[0].content.contains("yaml-language-server"));
+        let targets = template_targets_for_paths_with_schema::<TestConfig>(
+            root.join(format!("config.{extension}")),
+            &output_path,
+            &schema_path,
+        )
+        .unwrap();
+
+        assert_eq!(targets[0].path, output_path);
+        assert!(
+            targets[0]
+                .content
+                .starts_with("{\n  \"$schema\": \"./schemas/myapp.schema.json\",\n")
+        );
+        assert!(!targets[0].content.contains("yaml-language-server"));
+    }
 
     let _ = fs::remove_dir_all(root);
 }

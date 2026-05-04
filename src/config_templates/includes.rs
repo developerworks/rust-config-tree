@@ -175,11 +175,9 @@ where
                     target_path == expected_target
                 }
                 Some(_) => false,
-                None => !looks_like_split_section_path::<S>(
-                    root_base_dir,
-                    &target_path,
-                    split_paths,
-                ),
+                None => {
+                    !looks_like_split_section_path::<S>(root_base_dir, &target_path, split_paths)
+                }
             }
         })
         .collect()
@@ -216,9 +214,8 @@ where
 {
     let target_file_name = target_path.file_name();
     split_paths.iter().any(|section_path| {
-        let expected_path = normalize_lexical(root_base_dir.join(template_path_for_section::<S>(
-            section_path,
-        )));
+        let expected_path =
+            normalize_lexical(root_base_dir.join(template_path_for_section::<S>(section_path)));
         target_file_name == expected_path.file_name() && target_path != expected_path
     })
 }

@@ -1,4 +1,4 @@
-//! Schema binding helpers for generated TOML and YAML templates.
+//! Schema binding helpers for generated config templates.
 
 use std::{
     path::Component,
@@ -51,7 +51,7 @@ where
         .unwrap_or_else(|| root_schema_path.to_path_buf())
 }
 
-/// Prepends an editor schema directive when the template format supports one.
+/// Adds an editor schema binding when the template format supports one.
 ///
 /// # Arguments
 ///
@@ -61,7 +61,8 @@ where
 ///
 /// # Returns
 ///
-/// Returns template content with a directive for TOML/YAML, or unchanged JSON.
+/// Returns template content with a directive for TOML/YAML or a top-level
+/// `$schema` property for JSON/JSON5.
 ///
 /// # Examples
 ///
@@ -74,17 +75,49 @@ pub(super) fn template_with_schema_directive(
     content: &str,
 ) -> ConfigResult<String> {
     let schema_ref = schema_reference_for_path(template_path, schema_path)?;
-    let directive = match ConfigFormat::from_path(template_path) {
-        ConfigFormat::Yaml => Some(format!("# yaml-language-server: $schema={schema_ref}")),
-        ConfigFormat::Toml => Some(format!("#:schema {schema_ref}")),
-        ConfigFormat::Json => None,
+    let content = match ConfigFormat::from_path(template_path) {
+        ConfigFormat::Yaml => format!("# yaml-language-server: $schema={schema_ref}\n\n{content}"),
+        ConfigFormat::Toml => format!("#:schema {schema_ref}\n\n{content}"),
+        ConfigFormat::Json => template_with_json_schema_property(&schema_ref, content),
     };
 
-    let Some(directive) = directive else {
-        return Ok(content.to_owned());
-    };
+    Ok(content)
+}
 
-    Ok(format!("{directive}\n\n{content}"))
+/// Inserts a top-level JSON Schema property into a JSON5 object template.
+///
+/// # Arguments
+///
+/// - `schema_ref`: Schema path reference to write.
+/// - `content`: Existing JSON5 object template content.
+///
+/// # Returns
+///
+/// Returns `content` with a leading `$schema` property when the content is an
+/// object template.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
+fn template_with_json_schema_property(schema_ref: &str, content: &str) -> String {
+    let schema_ref = serde_json::to_string(schema_ref).expect("schema reference is a string");
+
+    if let Some(body) = content.strip_prefix("{\n") {
+        let separator = if body.trim_start().starts_with('}') {
+            "\n"
+        } else {
+            ",\n"
+        };
+        return format!("{{\n  \"$schema\": {schema_ref}{separator}{body}");
+    }
+
+    if content.trim() == "{}" {
+        return format!("{{\n  \"$schema\": {schema_ref}\n}}\n");
+    }
+
+    content.to_owned()
 }
 
 /// Builds a template-local schema reference from two filesystem paths.

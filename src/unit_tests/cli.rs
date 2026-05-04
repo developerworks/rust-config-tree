@@ -477,7 +477,9 @@ fn handle_config_template_defaults_to_root_config_named_targets() {
             .join("recorder_config.example.yaml"),
     )
     .unwrap();
-    assert!(template.starts_with("# yaml-language-server: $schema=./recorder_config.schema.json\n\n"));
+    assert!(
+        template.starts_with("# yaml-language-server: $schema=./recorder_config.schema.json\n\n")
+    );
 
     let _ = fs::remove_dir_all(root);
 }
