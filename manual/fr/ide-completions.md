@@ -37,10 +37,13 @@ correspondant.
 
 Les champs marques `x-env-only` sont omis des schemas generes, donc les IDE ne suggerent pas les secrets ou autres valeurs qui doivent venir uniquement de variables d environnement.
 
-Les schemas IDE valident toujours les champs presents, y compris les types, les
-enums et les controles de proprietes inconnues pris en charge par le schema
-genere. Utilisez `config-validate` pour les champs obligatoires et la validation
-finale de la configuration fusionnee.
+Les schemas IDE servent a la completion et aux controles d'editeur de base,
+comme les types, les enums et les controles de proprietes inconnues pris en
+charge par le schema genere. Ils ne decident pas si une valeur de champ concrete
+est valide pour l'application. La validation de valeur doit etre implementee
+dans le code avec `#[config(validate = Self::validate)]`, puis executee par
+`load_config` ou `config-validate`. Les champs obligatoires et la validation
+finale de la configuration fusionnee utilisent aussi ces chemins d'execution.
 
 ## TOML
 
@@ -139,4 +142,3 @@ References :
 - [Taplo directives](https://taplo.tamasfe.dev/configuration/directives.html)
 - [YAML Language Server](https://github.com/redhat-developer/yaml-language-server)
 - [VS Code JSON](https://code.visualstudio.com/Docs/languages/json)
-

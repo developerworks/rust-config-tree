@@ -31,7 +31,10 @@ Jokainen sisallytetty tiedosto voi kayttaa samaa skeemamuotoa, ja suhteelliset i
 - Skeemassa maaritellyt ymparistomuuttujat ilman erotinmerkkijakoa.
 - Figment-metadata runtime-lahteen seurantaan.
 - TRACE-tason lahteenseurannan tapahtumat `tracing`-kirjaston kautta.
-- Draft 7 JSON Schema -luonti editorien taydennysta ja validointia varten.
+- Draft 7 JSON Schema -luonti editorien taydennysta ja skeeman perustarkistuksia varten.
+- Kentta-arvojen validointi sovelluskoodissa
+  `#[config(validate = Self::validate)]`-attribuutilla, suoritettuna
+  `load_config`- tai `config-validate`-polussa.
 - YAML-, TOML-, JSON- ja JSON5-mallien luonti.
 - TOML `#:schema`- ja YAML Language Server -skeemamallirivit luoduille malleille.
 - Opt-in YAML-mallien jakaminen `x-tree-split`-merkityille osioille.

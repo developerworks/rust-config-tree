@@ -40,7 +40,10 @@ configuracao final continua sendo um valor normal de esquema `confique`.
 - Variaveis de ambiente declaradas no esquema sem divisao por delimitador.
 - Metadados Figment para rastreamento de origem em tempo de execucao.
 - Eventos de rastreamento de origem em nivel TRACE por `tracing`.
-- Geracao de JSON Schema Draft 7 para completamento e validacao no editor.
+- Geracao de JSON Schema Draft 7 para completamento e verificacoes basicas de esquema no editor.
+- Validacao de valores de campo no codigo da aplicacao com
+  `#[config(validate = Self::validate)]`, executada por `load_config` ou
+  `config-validate`.
 - Geracao de modelos YAML, TOML, JSON e JSON5.
 - Diretivas TOML `#:schema` e modelines YAML Language Server para modelos
   gerados.
@@ -65,4 +68,3 @@ Use estas APIs para a maioria das aplicacoes:
   de configuracao embutidos.
 
 Use `load_config_tree` quando precisar do primitivo de travessia sem `confique`.
-

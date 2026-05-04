@@ -14,7 +14,7 @@ Det hanterar:
 - kommandohanterare for `config-template`, `config-schema`,
   `config-validate`, `completions`, `install-completions` och
   `uninstall-completions`
-- generering av Draft 7 JSON Schema for rot och sektioner for editor-komplettering och validering
+- generering av Draft 7 JSON Schema for rot och sektioner for editor-komplettering och grundlaggande schemakontroller
 - generering av konfigurationsmallar for YAML, TOML, JSON och JSON5
 - schemadirektiv for TOML- och YAML-mallar utan att lagga till runtime-falt
 - rekursiv include-traversering
@@ -208,7 +208,12 @@ harleds fran utdatasokvagen:
 Anvand `write_config_schemas` for att skapa Draft 7 JSON Schemas for
 rotkonfigurationen och `x-tree-split`-markerade nastlade sektioner. De genererade schemana utelamnar
 `required`-begransningar sa IDE:er kan erbjuda komplettering for partiella
-konfigurationsfiler utan att rapportera saknade falt:
+konfigurationsfiler utan att rapportera saknade falt. Genererade
+`*.schema.json`-filer ar bara for IDE-komplettering och grundlaggande
+editor-kontroller; de avgor inte om ett konkret faltvarde ar giltigt for
+programmet. Faltvardevalidering ska implementeras i kod med
+`#[config(validate = Self::validate)]` och koras via `load_config` eller
+`config-validate`:
 
 ```rust
 use rust_config_tree::write_config_schemas;
@@ -248,7 +253,7 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 ```
 
 Anvand `write_config_templates_with_schema` nar genererade TOML- och YAML-mallar
-ska binda dessa scheman for IDE-komplettering och validering:
+ska binda dessa scheman for IDE-komplettering och grundlaggande schemakontroller:
 
 ```rust
 use rust_config_tree::write_config_templates_with_schema;
@@ -413,10 +418,11 @@ sektionsscheman. Om ingen utdatasokvag anges skrivs rotschemat till
 `config/<root_config_name>/<root_config_name>.schema.json`.
 
 `config-validate` laddar hela runtime-konfigurationstradet och kor `confique`
-standardvarden och validering. Anvand editorscheman for tyst komplettering medan
-delade filer redigeras; anvand detta kommando for obligatoriska falt och slutlig
-konfigurationsvalidering. Det skriver `Configuration is ok` nar valideringen
-lyckas.
+standardvarden och validering, inklusive validatorer deklarerade med
+`#[config(validate = Self::validate)]`. Anvand editorscheman for tyst
+komplettering medan delade filer redigeras; anvand detta kommando for
+obligatoriska falt och slutlig konfigurationsvalidering. Det skriver
+`Configuration is ok` nar valideringen lyckas.
 
 `completions <shell>` skriver kompletteringar till stdout.
 

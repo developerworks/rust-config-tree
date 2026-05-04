@@ -36,10 +36,13 @@ en el esquema raíz.
 
 Los campos marcados con `x-env-only` se omiten de los esquemas generados, por lo que los IDE no sugieren secrets u otros valores que deben venir solo de variables de entorno.
 
-Los esquemas del IDE siguen validando campos presentes, incluidas comprobaciones
-de tipo, enum y propiedades desconocidas admitidas por el esquema generado. Usa
-`config-validate` para campos obligatorios y validación final de la
-configuración fusionada.
+Los esquemas del IDE sirven para completado y comprobaciones básicas del
+editor, como tipo, enum y propiedades desconocidas admitidas por el esquema
+generado. No deciden si un valor concreto de campo es válido para la aplicación.
+La validación de valores debe implementarse en código con
+`#[config(validate = Self::validate)]` y ejecutarse mediante `load_config` o
+`config-validate`. Los campos obligatorios y la validación final de la
+configuración fusionada también usan esas rutas de ejecución.
 
 ## TOML
 

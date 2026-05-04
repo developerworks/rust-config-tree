@@ -36,9 +36,12 @@ Os esquemas gerados omitem restricoes `required`. IDEs ainda podem oferecer
 completamento, mas arquivos parciais como `config/log.yaml` nao relatam campos
 raiz ausentes. O esquema raiz completa apenas campos que pertencem ao arquivo
 raiz; campos de secoes divididas sao omitidos ali e completados por seus
-proprios esquemas de secao. Campos presentes ainda sao verificados pelo esquema
-no IDE. Campos obrigatorios e a validacao final da configuracao mesclada sao
-tratados por `load_config` ou `config-validate`.
+proprios esquemas de secao. Campos presentes ainda podem receber verificacoes
+basicas do editor, como tipo, enum e propriedades desconhecidas suportadas pelo
+esquema gerado. Os `*.schema.json` gerados nao decidem se um valor concreto de
+campo e valido para a aplicacao. A validacao de valores deve ser implementada no
+codigo com `#[config(validate = Self::validate)]`; `load_config` e
+`config-validate` executam essa validacao em tempo de execucao.
 
 Vincule esses esquemas a partir de modelos TOML e YAML gerados:
 
@@ -148,4 +151,3 @@ config/server.yaml
 
 O modelo raiz recebe um bloco de include, e `config/server.yaml` contem apenas a
 secao `server`. Secoes aninhadas so sao divididas recursivamente quando esses campos tambem carregam `x-tree-split`.
-

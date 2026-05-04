@@ -36,10 +36,13 @@ arquivos que vinculam o esquema de secao correspondente.
 
 Campos marcados com `x-env-only` sao omitidos dos esquemas gerados, entao IDEs nao sugerem secrets ou outros valores que devem vir somente de variaveis de ambiente.
 
-Esquemas de IDE ainda validam campos presentes, incluindo tipo, enum e
-verificacoes de propriedades desconhecidas suportadas pelo esquema gerado. Use
-`config-validate` para campos obrigatorios e validacao final da configuracao
-mesclada.
+Esquemas de IDE servem para completamento e verificacoes basicas do editor,
+como tipo, enum e propriedades desconhecidas suportadas pelo esquema gerado.
+Eles nao decidem se um valor concreto de campo e valido para a aplicacao. A
+validacao de valores deve ser implementada no codigo com
+`#[config(validate = Self::validate)]` e executada por `load_config` ou
+`config-validate`. Campos obrigatorios e a validacao final da configuracao
+mesclada tambem usam esses caminhos de execucao.
 
 ## TOML
 
@@ -138,4 +141,3 @@ Referencias:
 - [Taplo directives](https://taplo.tamasfe.dev/configuration/directives.html)
 - [YAML Language Server](https://github.com/redhat-developer/yaml-language-server)
 - [VS Code JSON](https://code.visualstudio.com/Docs/languages/json)
-

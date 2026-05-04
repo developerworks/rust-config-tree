@@ -34,9 +34,12 @@ template and parent schema.
 generated schemas は `required` constraint を省略します。IDE は補完を提供
 できますが、`config/log.yaml` のような partial file で missing root field を
 報告しません。root schema は root file に属する field だけを補完し、nested
-section field は各 section schema が補完します。present field は IDE の schema
-check を受けます。required field と final merged config validation は
-`load_config` または `config-validate` が扱います。
+section field は各 section schema が補完します。present field は type、enum、
+unknown property などの基本的な editor check を受けられます。生成された
+`*.schema.json` は具体的な field value が application として合法かどうかを
+判断しません。field value validation は code 側で
+`#[config(validate = Self::validate)]` として実装し、`load_config` または
+`config-validate` で実行します。
 
 generated TOML / YAML template から schema を bind する場合:
 
@@ -142,4 +145,3 @@ config/server.yaml
 
 root template は include block を受け取り、`config/server.yaml` は `server`
 section だけを含みます。nested section は、その field も `x-tree-split` を持つ場合だけ recursive splitting されます。
-

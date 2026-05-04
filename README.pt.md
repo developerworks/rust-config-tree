@@ -17,7 +17,7 @@ Ele lida com:
   `config-validate`, `completions`, `install-completions` e
   `uninstall-completions`
 - geracao de JSON Schema Draft 7 para a raiz e para secoes, para completamento e
-  validacao no editor
+  verificacoes basicas de esquema no editor
 - geracao de modelos de configuracao para YAML, TOML, JSON e JSON5
 - diretivas de esquema para modelos TOML e YAML sem adicionar campos em tempo de
   execucao
@@ -216,7 +216,11 @@ includes. O formato de saida e inferido pelo caminho de saida:
 Use `write_config_schemas` para criar JSON Schemas Draft 7 para a configuracao
 raiz e secoes aninhadas marcadas para divisao. Os esquemas gerados omitem restricoes `required` para
 que IDEs possam oferecer completamento em arquivos de configuracao parciais sem
-relatar campos ausentes:
+relatar campos ausentes. Os arquivos `*.schema.json` gerados servem apenas para
+completamento de IDE e verificacoes basicas do editor; eles nao decidem se um
+valor concreto de campo e valido para a aplicacao. A validacao de valores deve
+ser implementada no codigo com `#[config(validate = Self::validate)]` e
+executada por `load_config` ou `config-validate`:
 
 ```rust
 use rust_config_tree::write_config_schemas;
@@ -256,7 +260,8 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 ```
 
 Use `write_config_templates_with_schema` quando modelos TOML e YAML gerados
-devem vincular esses esquemas para completamento e validacao no IDE:
+devem vincular esses esquemas para completamento e verificacoes basicas de
+esquema no IDE:
 
 ```rust
 use rust_config_tree::write_config_templates_with_schema;
@@ -424,7 +429,8 @@ secao. Se nenhum caminho de saida for fornecido, o esquema raiz e gravado em
 `config/<root_config_name>/<root_config_name>.schema.json`.
 
 `config-validate` carrega a arvore de configuracao completa em tempo de
-execucao e executa padroes e validacao do `confique`. Use esquemas de editor
+execucao e executa padroes e validacao do `confique`, incluindo validadores
+declarados com `#[config(validate = Self::validate)]`. Use esquemas de editor
 para completamento sem ruido ao editar arquivos divididos; use este comando para
 campos obrigatorios e validacao final da configuracao. Ele imprime
 `Configuration is ok` quando a validacao tem sucesso.

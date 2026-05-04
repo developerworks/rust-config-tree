@@ -34,9 +34,12 @@ write_config_schemas::<AppConfig>("schemas/myapp.schema.json")?;
 
 `x-env-only`로 표시한 필드는 생성된 스키마에서 생략되므로, 환경 변수로만 제공해야 하는 secret이나 기타 값은 IDE가 완성하지 않습니다.
 
-IDE 스키마는 타입, enum, 알 수 없는 프로퍼티 검사 등 생성된 스키마가 지원하는
-현재 필드 검증을 계속 수행합니다. 필수 필드와 최종 병합 설정 검증에는
-`config-validate`를 사용하세요.
+IDE 스키마는 완성과 기본 에디터 검사용입니다. 타입, enum, 알 수 없는 프로퍼티
+검사처럼 생성된 스키마가 표현할 수 있는 범위만 다룹니다. 구체적인 필드 값이
+애플리케이션에서 유효한지는 판단하지 않습니다. 필드 값 유효성 검사는 코드에서
+`#[config(validate = Self::validate)]`로 구현하고, `load_config` 또는
+`config-validate`로 실행합니다. 필수 필드와 최종 병합 설정 검증도 이 런타임
+경로에서 처리합니다.
 
 ## TOML
 

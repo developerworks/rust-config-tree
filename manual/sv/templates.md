@@ -35,9 +35,12 @@ Genererade scheman utelamnar `required`-begransningar. IDE:er kan fortfarande
 erbjuda komplettering, men partiella filer som `config/log.yaml` rapporterar
 inte saknade rotfalt. Rotschemat kompletterar bara falt som hor hemma i
 rotfilen; delade sektionsfalt utelamnas dar och kompletteras av sina egna
-sektionsscheman. Befintliga falt schemakontrolleras fortfarande av IDE:n.
-Obligatoriska falt och slutlig sammanslagen konfigurationsvalidering hanteras
-av `load_config` eller `config-validate`.
+sektionsscheman. Befintliga falt kan fortfarande fa grundlaggande
+editor-kontroller, som typ, enum och okanda properties som stods av det
+genererade schemat. Genererade `*.schema.json`-filer avgor inte om ett konkret
+faltvarde ar giltigt for programmet. Faltvardevalidering ska implementeras i kod
+med `#[config(validate = Self::validate)]`; `load_config` och `config-validate`
+kor den runtime-valideringen.
 
 Bind dessa scheman fran genererade TOML- och YAML-mallar:
 

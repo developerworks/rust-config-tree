@@ -85,6 +85,17 @@ Merkitse lehtikentta `#[schemars(extend("x-env-only" = true))]`, kun arvon tulee
 secret: String,
 ```
 
+## Kentta-arvojen validointi
+
+Luodut `*.schema.json`-tiedostot ovat vain IDE-taydennysta ja editorin
+perustarkistuksia varten. Ne eivat paata, onko konkreettinen kentan arvo
+sovellukselle kelvollinen.
+
+Kentta-arvojen validointi toteutetaan koodissa
+`#[config(validate = Self::validate)]`-attribuutilla. Validaattori suoritetaan,
+kun lopullinen konfiguraatio ladataan `load_config`-funktiolla tai tarkistetaan
+`config-validate`-komennolla.
+
 ## Malliosioiden ohitukset
 
 Kun mallilahteella ei ole includeja, crate voi johtaa lapsimallitiedostot `x-tree-split`-merkityista sisakkaisista skeemaosioista. Oletuspolku ylatasolla on `config/<section>.yaml`.

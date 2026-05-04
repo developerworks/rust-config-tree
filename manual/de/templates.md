@@ -38,9 +38,12 @@ Vervollstaendigung anbieten, aber partielle Dateien wie `config/log.yaml`
 melden keine fehlenden Root-Felder. Das Root-Schema vervollstaendigt nur
 Felder, die in die Root-Datei gehoeren; aufgeteilte Abschnittsfelder werden
 dort weggelassen und durch ihre eigenen Abschnittsschemas vervollstaendigt.
-Vorhandene Felder werden von der IDE weiterhin gegen das Schema geprueft.
-Pflichtfelder und finale Validierung der zusammengefuehrten Konfiguration
-erfolgen durch `load_config` oder `config-validate`.
+Vorhandene Felder koennen weiterhin grundlegende Editor-Pruefungen erhalten,
+etwa Typ-, Enum- und Unbekannte-Eigenschaft-Pruefungen, soweit sie vom erzeugten
+Schema unterstuetzt werden. Erzeugte `*.schema.json`-Dateien entscheiden nicht,
+ob ein konkreter Feldwert fuer die Anwendung gueltig ist. Feldwertvalidierung
+muss im Code mit `#[config(validate = Self::validate)]` implementiert werden;
+`load_config` und `config-validate` fuehren diese Laufzeitvalidierung aus.
 
 Binde diese Schemas aus erzeugten TOML- und YAML-Vorlagen:
 

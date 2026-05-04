@@ -36,10 +36,13 @@ is in bestanden die het passende sectieschema koppelen.
 
 Velden gemarkeerd met `x-env-only` worden uit gegenereerde schemas weggelaten, zodat IDEs geen secrets of andere waarden voorstellen die alleen uit omgevingsvariabelen mogen komen.
 
-IDE-schema.s valideren nog steeds aanwezige velden, inclusief type-, enum- en
-onbekende-eigenschapcontroles die door het gegenereerde schema worden
-ondersteund. Gebruik `config-validate` voor verplichte velden en uiteindelijke
-samengevoegde configuratievalidatie.
+IDE-schema's zijn voor completion en basale editorcontroles, zoals type-, enum-
+en onbekende-eigenschapcontroles die door het gegenereerde schema worden
+ondersteund. Ze bepalen niet of een concrete veldwaarde geldig is voor de
+toepassing. Veldwaardevalidatie moet in code worden geimplementeerd met
+`#[config(validate = Self::validate)]` en wordt uitgevoerd via `load_config` of
+`config-validate`. Verplichte velden en uiteindelijke samengevoegde
+configuratievalidatie gebruiken ook die runtimepaden.
 
 ## TOML
 

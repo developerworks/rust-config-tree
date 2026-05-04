@@ -12,7 +12,7 @@ Se kasittelee:
 - `confique`-skeeman lataamisen suoraan kaytettavaksi konfiguraatio-olioksi Figmentin runtime provider -lahteiden kautta
 - `config-template`-, `config-schema`-, `config-validate`-, `completions`-,
   `install-completions`- ja `uninstall-completions`-komentojen kasittelijat
-- Draft 7 -juuri- ja osio-JSON Schema -skeemojen luonnin editorien taydennysta ja validointia varten
+- Draft 7 -juuri- ja osio-JSON Schema -skeemojen luonnin editorien taydennysta ja skeeman perustarkistuksia varten
 - konfiguraatiomallien luonnin YAML-, TOML-, JSON- ja JSON5-muodoissa
 - TOML- ja YAML-mallien skeemadirektiivit ilman runtime-kenttien lisaamista
 - rekursiivisen include-lapikaynnin
@@ -179,7 +179,7 @@ Mallit renderoidaan samalla skeemalla ja include-lapikaynnin saannoilla. Tuloste
 - `.json` ja `.json5` tuottavat JSON5-yhteensopivia malleja
 - tuntematon tai puuttuva paate tuottaa YAMLia
 
-Kayta `write_config_schemas`-funktiota Draft 7 JSON Schema -skeemojen luontiin juurikonfiguraatiolle ja jaetuille sisakkaisille osioille. Luodut skeemat jattavat `required`-rajoitteet pois, jotta IDEt voivat tarjota taydennysta osittaisille konfiguraatiotiedostoille ilman puuttuvien kenttien virheilmoituksia:
+Kayta `write_config_schemas`-funktiota Draft 7 JSON Schema -skeemojen luontiin juurikonfiguraatiolle ja jaetuille sisakkaisille osioille. Luodut skeemat jattavat `required`-rajoitteet pois, jotta IDEt voivat tarjota taydennysta osittaisille konfiguraatiotiedostoille ilman puuttuvien kenttien virheilmoituksia. Luodut `*.schema.json`-tiedostot ovat vain IDE-taydennysta ja editorin perustarkistuksia varten; ne eivat paata, onko konkreettinen kentan arvo sovellukselle kelvollinen. Kentta-arvojen validointi toteutetaan koodissa `#[config(validate = Self::validate)]`-attribuutilla ja suoritetaan `load_config`- tai `config-validate`-polussa:
 
 ```rust
 use rust_config_tree::write_config_schemas;
@@ -212,7 +212,7 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 }
 ```
 
-Kayta `write_config_templates_with_schema`-funktiota, kun luotujen TOML- ja YAML-mallien tulee sitoa nama skeemat IDE-taydennysta ja validointia varten:
+Kayta `write_config_templates_with_schema`-funktiota, kun luotujen TOML- ja YAML-mallien tulee sitoa nama skeemat IDE-taydennysta ja skeeman perustarkistuksia varten:
 
 ```rust
 use rust_config_tree::write_config_templates_with_schema;
@@ -349,7 +349,7 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 
 `config-schema --output <path>` kirjoittaa Draft 7 -juuri-JSON Schema -skeeman ja osioskeemat. Jos tulostepolkua ei anneta, juuriskeema kirjoitetaan tiedostoon `config/<root_config_name>/<root_config_name>.schema.json`.
 
-`config-validate` lataa koko runtime-konfiguraatiopuun ja ajaa `confique`-oletukset seka validoinnin. Kayta editoriskeemoja hiljaiseen taydennykseen jaettujen tiedostojen muokkauksessa; kayta tata komentoa pakollisille kentille ja lopulliselle konfiguraation validoinnille. Onnistuessaan se tulostaa `Configuration is ok`.
+`config-validate` lataa koko runtime-konfiguraatiopuun ja ajaa `confique`-oletukset seka validoinnin, mukaan lukien `#[config(validate = Self::validate)]`-attribuutilla maaritellyt validaattorit. Kayta editoriskeemoja hiljaiseen taydennykseen jaettujen tiedostojen muokkauksessa; kayta tata komentoa pakollisille kentille ja lopulliselle konfiguraation validoinnille. Onnistuessaan se tulostaa `Configuration is ok`.
 
 `completions <shell>` tulostaa taydennykset stdoutiin.
 

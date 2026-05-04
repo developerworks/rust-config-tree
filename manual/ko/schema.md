@@ -89,6 +89,15 @@ server:
 secret: String,
 ```
 
+## 필드 값 유효성 검사
+
+생성된 `*.schema.json` 파일은 IDE 완성과 기본 에디터 검사용입니다. 구체적인
+필드 값이 애플리케이션에서 유효한지는 판단하지 않습니다.
+
+필드 값 유효성 검사는 코드에서 `#[config(validate = Self::validate)]`로
+구현합니다. 최종 설정을 `load_config`로 로드하거나 `config-validate`로 검사할 때
+이 런타임 검증이 실행됩니다.
+
 ## 템플릿 섹션 override
 
 템플릿 소스에 include가 없으면 crate는 `x-tree-split`로 표시한 중첩 스키마 섹션에서 자식 템플릿 파일을

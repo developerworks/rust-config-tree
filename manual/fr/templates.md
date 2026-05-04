@@ -38,9 +38,12 @@ toujours proposer la completion, mais les fichiers partiels comme
 `config/log.yaml` ne signalent pas de champs racine manquants. Le schema racine
 ne complete que les champs qui appartiennent au fichier racine ; les champs de
 sections imbriquees y sont omis et sont completes par leurs propres schemas de
-section. Les champs presents restent controles par le schema dans l'IDE. Les
-champs obligatoires et la validation finale de la configuration fusionnee sont
-geres par `load_config` ou `config-validate`.
+section. Les champs presents peuvent encore recevoir des controles d'editeur de
+base, comme les types, les enums et les proprietes inconnues pris en charge par
+le schema genere. Les `*.schema.json` generes ne decident pas si une valeur de
+champ concrete est valide pour l'application. La validation de valeur doit etre
+implementee dans le code avec `#[config(validate = Self::validate)]` ; `load_config`
+et `config-validate` executent cette validation d'execution.
 
 Liez ces schemas depuis les modeles TOML et YAML generes :
 
@@ -151,4 +154,3 @@ config/server.yaml
 
 Le modele racine recoit un bloc d'inclusion, et `config/server.yaml` ne contient
 que la section `server`. Les sections imbriquees ne sont decoupees recursivement que lorsque ces champs portent aussi `x-tree-split`.
-

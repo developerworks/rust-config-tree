@@ -119,8 +119,10 @@ demo config-validate
 
 Genererade editorscheman undviker avsiktligt required-field-diagnostik for
 delade filer. `config-validate` laddar includes, tillampar standardvarden och
-kor slutlig `confique`-validering. Det skriver `Configuration is ok` nar
-valideringen lyckas.
+kor slutlig `confique`-validering, inklusive validatorer deklarerade med
+`#[config(validate = Self::validate)]`. Genererade `*.schema.json`-filer ar for
+IDE-komplettering och grundlaggande editor-kontroller, inte for
+faltvardelegalitet. Det skriver `Configuration is ok` nar valideringen lyckas.
 
 ## Skalkompletteringar
 

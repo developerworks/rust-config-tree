@@ -41,8 +41,11 @@ configuration finale reste une valeur de schema `confique` normale.
   delimiteur.
 - Metadonnees Figment pour le suivi des sources d'execution.
 - Evenements de suivi des sources au niveau TRACE via `tracing`.
-- Generation de schemas JSON Draft 7 pour la completion et la validation dans
-  l'editeur.
+- Generation de schemas JSON Draft 7 pour la completion et les controles de
+  schema de base dans l'editeur.
+- Validation des valeurs de champ dans le code applicatif avec
+  `#[config(validate = Self::validate)]`, executee par `load_config` ou
+  `config-validate`.
 - Generation de modeles YAML, TOML, JSON et JSON5.
 - Directives de schema TOML `#:schema` et modelines YAML Language Server pour
   les modeles generes.
@@ -68,4 +71,3 @@ Utilisez ces API pour la plupart des applications :
 
 Utilisez `load_config_tree` lorsque vous avez besoin de la primitive de
 traversee sans `confique`.
-

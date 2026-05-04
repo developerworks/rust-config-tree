@@ -38,7 +38,10 @@ uiteindelijke configuratie is nog steeds een normale `confique`-schemawaarde.
 - Door het schema gedeclareerde omgevingsvariabelen zonder delimiter-splitting.
 - Figment-metadata voor runtime brontracking.
 - Brontrackingevents op TRACE-niveau via `tracing`.
-- Draft 7 JSON Schema-generatie voor editorcompletion en validatie.
+- Draft 7 JSON Schema-generatie voor editorcompletion en basale schemacontroles.
+- Veldwaardevalidatie in toepassingscode met
+  `#[config(validate = Self::validate)]`, uitgevoerd door `load_config` of
+  `config-validate`.
 - YAML-, TOML-, JSON- en JSON5-sjabloongeneratie.
 - TOML `#:schema` en YAML Language Server-schemamodelines voor gegenereerde sjablonen.
 - Opt-in YAML-sjabloonsplitsing voor secties gemarkeerd met `x-tree-split`.

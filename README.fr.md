@@ -18,7 +18,7 @@ Il gere :
   `config-validate`, `completions`, `install-completions` et
   `uninstall-completions` ;
 - la generation de schemas JSON Draft 7 pour la racine et les sections, pour la
-  completion et la validation dans l'editeur ;
+  completion et les controles de schema de base dans l'editeur ;
 - la generation de modeles de configuration YAML, TOML, JSON et JSON5 ;
 - les directives de schema pour les modeles TOML et YAML sans ajouter de champs
   d'execution ;
@@ -222,7 +222,12 @@ d'inclusions. Le format de sortie est deduit du chemin de sortie :
 Utilisez `write_config_schemas` pour creer des schemas JSON Draft 7 pour la
 configuration racine et les sections imbriquees decoupees. Les schemas generes omettent
 les contraintes `required` afin que les IDE puissent proposer la completion pour
-des fichiers de configuration partiels sans signaler de champs manquants :
+des fichiers de configuration partiels sans signaler de champs manquants. Les
+fichiers `*.schema.json` generes servent uniquement a la completion IDE et aux
+controles d'editeur de base ; ils ne decident pas si une valeur de champ concrete
+est valide pour l'application. La validation de valeur doit etre implementee dans
+le code avec `#[config(validate = Self::validate)]`, puis executee par
+`load_config` ou `config-validate` :
 
 ```rust
 use rust_config_tree::write_config_schemas;
@@ -263,7 +268,8 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 ```
 
 Utilisez `write_config_templates_with_schema` lorsque les modeles TOML et YAML
-generes doivent lier ces schemas pour la completion et la validation dans l'IDE :
+generes doivent lier ces schemas pour la completion et les controles de schema
+de base dans l'IDE :
 
 ```rust
 use rust_config_tree::write_config_templates_with_schema;
@@ -432,7 +438,8 @@ schemas de section. Les sections imbriquees non marquees restent dans le schema 
 ecrit dans `config/<root_config_name>/<root_config_name>.schema.json`.
 
 `config-validate` charge l'arbre complet de configuration d'execution et lance
-les valeurs par defaut et la validation `confique`. Utilisez les schemas
+les valeurs par defaut et la validation `confique`, y compris les validateurs
+declares avec `#[config(validate = Self::validate)]`. Utilisez les schemas
 d'editeur pour une completion non bruyante pendant l'edition de fichiers
 separes ; utilisez cette commande pour les champs obligatoires et la validation
 finale de la configuration. Elle affiche `Configuration is ok` lorsque la

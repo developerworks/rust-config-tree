@@ -89,6 +89,15 @@ server:
 secret: String,
 ```
 
+## Field Value Validation
+
+生成された `*.schema.json` file は IDE 補完と基本的な editor check のための
+ものです。具体的な field value が application として合法かどうかは判断しません。
+
+field value validation は code 側で `#[config(validate = Self::validate)]` として
+実装します。final config を `load_config` で読み込むとき、または
+`config-validate` で確認するときに、この runtime validation が実行されます。
+
 ## Template Section Overrides
 
 template source に include がない場合、crate は `x-tree-split` で mark した nested schema section から child
@@ -111,4 +120,3 @@ impl ConfigSchema for AppConfig {
     }
 }
 ```
-

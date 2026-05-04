@@ -17,7 +17,7 @@ Gestiona:
   `config-validate`, `completions`, `install-completions` y
   `uninstall-completions`
 - generación de JSON Schema Draft 7 para la raíz y las secciones, útil para
-  completado y validación en editores
+  completado y comprobaciones básicas de esquema en editores
 - generación de plantillas de configuración para YAML, TOML, JSON y JSON5
 - directivas de esquema para plantillas TOML y YAML sin añadir campos en tiempo
   de ejecución
@@ -219,7 +219,12 @@ recorrido de includes. El formato de salida se infiere de la ruta de salida:
 Usa `write_config_schemas` para crear JSON Schemas Draft 7 para la
 configuración raíz y las secciones marcadas con `x-tree-split`. Los esquemas generados omiten
 restricciones `required` para que los IDE puedan ofrecer completado en archivos
-de configuración parciales sin informar campos faltantes:
+de configuración parciales sin informar campos faltantes. Los archivos
+`*.schema.json` generados sirven solo para completado de IDE y comprobaciones
+básicas del editor; no deciden si un valor concreto de campo es válido para la
+aplicación. La validación de valores debe implementarse en código con
+`#[config(validate = Self::validate)]` y ejecutarse mediante `load_config` o
+`config-validate`:
 
 ```rust
 use rust_config_tree::write_config_schemas;
@@ -259,7 +264,8 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 ```
 
 Usa `write_config_templates_with_schema` cuando las plantillas TOML y YAML
-generadas deban enlazar esos esquemas para completado y validación en el IDE:
+generadas deban enlazar esos esquemas para completado y comprobaciones básicas
+de esquema en el IDE:
 
 ```rust
 use rust_config_tree::write_config_templates_with_schema;
@@ -428,8 +434,9 @@ esquemas de sección. Si no se proporciona ruta de salida, el esquema raíz se
 escribe en `config/<root_config_name>/<root_config_name>.schema.json`.
 
 `config-validate` carga el árbol completo de configuración en tiempo de
-ejecución y ejecuta los valores por defecto y la validación de `confique`. Usa
-los esquemas del editor para completado sin ruido mientras editas archivos
+ejecución y ejecuta los valores por defecto y la validación de `confique`,
+incluidos los validadores declarados con `#[config(validate = Self::validate)]`.
+Usa los esquemas del editor para completado sin ruido mientras editas archivos
 divididos; usa este comando para campos obligatorios y validación final de la
 configuración. Imprime `Configuration is ok` cuando la validación tiene éxito.
 

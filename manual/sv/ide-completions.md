@@ -37,10 +37,12 @@ i rotschemat.
 
 Falt markerade med `x-env-only` utelamnas fran genererade scheman, sa IDE:er foreslar inte secrets eller andra varden som bara ska komma fran miljovariabler.
 
-IDE-scheman validerar fortfarande befintliga falt, inklusive typ, enum och
-kontroller for okanda properties som stods av det genererade schemat. Anvand
-`config-validate` for obligatoriska falt och slutlig sammanslagen
-konfigurationsvalidering.
+IDE-scheman ar for komplettering och grundlaggande editor-kontroller, som typ,
+enum och okanda properties som stods av det genererade schemat. De avgor inte om
+ett konkret faltvarde ar giltigt for programmet. Faltvardevalidering ska
+implementeras i kod med `#[config(validate = Self::validate)]` och koras via
+`load_config` eller `config-validate`. Obligatoriska falt och slutlig
+sammanslagen konfigurationsvalidering anvander ocksa dessa runtime-vagar.
 
 ## TOML
 

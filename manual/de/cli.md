@@ -122,8 +122,11 @@ demo config-validate
 
 Erzeugte Editor-Schemas vermeiden bewusst Pflichtfeld-Diagnosen fuer
 aufgeteilte Dateien. `config-validate` laedt Includes, wendet Defaults an und
-fuehrt die finale `confique`-Validierung aus. Bei erfolgreicher Validierung
-gibt es `Configuration is ok` aus.
+fuehrt die finale `confique`-Validierung aus, einschliesslich Validatoren aus
+`#[config(validate = Self::validate)]`. Erzeugte `*.schema.json`-Dateien bleiben
+fuer IDE-Vervollstaendigung und grundlegende Editor-Pruefungen gedacht, nicht
+fuer Feldwertlegalitaet. Bei erfolgreicher Validierung gibt es
+`Configuration is ok` aus.
 
 ## Shell-Vervollstaendigungen
 

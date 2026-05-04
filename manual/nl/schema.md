@@ -91,6 +91,17 @@ Markeer een leafveld met `#[schemars(extend("x-env-only" = true))]` wanneer de w
 secret: String,
 ```
 
+## Veldwaardevalidatie
+
+Gegenereerde `*.schema.json`-bestanden zijn alleen voor IDE-completion en basale
+editorcontroles. Ze bepalen niet of een concrete veldwaarde geldig is voor de
+toepassing.
+
+Veldwaardevalidatie moet in code worden geimplementeerd met
+`#[config(validate = Self::validate)]`. De validator draait wanneer de
+uiteindelijke configuratie wordt geladen met `load_config` of gecontroleerd met
+`config-validate`.
+
 ## Overrides voor sjabloonsecties
 
 Wanneer een sjabloonbron geen includes heeft, kan de crate kind-

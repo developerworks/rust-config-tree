@@ -17,7 +17,7 @@ Es unterstuetzt:
   `config-validate`, `completions`, `install-completions` und
   `uninstall-completions`
 - Erzeugung von Draft-7-JSON-Schemas fuer Root- und Abschnittsschemas zur
-  Editor-Vervollstaendigung und Validierung
+  Editor-Vervollstaendigung und grundlegenden Schema-Pruefung
 - Erzeugung von Konfigurationsvorlagen fuer YAML, TOML, JSON und JSON5
 - Schema-Direktiven fuer TOML- und YAML-Vorlagen ohne zusaetzliche
   Laufzeitfelder
@@ -218,7 +218,11 @@ Verwende `write_config_schemas`, um Draft-7-JSON-Schemas fuer die
 Root-Konfiguration und explizit aufgeteilte verschachtelte Abschnitte zu erzeugen. Die erzeugten
 Schemas lassen `required`-Einschraenkungen weg, damit IDEs Vervollstaendigung
 fuer partielle Konfigurationsdateien anbieten koennen, ohne fehlende Felder zu
-melden:
+melden. Die erzeugten `*.schema.json`-Dateien sind nur fuer IDE-Vervollstaendigung
+und grundlegende Editor-Pruefungen gedacht; sie entscheiden nicht, ob ein
+konkreter Feldwert fuer die Anwendung gueltig ist. Feldwertvalidierung muss im
+Code mit `#[config(validate = Self::validate)]` implementiert und dann ueber
+`load_config` oder `config-validate` ausgefuehrt werden:
 
 ```rust
 use rust_config_tree::write_config_schemas;
@@ -259,7 +263,8 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 ```
 
 Verwende `write_config_templates_with_schema`, wenn erzeugte TOML- und
-YAML-Vorlagen diese Schemas fuer IDE-Vervollstaendigung und Validierung binden
+YAML-Vorlagen diese Schemas fuer IDE-Vervollstaendigung und grundlegende
+Schema-Pruefungen binden
 sollen:
 
 ```rust
@@ -433,10 +438,11 @@ Abschnittsschemas. Wird kein Ausgabepfad angegeben, wird das Root-Schema nach
 `config/<root_config_name>/<root_config_name>.schema.json` geschrieben.
 
 `config-validate` laedt den vollstaendigen Laufzeit-Konfigurationsbaum und
-fuehrt `confique`-Defaults und Validierung aus. Verwende Editor-Schemas fuer
-rauscharme Vervollstaendigung beim Bearbeiten aufgeteilter Dateien; verwende
-diesen Befehl fuer Pflichtfelder und finale Konfigurationsvalidierung. Bei
-erfolgreicher Validierung gibt er `Configuration is ok` aus.
+fuehrt `confique`-Defaults und Validierung aus, einschliesslich Validatoren aus
+`#[config(validate = Self::validate)]`. Verwende Editor-Schemas fuer rauscharme
+Vervollstaendigung beim Bearbeiten aufgeteilter Dateien; verwende diesen Befehl
+fuer Pflichtfelder und finale Konfigurationsvalidierung. Bei erfolgreicher
+Validierung gibt er `Configuration is ok` aus.
 
 `completions <shell>` schreibt Vervollstaendigungen nach stdout.
 

@@ -35,10 +35,13 @@ Gegenereerde schema's laten `required`-constraints weg. IDE's kunnen nog steeds
 completion bieden, maar gedeeltelijke bestanden zoals `config/log.yaml`
 rapporteren geen ontbrekende rootvelden. Het rootschema vult alleen velden aan
 die in het rootbestand thuishoren; gesplitste sectievelden worden daar weggelaten
-en door hun eigen sectieschema's aangevuld. Aanwezige velden worden nog steeds
-door het schema gecontroleerd in de IDE. Verplichte velden en uiteindelijke
-samengevoegde configuratievalidatie worden afgehandeld door `load_config` of
-`config-validate`.
+en door hun eigen sectieschema's aangevuld. Aanwezige velden kunnen nog steeds
+basale editorcontroles krijgen, zoals type-, enum- en onbekende-eigenschapcontroles
+die door het gegenereerde schema worden ondersteund. Gegenereerde
+`*.schema.json`-bestanden bepalen niet of een concrete veldwaarde geldig is voor
+de toepassing. Veldwaardevalidatie moet in code worden geimplementeerd met
+`#[config(validate = Self::validate)]`; `load_config` en `config-validate`
+voeren die runtimevalidatie uit.
 
 Koppel die schema's vanuit gegenereerde TOML- en YAML-sjablonen:
 

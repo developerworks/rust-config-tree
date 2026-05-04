@@ -120,8 +120,10 @@ demo config-validate
 
 generated editor schemas は split file で required-field diagnostic を避けるよう
 に作られます。`config-validate` は includes を読み込み、defaults を適用し、
-final `confique` validation を実行します。成功時は `Configuration is ok` を
-出力します。
+final `confique` validation を実行します。これには
+`#[config(validate = Self::validate)]` で宣言した validator も含まれます。
+生成された `*.schema.json` は IDE 補完と基本的な editor check のためのもので、
+field value legality は判断しません。成功時は `Configuration is ok` を出力します。
 
 ## Shell Completions
 

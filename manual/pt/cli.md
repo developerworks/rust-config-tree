@@ -123,8 +123,11 @@ demo config-validate
 
 Esquemas de editor gerados evitam intencionalmente diagnosticos de campos
 obrigatorios para arquivos divididos. `config-validate` carrega includes, aplica
-padroes e executa a validacao final do `confique`. Ele imprime
-`Configuration is ok` quando a validacao tem sucesso.
+padroes e executa a validacao final do `confique`, incluindo validadores
+declarados com `#[config(validate = Self::validate)]`. Os `*.schema.json`
+gerados continuam sendo para completamento de IDE e verificacoes basicas do
+editor, nao para legalidade de valores de campo. Ele imprime `Configuration is
+ok` quando a validacao tem sucesso.
 
 ## Shell completions
 

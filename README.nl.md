@@ -16,7 +16,7 @@ Het ondersteunt:
 - opdrachtverwerkers voor `config-template`, `config-schema`,
   `config-validate`, `completions`, `install-completions` en
   `uninstall-completions`
-- Draft 7 JSON Schema-generatie voor root- en sectieschema's voor editorcompletion en validatie
+- Draft 7 JSON Schema-generatie voor root- en sectieschema's voor editorcompletion en basale schemacontroles
 - configuratiesjabloongeneratie voor YAML, TOML, JSON en JSON5
 - schemadirectives voor TOML- en YAML-sjablonen zonder runtimevelden toe te voegen
 - recursieve include-traversal
@@ -216,7 +216,11 @@ uitvoerformaat wordt afgeleid uit het uitvoerpad:
 Gebruik `write_config_schemas` om Draft 7 JSON Schemas voor de rootconfiguratie
 en gesplitste geneste secties te maken. De gegenereerde schema's laten `required`-regels
 weg, zodat IDE's completion kunnen bieden voor gedeeltelijke configuratiebestanden
-zonder ontbrekende velden te rapporteren:
+zonder ontbrekende velden te rapporteren. Gegenereerde `*.schema.json`-bestanden
+zijn alleen voor IDE-completion en basale editorcontroles; ze bepalen niet of
+een concrete veldwaarde geldig is voor de toepassing. Veldwaardevalidatie moet
+in code worden geimplementeerd met `#[config(validate = Self::validate)]` en
+wordt uitgevoerd via `load_config` of `config-validate`:
 
 ```rust
 use rust_config_tree::write_config_schemas;
@@ -256,7 +260,8 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 ```
 
 Gebruik `write_config_templates_with_schema` wanneer gegenereerde TOML- en
-YAML-sjablonen die schema's moeten koppelen voor IDE-completion en validatie:
+YAML-sjablonen die schema's moeten koppelen voor IDE-completion en basale
+schemacontroles:
 
 ```rust
 use rust_config_tree::write_config_templates_with_schema;
@@ -423,10 +428,11 @@ sectieschema's. Als geen uitvoerpad is opgegeven, wordt het rootschema naar
 `config/<root_config_name>/<root_config_name>.schema.json` geschreven.
 
 `config-validate` laadt de volledige runtimeconfiguratieboom en voert
-`confique`-standaardwaarden en validatie uit. Gebruik editorschema's voor
-rustige completion tijdens het bewerken van gesplitste bestanden; gebruik deze
-opdracht voor vereiste velden en uiteindelijke configuratievalidatie. Het print
-`Configuration is ok` wanneer de validatie slaagt.
+`confique`-standaardwaarden en validatie uit, inclusief validators die met
+`#[config(validate = Self::validate)]` zijn gedeclareerd. Gebruik editorschema's
+voor rustige completion tijdens het bewerken van gesplitste bestanden; gebruik
+deze opdracht voor vereiste velden en uiteindelijke configuratievalidatie. Het
+print `Configuration is ok` wanneer de validatie slaagt.
 
 `completions <shell>` print completions naar stdout.
 

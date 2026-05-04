@@ -40,7 +40,10 @@ finale Konfiguration bleibt ein normales `confique`-Schema.
 - Figment-Metadaten fuer Quellenverfolgung zur Laufzeit.
 - Quellenverfolgungsereignisse auf TRACE-Ebene ueber `tracing`.
 - Erzeugung von Draft-7-JSON-Schemas fuer Editor-Vervollstaendigung und
-  Validierung.
+  grundlegende Schema-Pruefungen.
+- Feldwertvalidierung im Anwendungscode mit
+  `#[config(validate = Self::validate)]`, ausgefuehrt durch `load_config` oder
+  `config-validate`.
 - Vorlagenerzeugung fuer YAML, TOML, JSON und JSON5.
 - TOML-`#:schema` und YAML-Language-Server-Modelines fuer erzeugte Vorlagen.
 - Opt-in-YAML-Vorlagenaufteilung fuer mit `x-tree-split` markierte Abschnitte.

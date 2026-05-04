@@ -40,7 +40,10 @@ configuración final sigue siendo un valor normal de esquema `confique`.
 - Variables de entorno declaradas por esquema sin división por delimitadores.
 - Metadatos de Figment para seguimiento de origen en tiempo de ejecución.
 - Eventos de seguimiento de origen en nivel TRACE mediante `tracing`.
-- Generación de JSON Schema Draft 7 para completado y validación en editores.
+- Generación de JSON Schema Draft 7 para completado y comprobaciones básicas de esquema en editores.
+- Validación de valores de campo en código de aplicación con
+  `#[config(validate = Self::validate)]`, ejecutada por `load_config` o
+  `config-validate`.
 - Generación de plantillas YAML, TOML, JSON y JSON5.
 - Directivas TOML `#:schema` y modelines de YAML Language Server para
   plantillas generadas.

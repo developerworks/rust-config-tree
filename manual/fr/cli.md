@@ -124,7 +124,11 @@ demo config-validate
 Les schemas d'editeur generes evitent intentionnellement les diagnostics de
 champs obligatoires pour les fichiers separes. `config-validate` charge les
 inclusions, applique les valeurs par defaut et lance la validation finale
-`confique`. Elle affiche `Configuration is ok` lorsque la validation reussit.
+`confique`, y compris les validateurs declares avec
+`#[config(validate = Self::validate)]`. Les `*.schema.json` generes restent
+reserves a la completion IDE et aux controles d'editeur de base, pas a la
+validation de legalite des valeurs. Elle affiche `Configuration is ok` lorsque
+la validation reussit.
 
 ## Completions shell
 

@@ -38,9 +38,12 @@ ofrecer completado, pero archivos parciales como `config/log.yaml` no informan
 campos raíz faltantes. El esquema raíz solo completa campos que pertenecen al
 archivo raíz; los campos de secciones divididas se omiten allí y se completan
 mediante sus propios esquemas de sección. Los campos presentes siguen siendo
-comprobados por el esquema en el IDE. Los campos obligatorios y la validación
-final de la configuración fusionada los gestionan `load_config` o
-`config-validate`.
+comprobados de forma básica por el editor, por ejemplo tipo, enum y propiedades
+desconocidas admitidas por el esquema generado. Los `*.schema.json` generados no
+deciden si un valor concreto de campo es válido para la aplicación. La
+validación de valores debe implementarse en código con
+`#[config(validate = Self::validate)]`; `load_config` y `config-validate`
+ejecutan esa validación en tiempo de ejecución.
 
 Enlaza esos esquemas desde plantillas TOML y YAML generadas:
 

@@ -90,6 +90,17 @@ Markera ett bladfalt med `#[schemars(extend("x-env-only" = true))]` nar vardet b
 secret: String,
 ```
 
+## Faltvardevalidering
+
+Genererade `*.schema.json`-filer ar bara for IDE-komplettering och
+grundlaggande editor-kontroller. De avgor inte om ett konkret faltvarde ar
+giltigt for programmet.
+
+Faltvardevalidering ska implementeras i kod med
+`#[config(validate = Self::validate)]`. Validatorn kors nar den slutliga
+konfigurationen laddas med `load_config` eller kontrolleras med
+`config-validate`.
+
 ## Overstyrning av mallsektioner
 
 Nar en mallkalla saknar includes kan craten harleda barnmallfiler fran nastlade

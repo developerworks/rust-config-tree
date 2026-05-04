@@ -29,7 +29,7 @@ template and parent schema.
 
 Merkitse lehtikentta `#[schemars(extend("x-env-only" = true))]`, kun arvon tulee tulla vain ymparistomuuttujista. Luodut mallit ja JSON Schema -skeemat jattavat env-only-kentat pois, ja niiden takia tyhjiksi jaavat ylaobjektit poistetaan.
 
-Luodut skeemat jattavat `required`-rajoitteet pois. IDEt voivat silti tarjota taydennysta, mutta osittaiset tiedostot kuten `config/log.yaml` eivat ilmoita puuttuvista juurikentista. Juuriskeema taydentaa vain juuritiedostoon kuuluvat kentat; sisakkaisten osioiden kentat jatetaan siella pois ja taydennetaan niiden omilla osioskeemoilla. Paikalla olevat kentat tarkistetaan yha skeemalla IDEssa. Pakolliset kentat ja lopullinen yhdistetyn konfiguraation validointi hoidetaan `load_config`-funktiolla tai `config-validate`-komennolla.
+Luodut skeemat jattavat `required`-rajoitteet pois. IDEt voivat silti tarjota taydennysta, mutta osittaiset tiedostot kuten `config/log.yaml` eivat ilmoita puuttuvista juurikentista. Juuriskeema taydentaa vain juuritiedostoon kuuluvat kentat; sisakkaisten osioiden kentat jatetaan siella pois ja taydennetaan niiden omilla osioskeemoilla. Paikalla olevat kentat voivat yha saada editorin perustarkistuksia, kuten luodun skeeman tukemat tyyppi-, enum- ja tuntemattomien ominaisuuksien tarkistukset. Luodut `*.schema.json`-tiedostot eivat paata, onko konkreettinen kentan arvo sovellukselle kelvollinen. Kentta-arvojen validointi toteutetaan koodissa `#[config(validate = Self::validate)]`-attribuutilla; `load_config` ja `config-validate` suorittavat sen runtime-validoinnin.
 
 Sido nama skeemat luoduista TOML- ja YAML-malleista:
 

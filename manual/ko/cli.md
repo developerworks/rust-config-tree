@@ -117,7 +117,9 @@ demo config-validate
 
 생성된 에디터 스키마는 분할 파일에 대해 의도적으로 필수 필드 진단을 피합니다.
 `config-validate`는 include를 로드하고 기본값을 적용한 뒤 최종 `confique` 검증을
-실행합니다. 검증이 성공하면 `Configuration is ok`를 출력합니다.
+실행합니다. 여기에는 `#[config(validate = Self::validate)]`로 선언한 validator도
+포함됩니다. 생성된 `*.schema.json`은 IDE 완성과 기본 에디터 검사용이며, 필드 값
+유효성 판단에는 사용하지 않습니다. 검증이 성공하면 `Configuration is ok`를 출력합니다.
 
 ## 셸 완성
 

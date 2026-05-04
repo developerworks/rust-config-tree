@@ -91,6 +91,16 @@ Markiere ein Blattfeld mit `#[schemars(extend("x-env-only" = true))]`, wenn sein
 secret: String,
 ```
 
+## Feldwertvalidierung
+
+Erzeugte `*.schema.json`-Dateien sind nur fuer IDE-Vervollstaendigung und
+grundlegende Editor-Pruefungen gedacht. Sie entscheiden nicht, ob ein konkreter
+Feldwert fuer die Anwendung gueltig ist.
+
+Feldwertvalidierung muss im Code mit `#[config(validate = Self::validate)]`
+implementiert werden. Der Validator laeuft, wenn die finale Konfiguration ueber
+`load_config` geladen oder ueber `config-validate` geprueft wird.
+
 ## Abschnittspfade fuer Vorlagen ueberschreiben
 
 Wenn eine Vorlagenquelle keine Includes hat, kann die Crate Kind-Vorlagendateien

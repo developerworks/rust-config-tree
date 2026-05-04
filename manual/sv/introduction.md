@@ -36,7 +36,10 @@ konfigurationen ar fortfarande ett normalt `confique`-schemavarde.
 - Schemadeklarerade miljovariabler utan delimitersplittring.
 - Figment-metadata for runtime-kallspArning.
 - KallspArningshandelser pa TRACE-niva via `tracing`.
-- Draft 7 JSON Schema-generering for editor-komplettering och validering.
+- Draft 7 JSON Schema-generering for editor-komplettering och grundlaggande schemakontroller.
+- Faltvardevalidering i programkod med
+  `#[config(validate = Self::validate)]`, kord via `load_config` eller
+  `config-validate`.
 - Generering av YAML-, TOML-, JSON- och JSON5-mallar.
 - TOML `#:schema` och YAML Language Server-modelines for genererade mallar.
 - Opt-in YAML-malluppdelning for sektioner markerade med `x-tree-split`.

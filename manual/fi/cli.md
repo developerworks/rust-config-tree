@@ -104,7 +104,7 @@ Validoi koko runtime-konfiguraatiopuu:
 demo config-validate
 ```
 
-Luodut editoriskeemat valttavat tarkoituksella required-kenttien diagnostiikkaa jaetuille tiedostoille. `config-validate` lataa includet, kayttaa oletusarvot ja ajaa lopullisen `confique`-validoinnin. Se tulostaa `Configuration is ok`, kun validointi onnistuu.
+Luodut editoriskeemat valttavat tarkoituksella required-kenttien diagnostiikkaa jaetuille tiedostoille. `config-validate` lataa includet, kayttaa oletusarvot ja ajaa lopullisen `confique`-validoinnin, mukaan lukien `#[config(validate = Self::validate)]`-attribuutilla maaritellyt validaattorit. Luodut `*.schema.json`-tiedostot ovat IDE-taydennysta ja editorin perustarkistuksia varten, eivat kentta-arvon kelvollisuuden arviointiin. Se tulostaa `Configuration is ok`, kun validointi onnistuu.
 
 ## Shell-taydennykset
 

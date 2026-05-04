@@ -121,8 +121,11 @@ demo config-validate
 
 Gegenereerde editorschema's vermijden bewust diagnostics voor verplichte velden
 in gesplitste bestanden. `config-validate` laadt includes, past defaults toe en
-voert uiteindelijke `confique`-validatie uit. Het print `Configuration is ok`
-wanneer de validatie slaagt.
+voert uiteindelijke `confique`-validatie uit, inclusief validators die met
+`#[config(validate = Self::validate)]` zijn gedeclareerd. Gegenereerde
+`*.schema.json`-bestanden blijven voor IDE-completion en basale editorcontroles,
+niet voor veldwaardelegaliteit. Het print `Configuration is ok` wanneer de
+validatie slaagt.
 
 ## Shellcompletions
 

@@ -91,6 +91,17 @@ Marque um campo folha com `#[schemars(extend("x-env-only" = true))]` quando seu 
 secret: String,
 ```
 
+## Validacao de valores de campo
+
+Os arquivos `*.schema.json` gerados servem apenas para completamento de IDE e
+verificacoes basicas do editor. Eles nao decidem se um valor concreto de campo e
+valido para a aplicacao.
+
+A validacao de valores deve ser implementada no codigo com
+`#[config(validate = Self::validate)]`. O validador e executado quando a
+configuracao final e carregada por `load_config` ou verificada por
+`config-validate`.
+
 ## Sobrescritas de secao de modelo
 
 Quando uma origem de modelo nao tem includes, o crate pode derivar arquivos de
@@ -113,4 +124,3 @@ impl ConfigSchema for AppConfig {
     }
 }
 ```
-

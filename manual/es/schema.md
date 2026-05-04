@@ -91,6 +91,17 @@ Marca un campo hoja con `#[schemars(extend("x-env-only" = true))]` cuando su val
 secret: String,
 ```
 
+## Validación de valores de campo
+
+Los archivos `*.schema.json` generados sirven solo para completado de IDE y
+comprobaciones básicas del editor. No deciden si un valor concreto de campo es
+válido para la aplicación.
+
+La validación de valores debe implementarse en código con
+`#[config(validate = Self::validate)]`. El validador se ejecuta cuando la
+configuración final se carga con `load_config` o se comprueba con
+`config-validate`.
+
 ## Overrides de sección de plantilla
 
 Cuando una fuente de plantilla no tiene includes, el crate puede derivar

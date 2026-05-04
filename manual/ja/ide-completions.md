@@ -34,9 +34,12 @@ root schema は nested section property を省略するため、child section co
 
 `x-env-only` で mark した field は generated schema から省略されるため、環境変数だけで渡す secret などは IDE 補完に出ません。
 
-IDE schema は present field の type、enum、unknown property check を引き続き
-行います。required field と final merged config validation には
-`config-validate` を使います。
+IDE schema は補完と基本的な editor check のためのものです。type、enum、
+unknown property check など、生成 schema が表せる範囲だけを扱います。
+具体的な field value が application として合法かどうかは判断しません。
+field value validation は code 側で `#[config(validate = Self::validate)]` として
+実装し、`load_config` または `config-validate` で実行します。required field と
+final merged config validation もこの runtime path で扱います。
 
 ## TOML
 
@@ -133,4 +136,3 @@ References:
 - [Taplo directives](https://taplo.tamasfe.dev/configuration/directives.html)
 - [YAML Language Server](https://github.com/redhat-developer/yaml-language-server)
 - [VS Code JSON](https://code.visualstudio.com/Docs/languages/json)
-
