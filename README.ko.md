@@ -15,7 +15,7 @@
   `install-completions`, `uninstall-completions` 명령 핸들러
 - 에디터 완성과 기본 schema 검사를 위한 Draft 7 루트 및 섹션 JSON Schema 생성
 - YAML, TOML, JSON, JSON5 설정 템플릿 생성
-- 런타임 필드를 추가하지 않는 TOML 및 YAML 템플릿용 스키마 지시문
+- TOML, YAML, JSON, JSON5 템플릿 스키마 바인딩
 - 재귀 include 순회
 - 환경 값 병합 전에 `.env` 로드
 - Figment 메타데이터를 통한 소스 추적
@@ -219,8 +219,8 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 ```
 
 Mark a nested field with `#[schemars(extend("x-tree-split" = true))]` when it
-should be generated as its own `config/*.yaml` template and
-`schemas/*.schema.json` schema. Unmarked nested fields stay in the parent
+should be generated as its own `*.yaml` template and
+`<section>.schema.json` schema. Unmarked nested fields stay in the parent
 template and parent schema.
 
 값을 환경 변수로만 제공해야 하는 leaf 필드에는 `#[schemars(extend("x-env-only" = true))]`를 붙입니다. 생성된 템플릿과 JSON Schema는 env-only 필드를 생략하며, 이 생략으로 비게 된 부모 객체도 함께 제거합니다.
@@ -244,8 +244,9 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 }
 ```
 
-생성된 TOML 및 YAML 템플릿이 IDE 완성과 기본 schema 검사를 위해 해당 스키마에 바인딩되어야
-한다면 `write_config_templates_with_schema`를 사용하세요.
+생성된 TOML, YAML, JSON 및 JSON5 템플릿이 IDE 완성과 기본 스키마 검사를 위해
+해당 스키마에 바인딩되어야 한다면 `write_config_templates_with_schema`를
+사용하세요.
 
 ```rust
 use rust_config_tree::write_config_templates_with_schema;
@@ -261,12 +262,12 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 }
 ```
 
-루트 TOML/YAML 대상은 루트 스키마를 바인딩하며 자식 섹션 필드를 완성하지
+TOML 및 YAML 루트 대상은 루트 스키마를 바인딩하며 자식 섹션 필드를 완성하지
 않습니다. 분할된 섹션 YAML 대상은 대응하는 섹션 스키마를 바인딩합니다. 예를 들어
-`config/log.yaml`은
-`# yaml-language-server: $schema=../schemas/log.schema.json`를 받습니다. JSON 및
-JSON5 대상은 의도적으로 `$schema` 필드를 받지 않습니다. VS Code `json.schemas`
-같은 에디터 설정으로 바인딩하세요.
+`log.yaml`은
+`# yaml-language-server: $schema=./schemas/log.schema.json`를 받습니다. JSON 및
+JSON5 대상은 VS Code가 인식할 수 있는 루트 `$schema` 필드를 받습니다.
+VS Code `json.schemas` 같은 에디터 설정도 대체 바인딩 경로로 사용할 수 있습니다.
 
 템플릿 생성은 다음 순서로 소스 트리를 선택합니다.
 
@@ -280,10 +281,10 @@ JSON5 대상은 의도적으로 `$schema` 필드를 받지 않습니다. VS Code
 
 ```text
 config.example.yaml
-config/server.yaml
+server.yaml
 ```
 
-루트 템플릿은 `config/server.yaml` include 블록을 받습니다. `config/server.yaml`
+루트 템플릿은 `server.yaml` include 블록을 받습니다. `server.yaml`
 처럼 중첩 섹션에 매핑되는 YAML 대상은 해당 섹션만 포함합니다. 더 깊은 중첩
 섹션은 해당 필드도 `x-tree-split`를 가질 때만 재귀 분할됩니다.
 
@@ -309,8 +310,8 @@ impl ConfigSchema for AppConfig {
 }
 ```
 
-기본 섹션 경로는 최상위 중첩 섹션에 대해 `config/<section>.yaml`입니다. 중첩
-자식은 부모 파일 stem 아래에 배치됩니다. 예: `config/trading/risk.yaml`.
+기본 섹션 경로는 최상위 중첩 섹션에 대해 `<section>.yaml`입니다. 중첩
+자식은 부모 파일 stem 아래에 배치됩니다. 예: `trading/risk.yaml`.
 
 ## CLI Integration
 
@@ -395,10 +396,11 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 `config-template --output <file-name>`은 `config/<root_config_name>/` 아래에
 템플릿을 쓰고 선택한 파일 이름을 사용합니다. 경로를 제공하면 파일 이름만
 사용합니다. 출력 파일 이름을 제공하지 않으면
-`config/<root_config_name>/<root_config_name>.example.yaml`을 씁니다. 런타임
-`$schema` 필드를 추가하지 않고 TOML 및 YAML 템플릿을 생성된 JSON Schema 집합에
-바인딩하려면 `--schema <path>`를 추가하세요. 이 옵션은 선택한 스키마 경로에
-루트 스키마와 섹션 스키마도 씁니다.
+`config/<root_config_name>/<root_config_name>.example.yaml`을 씁니다.
+TOML, YAML, JSON 및 JSON5 템플릿을 생성된 JSON Schema 집합에 바인딩하려면
+`--schema <path>`를 추가하세요. JSON 및 JSON5 템플릿은 VS Code가 인식하는
+`$schema` 필드를 받습니다. 이 옵션은 선택한 스키마 경로에 루트 스키마와 섹션
+스키마도 씁니다.
 
 `config-schema --output <path>`는 루트 Draft 7 JSON Schema와 섹션 스키마를
 씁니다. 출력 경로를 제공하지 않으면 루트 스키마는

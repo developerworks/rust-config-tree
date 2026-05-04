@@ -18,7 +18,7 @@ Het ondersteunt:
   `uninstall-completions`
 - Draft 7 JSON Schema-generatie voor root- en sectieschema's voor editorcompletion en basale schemacontroles
 - configuratiesjabloongeneratie voor YAML, TOML, JSON en JSON5
-- schemadirectives voor TOML- en YAML-sjablonen zonder runtimevelden toe te voegen
+- schemabindingen voor TOML-, YAML-, JSON- en JSON5-sjablonen
 - recursieve include-traversal
 - `.env` laden voordat omgevingswaarden worden samengevoegd
 - brontracking via Figment-metadata
@@ -233,8 +233,8 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 ```
 
 Mark a nested field with `#[schemars(extend("x-tree-split" = true))]` when it
-should be generated as its own `config/*.yaml` template and
-`schemas/*.schema.json` schema. Unmarked nested fields stay in the parent
+should be generated as its own `*.yaml` template and
+`<section>.schema.json` schema. Unmarked nested fields stay in the parent
 template and parent schema.
 
 Markeer een leafveld met `#[schemars(extend("x-env-only" = true))]` wanneer de waarde alleen uit omgevingsvariabelen mag komen. Gegenereerde sjablonen en JSON Schemas laten env-only velden weg, en lege bovenliggende objecten die daardoor overblijven worden verwijderd.
@@ -259,9 +259,9 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 }
 ```
 
-Gebruik `write_config_templates_with_schema` wanneer gegenereerde TOML- en
-YAML-sjablonen die schema's moeten koppelen voor IDE-completion en basale
-schemacontroles:
+Gebruik `write_config_templates_with_schema` wanneer gegenereerde TOML-, YAML-,
+JSON- en JSON5-sjablonen die schema's moeten koppelen voor IDE-completion en
+basale schemacontroles:
 
 ```rust
 use rust_config_tree::write_config_templates_with_schema;
@@ -277,12 +277,12 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 }
 ```
 
-Root-TOML/YAML-doelen koppelen het rootschema en vullen geen velden van
+TOML- en YAML-rootdoelen koppelen het rootschema en vullen geen velden van
 gesplitste kindsecties aan. Gesplitste sectie-YAML-doelen koppelen hun passende
-sectieschema, bijvoorbeeld `config/log.yaml` krijgt
-`# yaml-language-server: $schema=../schemas/log.schema.json`. JSON- en
-JSON5-doelen krijgen bewust geen `$schema`-veld; koppel ze met editorinstellingen
-zoals VS Code `json.schemas`.
+sectieschema, bijvoorbeeld `log.yaml` krijgt
+`# yaml-language-server: $schema=./schemas/log.schema.json`. JSON- en
+JSON5-doelen krijgen een rootveld `$schema` dat VS Code kan herkennen.
+VS Code `json.schemas` blijft een alternatieve koppelingsroute.
 
 Sjabloongeneratie kiest de bronboom in deze volgorde:
 
@@ -296,11 +296,11 @@ produceert een lege `config.example.yaml`-bron:
 
 ```text
 config.example.yaml
-config/server.yaml
+server.yaml
 ```
 
-Het rootsjabloon krijgt een include-blok voor `config/server.yaml`. YAML-doelen
-die naar een geneste sectie verwijzen, zoals `config/server.yaml`, bevatten
+Het rootsjabloon krijgt een include-blok voor `server.yaml`. YAML-doelen
+die naar een geneste sectie verwijzen, zoals `server.yaml`, bevatten
 alleen die sectie. Verdere geneste secties worden alleen recursief gesplitst wanneer die velden ook
 `x-tree-split` dragen.
 
@@ -327,9 +327,9 @@ impl ConfigSchema for AppConfig {
 }
 ```
 
-Het standaardsectiepad is `config/<section>.yaml` voor geneste secties op het
+Het standaardsectiepad is `<section>.yaml` voor geneste secties op het
 hoogste niveau. Geneste kinderen worden onder de bestandsstem van hun ouder
-geplaatst, bijvoorbeeld `config/trading/risk.yaml`.
+geplaatst, bijvoorbeeld `trading/risk.yaml`.
 
 ## CLI-integratie
 
@@ -418,10 +418,10 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 opgegeven, wordt alleen de bestandsnaam gebruikt. Als geen uitvoerbestandsnaam
 is opgegeven, schrijft het
 `config/<root_config_name>/<root_config_name>.example.yaml`. Voeg
-`--schema <path>` toe om TOML- en YAML-sjablonen te koppelen aan een
-gegenereerde JSON Schema-set zonder een runtimeveld `$schema` toe te voegen.
-Dit schrijft ook het rootschema en de sectieschema's naar het gekozen
-schemapad.
+`--schema <path>` toe om TOML-, YAML-, JSON- en JSON5-sjablonen te koppelen aan
+een gegenereerde JSON Schema-set. JSON- en JSON5-sjablonen krijgen een
+`$schema`-veld dat VS Code herkent. Dit schrijft ook het rootschema en de
+sectieschema's naar het gekozen schemapad.
 
 `config-schema --output <path>` schrijft het root-Draft 7 JSON Schema en de
 sectieschema's. Als geen uitvoerpad is opgegeven, wordt het rootschema naar

@@ -59,7 +59,7 @@ schema(结构定义) 合并和校验之前发现子配置文件。
 
 使用 `#[config(nested)]` 表示结构化 section(配置段)。嵌套 section(配置段)
 一定会影响运行时加载。如果某个 nested(嵌套) 字段还需要生成独立的
-`config/*.yaml` 模板和 `schemas/*.schema.json` schema(结构定义)，就给这个字段加上
+`*.yaml` 模板和 `<section>.schema.json` schema(结构定义)，就给这个字段加上
 `#[schemars(extend("x-tree-split" = true))]`：
 
 ```rust
@@ -105,7 +105,7 @@ secret: String,
 
 当模板 source(来源) 没有 include(包含文件) 时，crate(软件包) 可以从带
 `x-tree-split` 标记的嵌套 schema section(结构定义配置段) 推导子模板文件。
-默认顶层路径是 `config/<section>.yaml`。
+默认顶层路径是相对 root template(根模板) 目录的 `<section>.yaml`。
 
 使用 `template_path_for_section` 覆盖路径：
 

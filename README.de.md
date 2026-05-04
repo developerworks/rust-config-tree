@@ -19,8 +19,7 @@ Es unterstuetzt:
 - Erzeugung von Draft-7-JSON-Schemas fuer Root- und Abschnittsschemas zur
   Editor-Vervollstaendigung und grundlegenden Schema-Pruefung
 - Erzeugung von Konfigurationsvorlagen fuer YAML, TOML, JSON und JSON5
-- Schema-Direktiven fuer TOML- und YAML-Vorlagen ohne zusaetzliche
-  Laufzeitfelder
+- Schema-Bindings fuer TOML-, YAML-, JSON- und JSON5-Vorlagen
 - rekursive Include-Traversierung
 - Laden von `.env`, bevor Umgebungswerte zusammengefuehrt werden
 - Quellenverfolgung ueber Figment-Metadaten
@@ -235,8 +234,8 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 ```
 
 Mark a nested field with `#[schemars(extend("x-tree-split" = true))]` when it
-should be generated as its own `config/*.yaml` template and
-`schemas/*.schema.json` schema. Unmarked nested fields stay in the parent
+should be generated as its own `*.yaml` template and
+`<section>.schema.json` schema. Unmarked nested fields stay in the parent
 template and parent schema.
 
 Markiere ein Blattfeld mit `#[schemars(extend("x-env-only" = true))]`, wenn der Wert nur aus Umgebungsvariablen kommen darf. Generierte Vorlagen und JSON-Schemas lassen env-only-Felder weg, und dadurch leere Elternobjekte werden entfernt.
@@ -262,9 +261,9 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 }
 ```
 
-Verwende `write_config_templates_with_schema`, wenn erzeugte TOML- und
-YAML-Vorlagen diese Schemas fuer IDE-Vervollstaendigung und grundlegende
-Schema-Pruefungen binden
+Verwende `write_config_templates_with_schema`, wenn erzeugte TOML-, YAML-,
+JSON- und JSON5-Vorlagen diese Schemas fuer IDE-Vervollstaendigung und
+grundlegende Schema-Pruefungen binden
 sollen:
 
 ```rust
@@ -281,12 +280,12 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 }
 ```
 
-Root-Ziele fuer TOML/YAML binden das Root-Schema und vervollstaendigen keine
-aufgeteilten untergeordneten Abschnittsfelder. Aufgeteilte YAML-Abschnittsziele binden ihr
-passendes Abschnittsschema, zum Beispiel erhaelt `config/log.yaml`
-`# yaml-language-server: $schema=../schemas/log.schema.json`. JSON- und
-JSON5-Ziele erhalten bewusst kein `$schema`-Feld; binde sie ueber
-Editor-Einstellungen wie VS Code `json.schemas`.
+TOML- und YAML-Root-Ziele binden das Root-Schema und vervollstaendigen keine
+aufgeteilten untergeordneten Abschnittsfelder. Aufgeteilte YAML-Abschnittsziele
+binden ihr passendes Abschnittsschema, zum Beispiel erhaelt `log.yaml`
+`# yaml-language-server: $schema=./schemas/log.schema.json`. JSON- und
+JSON5-Ziele erhalten ein oberstes `$schema`-Feld, das VS Code erkennen kann.
+VS Code `json.schemas` bleibt als alternative Bindung moeglich.
 
 Die Vorlagenerzeugung waehlt den Quellbaum in dieser Reihenfolge:
 
@@ -300,12 +299,12 @@ obigen Schema erzeugt eine leere Quelle `config.example.yaml`:
 
 ```text
 config.example.yaml
-config/server.yaml
+server.yaml
 ```
 
-Die Root-Vorlage erhaelt einen Include-Block fuer `config/server.yaml`.
+Die Root-Vorlage erhaelt einen Include-Block fuer `server.yaml`.
 YAML-Ziele, die einem verschachtelten Abschnitt entsprechen, etwa
-`config/server.yaml`, enthalten nur diesen Abschnitt. Weitere verschachtelte
+`server.yaml`, enthalten nur diesen Abschnitt. Weitere verschachtelte
 Abschnitte werden nur rekursiv aufgeteilt, wenn diese Felder ebenfalls
 `x-tree-split` tragen.
 
@@ -332,9 +331,9 @@ impl ConfigSchema for AppConfig {
 }
 ```
 
-Der Standardpfad fuer Abschnitte ist `config/<section>.yaml` fuer
+Der Standardpfad fuer Abschnitte ist `<section>.yaml` fuer
 verschachtelte Top-Level-Abschnitte. Verschachtelte Kinder werden unter dem
-Dateistamm ihres Elternteils abgelegt, zum Beispiel `config/trading/risk.yaml`.
+Dateistamm ihres Elternteils abgelegt, zum Beispiel `trading/risk.yaml`.
 
 ## CLI-Integration
 
@@ -428,10 +427,7 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 angegeben wird, wird nur dessen Dateiname verwendet. Wird kein Ausgabe-Dateiname
 angegeben, schreibt der Befehl
 `config/<root_config_name>/<root_config_name>.example.yaml`. Fuege
-`--schema <path>` hinzu, um TOML- und YAML-Vorlagen an ein erzeugtes
-JSON-Schema-Set zu binden, ohne ein Laufzeitfeld `$schema` hinzuzufuegen. Dabei
-werden auch das Root-Schema und Abschnittsschemas an den gewaehlten Schemapfad
-geschrieben.
+`--schema <path>` hinzu, um TOML-, YAML-, JSON- und JSON5-Vorlagen an ein erzeugtes JSON-Schema-Set zu binden. JSON- und JSON5-Vorlagen erhalten ein von VS Code erkennbares `$schema`-Feld. Dabei werden auch das Root-Schema und Abschnittsschemas an den gewaehlten Schemapfad geschrieben.
 
 `config-schema --output <path>` schreibt das Root-Draft-7-JSON-Schema und
 Abschnittsschemas. Wird kein Ausgabepfad angegeben, wird das Root-Schema nach

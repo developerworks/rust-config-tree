@@ -72,12 +72,22 @@ server:
 
 `write_config_templates_with_schema` adds this modeline automatically for YAML
 templates. Split YAML templates bind their section schema, for example
-`config/log.yaml` binds `../schemas/log.schema.json`.
+`log.yaml` binds `./schemas/log.schema.json`.
 
 ## JSON
 
-JSON cannot carry comments, and `$schema` is a real JSON property. Keep runtime
-config files clean and bind JSON files through editor settings:
+JSON and JSON5 files can bind a schema with a top-level `$schema` property.
+`write_config_templates_with_schema` adds it automatically for generated JSON
+and JSON5 templates:
+
+```json
+{
+  "$schema": "./schemas/myapp.schema.json"
+}
+```
+
+Editor settings are still useful when a project does not want an in-file
+binding:
 
 ```json
 {
@@ -123,11 +133,11 @@ config.toml:
 config.yaml:
   # yaml-language-server: $schema=./schemas/myapp.schema.json
 
-config/server.yaml:
-  # yaml-language-server: $schema=../schemas/server.schema.json
+server.yaml:
+  # yaml-language-server: $schema=./schemas/server.schema.json
 
 config.json:
-  No runtime $schema field; bind with editor settings
+  "$schema": "./schemas/myapp.schema.json"
 ```
 
 References:

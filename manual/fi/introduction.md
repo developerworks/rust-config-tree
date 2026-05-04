@@ -36,7 +36,8 @@ Jokainen sisallytetty tiedosto voi kayttaa samaa skeemamuotoa, ja suhteelliset i
   `#[config(validate = Self::validate)]`-attribuutilla, suoritettuna
   `load_config`- tai `config-validate`-polussa.
 - YAML-, TOML-, JSON- ja JSON5-mallien luonti.
-- TOML `#:schema`- ja YAML Language Server -skeemamallirivit luoduille malleille.
+- TOML `#:schema` -direktiivit, YAML Language Server -skeemamallirivit ja
+  JSON/JSON5 `$schema` -kentat luoduille malleille.
 - Opt-in YAML-mallien jakaminen `x-tree-split`-merkityille osioille.
 - Sisaanrakennetut clap-alikomennot konfiguraatiomalleille, JSON Schemalle ja shell-taydennyksille.
 - Alemman tason puu-API kutsujille, jotka eivat kayta `confique`-kirjastoa.

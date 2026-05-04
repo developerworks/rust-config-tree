@@ -61,7 +61,7 @@ samengevoegd en gevalideerd.
 Gebruik `#[config(nested)]` voor gestructureerde secties. Geneste secties
 worden altijd gebruikt voor runtime laden. Voeg
 `#[schemars(extend("x-tree-split" = true))]` toe wanneer een genest veld ook
-als eigen `config/*.yaml`-sjabloon en `schemas/*.schema.json`-schema moet
+als eigen `*.yaml`-sjabloon en `<section>.schema.json`-schema moet
 worden gegenereerd:
 
 ```rust
@@ -106,7 +106,7 @@ uiteindelijke configuratie wordt geladen met `load_config` of gecontroleerd met
 
 Wanneer een sjabloonbron geen includes heeft, kan de crate kind-
 sjabloonbestanden afleiden uit geneste schemaselecties gemarkeerd met `x-tree-split`. Het standaardpad op het
-hoogste niveau is `config/<section>.yaml`.
+hoogste niveau is `<section>.yaml`.
 
 Overschrijf dat pad met `template_path_for_section`:
 

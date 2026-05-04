@@ -61,7 +61,7 @@ zusammengefuehrt und validiert wird.
 Verwende `#[config(nested)]` fuer strukturierte Abschnitte. Verschachtelte
 Abschnitte werden immer fuer das Laden zur Laufzeit genutzt. Fuege
 `#[schemars(extend("x-tree-split" = true))]` hinzu, wenn ein nested Feld
-zusaetzlich als eigenes `config/*.yaml`-Template und `schemas/*.schema.json`-Schema
+zusaetzlich als eigenes `*.yaml`-Template und `<section>.schema.json`-Schema
 erzeugt werden soll:
 
 ```rust
@@ -105,7 +105,7 @@ implementiert werden. Der Validator laeuft, wenn die finale Konfiguration ueber
 
 Wenn eine Vorlagenquelle keine Includes hat, kann die Crate Kind-Vorlagendateien
 aus mit `x-tree-split` markierten verschachtelten Schemaabschnitten ableiten. Der Standardpfad auf oberster
-Ebene ist `config/<section>.yaml`.
+Ebene ist `<section>.yaml`.
 
 Ueberschreibe diesen Pfad mit `template_path_for_section`:
 

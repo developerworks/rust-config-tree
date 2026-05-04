@@ -57,11 +57,19 @@ server:
   port: 3000
 ```
 
-`write_config_templates_with_schema` lisaa taman mallirivin automaattisesti YAML-malleihin. Jaetut YAML-mallit sitovat osioskeemansa; esimerkiksi `config/log.yaml` sitoo skeeman `../schemas/log.schema.json`.
+`write_config_templates_with_schema` lisaa taman mallirivin automaattisesti YAML-malleihin. Jaetut YAML-mallit sitovat osioskeemansa; esimerkiksi `log.yaml` sitoo skeeman `./schemas/log.schema.json`.
 
 ## JSON
 
-JSON ei voi sisaltaa kommentteja, ja `$schema` on oikea JSON-ominaisuus. Pida runtime-konfiguraatiotiedostot puhtaina ja sido JSON-tiedostot editoriasetuksilla:
+JSON- ja JSON5-tiedostot voivat sitoa skeeman juuritason `$schema`-kentalla. `write_config_templates_with_schema` lisaa sen automaattisesti luotuihin JSON- ja JSON5-malleihin:
+
+```json
+{
+  "$schema": "./schemas/myapp.schema.json"
+}
+```
+
+Editoriasetukset ovat edelleen hyodyllisia, jos projekti ei halua sidontaa tiedostoon:
 
 ```json
 {
@@ -107,11 +115,11 @@ config.toml:
 config.yaml:
   # yaml-language-server: $schema=./schemas/myapp.schema.json
 
-config/server.yaml:
-  # yaml-language-server: $schema=../schemas/server.schema.json
+server.yaml:
+  # yaml-language-server: $schema=./schemas/server.schema.json
 
 config.json:
-  No runtime $schema field; bind with editor settings
+  "$schema": "./schemas/myapp.schema.json"
 ```
 
 Viitteet:

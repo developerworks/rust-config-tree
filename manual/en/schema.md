@@ -60,7 +60,7 @@ discover child config files before the final schema is merged and validated.
 Use `#[config(nested)]` for structured sections. Nested sections are always
 used for runtime loading. Add `#[schemars(extend("x-tree-split" = true))]`
 when a nested field should also be generated as an independent
-`config/*.yaml` template and `schemas/*.schema.json` schema:
+`*.yaml` template and `<section>.schema.json` schema:
 
 ```rust
 #[derive(Debug, Config, JsonSchema)]
@@ -103,7 +103,7 @@ is loaded through `load_config` or checked through `config-validate`.
 
 When a template source has no includes, the crate can derive child template
 files from nested schema sections marked with `x-tree-split`. The default
-top-level path is `config/<section>.yaml`.
+top-level path is `<section>.yaml` relative to the root template directory.
 
 Override that path with `template_path_for_section`:
 

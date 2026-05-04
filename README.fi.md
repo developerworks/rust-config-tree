@@ -14,7 +14,7 @@ Se kasittelee:
   `install-completions`- ja `uninstall-completions`-komentojen kasittelijat
 - Draft 7 -juuri- ja osio-JSON Schema -skeemojen luonnin editorien taydennysta ja skeeman perustarkistuksia varten
 - konfiguraatiomallien luonnin YAML-, TOML-, JSON- ja JSON5-muodoissa
-- TOML- ja YAML-mallien skeemadirektiivit ilman runtime-kenttien lisaamista
+- TOML-, YAML-, JSON- ja JSON5-mallien skeemasidonnat
 - rekursiivisen include-lapikaynnin
 - `.env`-latauksen ennen ymparistoarvojen yhdistamista
 - lahteen seurannan Figment-metadatan kautta
@@ -192,8 +192,8 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 ```
 
 Mark a nested field with `#[schemars(extend("x-tree-split" = true))]` when it
-should be generated as its own `config/*.yaml` template and
-`schemas/*.schema.json` schema. Unmarked nested fields stay in the parent
+should be generated as its own `*.yaml` template and
+`<section>.schema.json` schema. Unmarked nested fields stay in the parent
 template and parent schema.
 
 Merkitse lehtikentta `#[schemars(extend("x-env-only" = true))]`, kun arvon tulee tulla vain ymparistomuuttujista. Luodut mallit ja JSON Schema -skeemat jattavat env-only-kentat pois, ja niiden takia tyhjiksi jaavat ylaobjektit poistetaan.
@@ -212,7 +212,9 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 }
 ```
 
-Kayta `write_config_templates_with_schema`-funktiota, kun luotujen TOML- ja YAML-mallien tulee sitoa nama skeemat IDE-taydennysta ja skeeman perustarkistuksia varten:
+Kayta `write_config_templates_with_schema`-funktiota, kun luotujen TOML-, YAML-,
+JSON- ja JSON5-mallien tulee sitoa nama skeemat IDE-taydennysta ja skeeman
+perustarkistuksia varten:
 
 ```rust
 use rust_config_tree::write_config_templates_with_schema;
@@ -228,7 +230,12 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 }
 ```
 
-Juuri-TOML/YAML-kohteet sitovat juuriskeeman eivatka taydenna jaettujen lapsiosioiden kenttia. Jaetut osio-YAML-kohteet sitovat vastaavan osioskeeman; esimerkiksi `config/log.yaml` saa rivin `# yaml-language-server: $schema=../schemas/log.schema.json`. JSON- ja JSON5-kohteisiin ei tarkoituksella lisata `$schema`-kenttaa; sido ne editoriasetuksilla, kuten VS Coden `json.schemas`.
+TOML- ja YAML-juurikohteet sitovat juuriskeeman eivatka taydenna jaettujen
+lapsiosioiden kenttia. Jaetut osio-YAML-kohteet sitovat vastaavan osioskeeman;
+esimerkiksi `log.yaml` saa rivin
+`# yaml-language-server: $schema=./schemas/log.schema.json`. JSON- ja
+JSON5-kohteet saavat juuritason `$schema`-kentan, jonka VS Code tunnistaa.
+VS Coden `json.schemas` on edelleen vaihtoehtoinen sidontatapa.
 
 Mallien luonti valitsee lahdepuun tassa jarjestyksessa:
 
@@ -240,10 +247,10 @@ Jos lahdesolmulla ei ole include-listaa, `rust-config-tree` johtaa lapsimallitie
 
 ```text
 config.example.yaml
-config/server.yaml
+server.yaml
 ```
 
-Juurimalli saa include-lohkon tiedostolle `config/server.yaml`. YAML-kohteet, jotka vastaavat sisakkaista osiota, kuten `config/server.yaml`, sisaltavat vain kyseisen osion. Syvemmat sisakkaiset osiot jaetaan rekursiivisesti vain, kun myos niilla kentilla on `x-tree-split`.
+Juurimalli saa include-lohkon tiedostolle `server.yaml`. YAML-kohteet, jotka vastaavat sisakkaista osiota, kuten `server.yaml`, sisaltavat vain kyseisen osion. Syvemmat sisakkaiset osiot jaetaan rekursiivisesti vain, kun myos niilla kentilla on `x-tree-split`.
 
 Ohita `template_path_for_section`, kun osio tulee luoda eri polkuun:
 
@@ -267,7 +274,7 @@ impl ConfigSchema for AppConfig {
 }
 ```
 
-Oletusosiopolku on `config/<section>.yaml` ylatasojen sisakkaisille osioille. Sisakkaiset lapset sijoitetaan vanhemman tiedostonimen rungon alle, esimerkiksi `config/trading/risk.yaml`.
+Oletusosiopolku on `<section>.yaml` ylatasojen sisakkaisille osioille. Sisakkaiset lapset sijoitetaan vanhemman tiedostonimen rungon alle, esimerkiksi `trading/risk.yaml`.
 
 ## CLI-integraatio
 
@@ -345,7 +352,7 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 }
 ```
 
-`config-template --output <file-name>` kirjoittaa mallit hakemistoon `config/<root_config_name>/` valitulla tiedostonimella. Jos polku annetaan, vain sen tiedostonimi kaytetaan. Jos tulostetiedoston nimea ei anneta, komento kirjoittaa `config/<root_config_name>/<root_config_name>.example.yaml`. Lisaa `--schema <path>`, jotta TOML- ja YAML-mallit sidotaan luotuun JSON Schema -joukkoon ilman runtime-`$schema`-kenttaa. Tama kirjoittaa myos juuriskeeman ja osioskeemat valittuun skeemapolkuun.
+`config-template --output <file-name>` kirjoittaa mallit hakemistoon `config/<root_config_name>/` valitulla tiedostonimella. Jos polku annetaan, vain sen tiedostonimi kaytetaan. Jos tulostetiedoston nimea ei anneta, komento kirjoittaa `config/<root_config_name>/<root_config_name>.example.yaml`. Lisaa `--schema <path>`, jotta TOML-, YAML-, JSON- ja JSON5-mallit sidotaan luotuun JSON Schema -joukkoon. JSON- ja JSON5-mallit saavat `$schema`-kentan, jonka VS Code tunnistaa. Tama kirjoittaa myos juuriskeeman ja osioskeemat valittuun skeemapolkuun.
 
 `config-schema --output <path>` kirjoittaa Draft 7 -juuri-JSON Schema -skeeman ja osioskeemat. Jos tulostepolkua ei anneta, juuriskeema kirjoitetaan tiedostoon `config/<root_config_name>/<root_config_name>.schema.json`.
 

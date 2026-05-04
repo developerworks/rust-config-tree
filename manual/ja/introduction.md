@@ -40,7 +40,8 @@ schema value です。
 - application code で `#[config(validate = Self::validate)]` として実装し、
   `load_config` または `config-validate` で実行する field value validation。
 - YAML、TOML、JSON、JSON5 template generation。
-- generated TOML template の `#:schema` と YAML Language Server modeline。
+- generated TOML template の `#:schema`、YAML Language Server modeline、
+  JSON / JSON5 template の `$schema` field。
 - `x-tree-split` で mark した nested section の YAML template splitting。
 - config template、JSON Schema、shell completion 向け built-in clap subcommands。
 - `confique` を使わない caller 向けの lower-level tree API。

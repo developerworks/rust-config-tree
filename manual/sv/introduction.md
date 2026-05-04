@@ -41,7 +41,8 @@ konfigurationen ar fortfarande ett normalt `confique`-schemavarde.
   `#[config(validate = Self::validate)]`, kord via `load_config` eller
   `config-validate`.
 - Generering av YAML-, TOML-, JSON- och JSON5-mallar.
-- TOML `#:schema` och YAML Language Server-modelines for genererade mallar.
+- TOML `#:schema`, YAML Language Server-modelines och JSON/JSON5-`$schema`-falt
+  for genererade mallar.
 - Opt-in YAML-malluppdelning for sektioner markerade med `x-tree-split`.
 - Inbyggda clap-underkommandon for konfigurationsmallar, JSON Schema och skalkompletteringar.
 - Ett lagre niva trad-API for anropare som inte anvander `confique`.

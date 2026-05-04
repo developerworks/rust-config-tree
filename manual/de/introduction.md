@@ -45,7 +45,8 @@ finale Konfiguration bleibt ein normales `confique`-Schema.
   `#[config(validate = Self::validate)]`, ausgefuehrt durch `load_config` oder
   `config-validate`.
 - Vorlagenerzeugung fuer YAML, TOML, JSON und JSON5.
-- TOML-`#:schema` und YAML-Language-Server-Modelines fuer erzeugte Vorlagen.
+- TOML-`#:schema`, YAML-Language-Server-Modelines und JSON/JSON5-`$schema`-
+  Felder fuer erzeugte Vorlagen.
 - Opt-in-YAML-Vorlagenaufteilung fuer mit `x-tree-split` markierte Abschnitte.
 - Eingebaute clap-Unterbefehle fuer Konfigurationsvorlagen, JSON-Schema und
   Shell-Vervollstaendigungen.

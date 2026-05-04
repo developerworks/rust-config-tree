@@ -72,12 +72,19 @@ server:
 
 `write_config_templates_with_schema` は YAML template にこの modeline を自動追加
 します。split YAML template は section schema を bind します。たとえば
-`config/log.yaml` は `../schemas/log.schema.json` を bind します。
+`log.yaml` は `./schemas/log.schema.json` を bind します。
 
 ## JSON
 
-JSON は comment を持てず、`$schema` は real JSON property です。runtime config
-file を clean に保ち、editor settings で JSON file を bind してください。
+JSON / JSON5 file は root `$schema` field で schema を bind できます。`write_config_templates_with_schema` は generated JSON / JSON5 template に自動で追加します。
+
+```json
+{
+  "$schema": "./schemas/myapp.schema.json"
+}
+```
+
+file 内 binding を使わない project では editor settings も引き続き使えます。
 
 ```json
 {
@@ -123,11 +130,11 @@ config.toml:
 config.yaml:
   # yaml-language-server: $schema=./schemas/myapp.schema.json
 
-config/server.yaml:
-  # yaml-language-server: $schema=../schemas/server.schema.json
+server.yaml:
+  # yaml-language-server: $schema=./schemas/server.schema.json
 
 config.json:
-  No runtime $schema field; bind with editor settings
+  "$schema": "./schemas/myapp.schema.json"
 ```
 
 References:

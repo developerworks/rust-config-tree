@@ -79,13 +79,19 @@ server:
 
 `write_config_templates_with_schema` fuegt diese Modeline fuer YAML-Vorlagen
 automatisch hinzu. Aufgeteilte YAML-Vorlagen binden ihr Abschnittsschema, zum
-Beispiel bindet `config/log.yaml` `../schemas/log.schema.json`.
+Beispiel bindet `log.yaml` `./schemas/log.schema.json`.
 
 ## JSON
 
-JSON kann keine Kommentare tragen, und `$schema` ist eine echte JSON-
-Eigenschaft. Halte Laufzeit-Konfigurationsdateien sauber und binde JSON-Dateien
-ueber Editor-Einstellungen:
+JSON- und JSON5-Dateien koennen ein Schema mit einem obersten `$schema`-Feld binden. `write_config_templates_with_schema` fuegt es fuer erzeugte JSON- und JSON5-Vorlagen automatisch hinzu:
+
+```json
+{
+  "$schema": "./schemas/myapp.schema.json"
+}
+```
+
+Editor-Einstellungen bleiben nuetzlich, wenn ein Projekt keine Bindung in der Datei will:
 
 ```json
 {
@@ -131,11 +137,11 @@ config.toml:
 config.yaml:
   # yaml-language-server: $schema=./schemas/myapp.schema.json
 
-config/server.yaml:
-  # yaml-language-server: $schema=../schemas/server.schema.json
+server.yaml:
+  # yaml-language-server: $schema=./schemas/server.schema.json
 
 config.json:
-  No runtime $schema field; bind with editor settings
+  "$schema": "./schemas/myapp.schema.json"
 ```
 
 Referenzen:

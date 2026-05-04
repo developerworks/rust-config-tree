@@ -19,8 +19,7 @@ Ele lida com:
 - geracao de JSON Schema Draft 7 para a raiz e para secoes, para completamento e
   verificacoes basicas de esquema no editor
 - geracao de modelos de configuracao para YAML, TOML, JSON e JSON5
-- diretivas de esquema para modelos TOML e YAML sem adicionar campos em tempo de
-  execucao
+- vinculos de esquema para modelos TOML, YAML, JSON e JSON5
 - travessia recursiva de includes
 - carregamento de `.env` antes que valores de ambiente sejam mesclados
 - rastreamento de origem por metadados Figment
@@ -233,8 +232,8 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 ```
 
 Mark a nested field with `#[schemars(extend("x-tree-split" = true))]` when it
-should be generated as its own `config/*.yaml` template and
-`schemas/*.schema.json` schema. Unmarked nested fields stay in the parent
+should be generated as its own `*.yaml` template and
+`<section>.schema.json` schema. Unmarked nested fields stay in the parent
 template and parent schema.
 
 Marque um campo folha com `#[schemars(extend("x-env-only" = true))]` quando o valor deve vir somente de variaveis de ambiente. Os modelos gerados e os JSON Schemas omitem campos env-only, e objetos pai que ficarem vazios tambem sao removidos.
@@ -259,9 +258,9 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 }
 ```
 
-Use `write_config_templates_with_schema` quando modelos TOML e YAML gerados
-devem vincular esses esquemas para completamento e verificacoes basicas de
-esquema no IDE:
+Use `write_config_templates_with_schema` quando modelos TOML, YAML, JSON e JSON5
+gerados devem vincular esses esquemas para completamento e verificacoes basicas
+de esquema no IDE:
 
 ```rust
 use rust_config_tree::write_config_templates_with_schema;
@@ -277,12 +276,12 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 }
 ```
 
-Destinos TOML/YAML raiz vinculam o esquema raiz e nao completam campos de secoes
-filhas. Destinos YAML de secao dividida vinculam o esquema da secao
-correspondente; por exemplo, `config/log.yaml` recebe
-`# yaml-language-server: $schema=../schemas/log.schema.json`. Destinos JSON e
-JSON5 intencionalmente nao recebem um campo `$schema`; vincule-os por
-configuracoes do editor, como `json.schemas` do VS Code.
+Destinos raiz TOML e YAML vinculam o esquema raiz e nao completam campos de
+secoes filhas. Destinos YAML de secao dividida vinculam o esquema da secao
+correspondente; por exemplo, `log.yaml` recebe
+`# yaml-language-server: $schema=./schemas/log.schema.json`. Destinos JSON e
+JSON5 recebem um campo raiz `$schema` que o VS Code pode reconhecer. VS Code
+`json.schemas` continua sendo um caminho alternativo de vinculo.
 
 A geracao de modelos escolhe sua arvore de origem nesta ordem:
 
@@ -296,11 +295,11 @@ acima, uma origem `config.example.yaml` vazia produz:
 
 ```text
 config.example.yaml
-config/server.yaml
+server.yaml
 ```
 
-O modelo raiz recebe um bloco de include para `config/server.yaml`. Destinos YAML
-que mapeiam para uma secao aninhada, como `config/server.yaml`, contem apenas
+O modelo raiz recebe um bloco de include para `server.yaml`. Destinos YAML
+que mapeiam para uma secao aninhada, como `server.yaml`, contem apenas
 essa secao. Secoes ainda mais aninhadas so sao divididas recursivamente quando esses
 campos tambem carregam `x-tree-split`.
 
@@ -327,9 +326,9 @@ impl ConfigSchema for AppConfig {
 }
 ```
 
-O caminho de secao padrao e `config/<section>.yaml` para secoes aninhadas de
+O caminho de secao padrao e `<section>.yaml` para secoes aninhadas de
 primeiro nivel. Filhos aninhados sao colocados sob o stem do arquivo pai, por
-exemplo `config/trading/risk.yaml`.
+exemplo `trading/risk.yaml`.
 
 ## Integracao de CLI
 
@@ -419,10 +418,10 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 for fornecido, somente o nome do arquivo e usado. Se nenhum nome de arquivo de
 saida for fornecido, ele grava
 `config/<root_config_name>/<root_config_name>.example.yaml`. Adicione
-`--schema <path>` para vincular modelos TOML e YAML a um conjunto de JSON
-Schema gerado sem adicionar um campo `$schema` em tempo de execucao. Isso
-tambem grava o esquema raiz e os esquemas de secao no caminho de esquema
-selecionado.
+`--schema <path>` para vincular modelos TOML, YAML, JSON e JSON5 a um conjunto
+de JSON Schema gerado. Modelos JSON e JSON5 recebem um campo `$schema`
+reconhecido pelo VS Code. Isso tambem grava o esquema raiz e os esquemas de
+secao no caminho de esquema selecionado.
 
 `config-schema --output <path>` grava o JSON Schema Draft 7 raiz e esquemas de
 secao. Se nenhum caminho de saida for fornecido, o esquema raiz e gravado em

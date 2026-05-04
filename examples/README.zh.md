@@ -9,12 +9,15 @@
 ```bash
 cargo run --example basic_loading
 cargo run --example cli_overrides -- --server-port 9000
-cargo run --example config_commands -- config-template --output app_config.example.yaml
-cargo run --example config_commands -- config-schema --output /tmp/myapp.schema.json
+cargo run --example config_commands -- config-template
+cargo run --example config_commands -- config-schema
 cargo run --example config_commands -- config-validate
 cargo run --example generate_templates
 cargo run --example tree_api
 ```
+
+`config_commands` 的 template(模板) 和 schema(结构定义) 命令使用 CLI 默认路径，
+因此 `AppConfig` 会把生成文件写到 `config/app_config/` 下。
 
 这些示例覆盖以下内容：
 

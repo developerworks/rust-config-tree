@@ -76,13 +76,19 @@ server:
 
 `write_config_templates_with_schema` voegt deze modeline automatisch toe voor
 YAML-sjablonen. Gesplitste YAML-sjablonen koppelen hun sectieschema, bijvoorbeeld
-`config/log.yaml` koppelt `../schemas/log.schema.json`.
+`log.yaml` koppelt `./schemas/log.schema.json`.
 
 ## JSON
 
-JSON kan geen comments bevatten, en `$schema` is een echte JSON-eigenschap.
-Houd runtimeconfiguratiebestanden schoon en koppel JSON-bestanden via
-editorinstellingen:
+JSON- en JSON5-bestanden kunnen een schema koppelen met een rootveld `$schema`. `write_config_templates_with_schema` voegt dit automatisch toe aan gegenereerde JSON- en JSON5-sjablonen:
+
+```json
+{
+  "$schema": "./schemas/myapp.schema.json"
+}
+```
+
+Editorinstellingen blijven nuttig wanneer een project geen binding in het bestand wil:
 
 ```json
 {
@@ -128,11 +134,11 @@ config.toml:
 config.yaml:
   # yaml-language-server: $schema=./schemas/myapp.schema.json
 
-config/server.yaml:
-  # yaml-language-server: $schema=../schemas/server.schema.json
+server.yaml:
+  # yaml-language-server: $schema=./schemas/server.schema.json
 
 config.json:
-  No runtime $schema field; bind with editor settings
+  "$schema": "./schemas/myapp.schema.json"
 ```
 
 Referenties:

@@ -72,12 +72,21 @@ server:
 
 `write_config_templates_with_schema`는 YAML 템플릿에 이 modeline을 자동으로
 추가합니다. 분할 YAML 템플릿은 섹션 스키마를 바인딩합니다. 예를 들어
-`config/log.yaml`은 `../schemas/log.schema.json`를 바인딩합니다.
+`log.yaml`은 `./schemas/log.schema.json`를 바인딩합니다.
 
 ## JSON
 
-JSON은 주석을 담을 수 없고 `$schema`는 실제 JSON 프로퍼티입니다. 런타임 설정
-파일은 깨끗하게 유지하고 에디터 설정을 통해 JSON 파일을 바인딩하세요.
+JSON 및 JSON5 파일은 루트 `$schema` 필드로 스키마를 바인딩할 수 있습니다.
+`write_config_templates_with_schema`는 생성된 JSON 및 JSON5 템플릿에 이 필드를
+자동으로 추가합니다.
+
+```json
+{
+  "$schema": "./schemas/myapp.schema.json"
+}
+```
+
+파일 안 바인딩을 원하지 않는 프로젝트에서는 에디터 설정도 계속 사용할 수 있습니다.
 
 ```json
 {
@@ -123,11 +132,11 @@ config.toml:
 config.yaml:
   # yaml-language-server: $schema=./schemas/myapp.schema.json
 
-config/server.yaml:
-  # yaml-language-server: $schema=../schemas/server.schema.json
+server.yaml:
+  # yaml-language-server: $schema=./schemas/server.schema.json
 
 config.json:
-  No runtime $schema field; bind with editor settings
+  "$schema": "./schemas/myapp.schema.json"
 ```
 
 참고:

@@ -25,14 +25,14 @@ write_config_schemas::<AppConfig>("schemas/myapp.schema.json")?;
 ```
 
 Mark a nested field with `#[schemars(extend("x-tree-split" = true))]` when it
-should be generated as its own `config/*.yaml` template and
-`schemas/*.schema.json` schema. Unmarked nested fields stay in the parent
+should be generated as its own `*.yaml` template and
+`<section>.schema.json` schema. Unmarked nested fields stay in the parent
 template and parent schema.
 
 Mark a leaf field with `#[schemars(extend("x-env-only" = true))]` when the value must come only from environment variables. Generated templates and JSON Schemas omit env-only fields, and empty parent objects left behind by those omissions are pruned.
 
 Generated schemas omit `required` constraints. IDEs can still offer completion,
-but partial files such as `config/log.yaml` do not report missing root fields.
+but partial files such as `log.yaml` do not report missing root fields.
 The root schema only completes fields that belong in the root file; split
 section fields are omitted there and completed by their own section schemas.
 Present fields can still receive basic editor checks, such as type, enum, and
@@ -42,7 +42,7 @@ the application. Implement field value validation in code with
 `#[config(validate = Self::validate)]`; `load_config` and `config-validate`
 execute that runtime validation.
 
-Bind those schemas from generated TOML and YAML templates:
+Bind those schemas from generated TOML, YAML, JSON, and JSON5 templates:
 
 ```rust
 use rust_config_tree::write_config_templates_with_schema;
@@ -55,11 +55,10 @@ write_config_templates_with_schema::<AppConfig>(
 # Ok::<(), Box<dyn std::error::Error + Send + Sync>>(())
 ```
 
-Root TOML/YAML templates bind the root schema and do not complete split child
-section fields. Split section YAML templates bind their section schema. JSON and JSON5
-templates are left unchanged so the runtime config does not contain a
-`$schema` field. Bind JSON files with editor settings such as VS Code
-`json.schemas`.
+Root templates bind the root schema and do not complete split child section
+fields. Split section YAML templates bind their section schema. JSON and JSON5
+templates receive a top-level `$schema` field. Editor settings such as VS Code
+`json.schemas` can still be used as an alternative binding path.
 
 The output format is inferred from the output path:
 
@@ -67,6 +66,12 @@ The output format is inferred from the output path:
 - `.toml` generates TOML.
 - `.json` and `.json5` generate JSON5-compatible templates.
 - unknown or missing extensions generate YAML.
+
+The template APIs write exactly under the `output_path` you pass. The built-in
+`config-template` CLI command normalizes generated templates under
+`config/<root_config_name>/`; without `--output`, `AppConfig` writes
+`config/app_config/app_config.example.yaml` and the matching default schema
+`config/app_config/app_config.schema.json`.
 
 ## Schema Bindings
 
@@ -83,11 +88,21 @@ With a schema path of `schemas/myapp.schema.json`, generated root templates use:
 Generated section templates bind section schemas:
 
 ```yaml
-# config/log.yaml
-# yaml-language-server: $schema=../schemas/log.schema.json
+# log.yaml
+# yaml-language-server: $schema=./schemas/log.schema.json
 ```
 
-For JSON, keep the file free of `$schema` and bind it with editor settings:
+Generated JSON and JSON5 templates bind the schema with a top-level `$schema`
+field:
+
+```json
+{
+  "$schema": "./schemas/myapp.schema.json"
+}
+```
+
+Editor settings are still useful when a project does not want an in-file
+binding:
 
 ```json
 {
@@ -122,14 +137,14 @@ paths under the output directory.
 ```yaml
 # config.yaml
 include:
-  - config/server.yaml
+  - server.yaml
 ```
 
 Generating `config.example.yaml` writes:
 
 ```text
 config.example.yaml
-config/server.yaml
+server.yaml
 ```
 
 Relative include targets are mirrored under the output file's parent directory.
@@ -143,10 +158,10 @@ nested schema sections marked with `x-tree-split`. For a schema with a marked
 
 ```text
 config.example.yaml
-config/server.yaml
+server.yaml
 ```
 
-The root template receives an include block, and `config/server.yaml` contains
+The root template receives an include block, and `server.yaml` contains
 only the `server` section. Unmarked nested sections stay inline in their parent
 template. Nested sections are split recursively only when those fields also
 carry `x-tree-split`.

@@ -17,7 +17,7 @@ It handles:
   `install-completions`, and `uninstall-completions` command handlers
 - Draft 7 root and section JSON Schema generation for editor completion and basic schema checks
 - config template generation for YAML, TOML, JSON, and JSON5
-- schema directives for TOML and YAML templates without adding runtime fields
+- schema bindings for TOML, YAML, JSON, and JSON5 templates
 - recursive include traversal
 - `.env` loading before environment values are merged
 - source tracking through Figment metadata
@@ -207,7 +207,7 @@ output format is inferred from the output path:
 Use `write_config_schemas` to create Draft 7 JSON Schemas for the root config
 and split nested sections. Mark a nested field with
 `#[schemars(extend("x-tree-split" = true))]` when it should be generated as its
-own `config/*.yaml` and `schemas/*.schema.json` pair. Unmarked nested fields
+own `*.yaml` and `<section>.schema.json` pair. Unmarked nested fields
 stay in the parent template and parent schema.
 
 Mark a leaf field with `#[schemars(extend("x-env-only" = true))]` when the value
@@ -254,8 +254,9 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 }
 ```
 
-Use `write_config_templates_with_schema` when generated TOML and YAML templates
-should bind those schemas for IDE completion and basic schema checks:
+Use `write_config_templates_with_schema` when generated TOML, YAML, JSON, and
+JSON5 templates should bind those schemas for IDE completion and basic schema
+checks:
 
 ```rust
 use rust_config_tree::write_config_templates_with_schema;
@@ -271,12 +272,13 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 }
 ```
 
-Root TOML/YAML targets bind the root schema and do not complete split child
-section fields. Split section YAML targets bind their matching section schema, for
-example `config/log.yaml` receives
-`# yaml-language-server: $schema=../schemas/log.schema.json`. JSON and JSON5
-targets intentionally do not receive a `$schema` field; bind them with editor
-settings such as VS Code `json.schemas`.
+Root targets bind the root schema and do not complete split child section
+fields. Split section YAML targets bind their matching section schema, for
+example `log.yaml` receives
+`# yaml-language-server: $schema=./schemas/log.schema.json`. JSON and JSON5
+targets receive a top-level `$schema` field that points at the matching
+generated schema. Editor settings such as VS Code `json.schemas` can still be
+used as an alternative binding path.
 
 Template generation chooses its source tree in this order:
 
@@ -290,11 +292,11 @@ schema above, an empty `config.example.yaml` source produces:
 
 ```text
 config.example.yaml
-config/server.yaml
+server.yaml
 ```
 
-The root template receives an include block for `config/server.yaml`. YAML
-targets that map to a nested section, such as `config/server.yaml`, contain only
+The root template receives an include block for `server.yaml`. YAML
+targets that map to a nested section, such as `server.yaml`, contain only
 that section. Unmarked nested sections stay inline in their parent template.
 Further nested sections are split recursively when those fields also carry
 `x-tree-split`.
@@ -323,9 +325,9 @@ impl ConfigSchema for AppConfig {
 }
 ```
 
-The default section path is `config/<section>.yaml` for top-level nested
-sections. Nested children are placed under their parent file stem, for example
-`config/trading/risk.yaml`.
+The default section path is `<section>.yaml` relative to the root template
+directory for top-level nested sections. Nested children are placed under their
+parent file stem, for example `trading/risk.yaml`.
 
 ## CLI Integration
 
@@ -413,9 +415,9 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 `config/<root_config_name>/` using the selected file name. If a path is
 provided, only its file name is used. If no output file name is provided, it
 writes `config/<root_config_name>/<root_config_name>.example.yaml`. Add
-`--schema <path>` to bind TOML and YAML templates to a generated JSON Schema
-set without adding a runtime `$schema` field. This also writes the root schema
-and section schemas to the selected schema path.
+`--schema <path>` to bind TOML, YAML, JSON, and JSON5 templates to a generated
+JSON Schema set. This also writes the root schema and section schemas to the
+selected schema path.
 
 `config-schema --output <path>` writes the root Draft 7 JSON Schema and
 section schemas. If no output path is provided, the root schema is written to

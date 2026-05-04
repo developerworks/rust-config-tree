@@ -87,14 +87,14 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 ## Config Templates
 
 ```bash
-demo config-template --output app_config.example.yaml
+demo config-template
 ```
 
 The command writes templates under `config/<root_config_name>/`. If `--output`
 receives a path, only the file name is used. If no output file name is provided,
 the command writes
 `config/<root_config_name>/<root_config_name>.example.yaml`. Add
-`--schema schemas/myapp.schema.json` to bind generated TOML and YAML templates
+`--schema schemas/myapp.schema.json` to bind generated TOML, YAML, JSON, and JSON5 templates
 to generated JSON Schemas. Split YAML templates bind the matching section
 schema. The command also writes the root and section schemas to the selected
 schema path.
@@ -106,7 +106,7 @@ demo config-template --output app_config.example.toml --schema schemas/myapp.sch
 Generate root and section JSON Schemas:
 
 ```bash
-demo config-schema --output schemas/myapp.schema.json
+demo config-schema
 ```
 
 Without `--output`, `config-schema` writes the root schema to

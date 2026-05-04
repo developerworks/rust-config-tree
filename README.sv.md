@@ -16,7 +16,7 @@ Det hanterar:
   `uninstall-completions`
 - generering av Draft 7 JSON Schema for rot och sektioner for editor-komplettering och grundlaggande schemakontroller
 - generering av konfigurationsmallar for YAML, TOML, JSON och JSON5
-- schemadirektiv for TOML- och YAML-mallar utan att lagga till runtime-falt
+- schemabindningar for TOML-, YAML-, JSON- och JSON5-mallar
 - rekursiv include-traversering
 - laddning av `.env` innan miljo-varden slas samman
 - kallspArning via Figment-metadata
@@ -226,8 +226,8 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 ```
 
 Mark a nested field with `#[schemars(extend("x-tree-split" = true))]` when it
-should be generated as its own `config/*.yaml` template and
-`schemas/*.schema.json` schema. Unmarked nested fields stay in the parent
+should be generated as its own `*.yaml` template and
+`<section>.schema.json` schema. Unmarked nested fields stay in the parent
 template and parent schema.
 
 Markera ett bladfalt med `#[schemars(extend("x-env-only" = true))]` nar vardet bara ska komma fran miljovariabler. Genererade mallar och JSON Schemas utelamnar env-only-falt, och foralderobjekt som blir tomma tas bort.
@@ -252,8 +252,9 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 }
 ```
 
-Anvand `write_config_templates_with_schema` nar genererade TOML- och YAML-mallar
-ska binda dessa scheman for IDE-komplettering och grundlaggande schemakontroller:
+Anvand `write_config_templates_with_schema` nar genererade TOML-, YAML-, JSON-
+och JSON5-mallar ska binda dessa scheman for IDE-komplettering och
+grundlaggande schemakontroller:
 
 ```rust
 use rust_config_tree::write_config_templates_with_schema;
@@ -269,12 +270,12 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 }
 ```
 
-Rotmal for TOML/YAML binder rotschemat och kompletterar inte delade barnsektioners
-falt. Delade sektionsmal for YAML binder sin motsvarande sektionsschema, till
-exempel far `config/log.yaml`
-`# yaml-language-server: $schema=../schemas/log.schema.json`. JSON- och
-JSON5-mal far avsiktligt inget `$schema`-falt; bind dem med editor-installningar
-som VS Code `json.schemas`.
+Rotmal for TOML och YAML binder rotschemat och kompletterar inte delade
+barnsektioners falt. Delade sektionsmal for YAML binder sitt motsvarande
+sektionsschema, till exempel far `log.yaml`
+`# yaml-language-server: $schema=./schemas/log.schema.json`. JSON- och
+JSON5-mal far ett rotfalt `$schema` som VS Code kan kanna igen. VS Code
+`json.schemas` ar fortfarande en alternativ bindningsvag.
 
 Mallgenerering valjer kalltrad i denna ordning:
 
@@ -288,11 +289,11 @@ tom `config.example.yaml`-kalla:
 
 ```text
 config.example.yaml
-config/server.yaml
+server.yaml
 ```
 
-Rotmallen far ett include-block for `config/server.yaml`. YAML-mal som mappar
-till en nastlad sektion, till exempel `config/server.yaml`, innehaller bara den
+Rotmallen far ett include-block for `server.yaml`. YAML-mal som mappar
+till en nastlad sektion, till exempel `server.yaml`, innehaller bara den
 sektionen. Ytterligare nastlade sektioner delas rekursivt bara nar de falten ocksa bar `x-tree-split`.
 
 Overstyr `template_path_for_section` nar en sektion ska genereras pa en annan
@@ -318,9 +319,9 @@ impl ConfigSchema for AppConfig {
 }
 ```
 
-Standardvagen for sektioner ar `config/<section>.yaml` for nastlade sektioner
+Standardvagen for sektioner ar `<section>.yaml` for nastlade sektioner
 pa toppniva. Nastlade barn placeras under foraldrafilens stam, till exempel
-`config/trading/risk.yaml`.
+`trading/risk.yaml`.
 
 ## CLI-integrering
 
@@ -409,9 +410,10 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 `config/<root_config_name>/` med det valda filnamnet. Om en sokvag anges anvands
 bara filnamnet. Om inget utdatafilnamn anges skriver det
 `config/<root_config_name>/<root_config_name>.example.yaml`. Lagg till
-`--schema <path>` for att binda TOML- och YAML-mallar till en genererad JSON
-Schema-uppsattning utan att lagga till ett runtime-`$schema`-falt. Detta skriver
-ocksa rotschemat och sektionsscheman till den valda schemasokvagen.
+`--schema <path>` for att binda TOML-, YAML-, JSON- och JSON5-mallar till en
+genererad JSON Schema-uppsattning. JSON- och JSON5-mallar far ett `$schema`-falt
+som VS Code kanner igen. Detta skriver ocksa rotschemat och sektionsscheman till
+den valda schemasokvagen.
 
 `config-schema --output <path>` skriver rotens Draft 7 JSON Schema och
 sektionsscheman. Om ingen utdatasokvag anges skrivs rotschemat till

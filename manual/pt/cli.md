@@ -90,17 +90,18 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 ## Modelos de configuracao
 
 ```bash
-demo config-template --output app_config.example.yaml
+demo config-template
 ```
 
 O comando grava modelos em `config/<root_config_name>/`. Se `--output` receber
 um caminho, somente o nome do arquivo e usado. Se nenhum nome de arquivo de
 saida for fornecido, o comando grava
 `config/<root_config_name>/<root_config_name>.example.yaml`. Adicione
-`--schema schemas/myapp.schema.json` para vincular modelos TOML e YAML gerados a
-JSON Schemas gerados. Modelos YAML divididos vinculam o esquema de secao
-correspondente. O comando tambem grava o esquema raiz e esquemas de secao no
-caminho de esquema selecionado.
+`--schema schemas/myapp.schema.json` para vincular modelos TOML, YAML, JSON e
+JSON5 gerados a JSON Schemas gerados. Modelos YAML divididos vinculam o esquema
+de secao correspondente. Modelos JSON e JSON5 recebem um campo `$schema`
+reconhecido pelo VS Code. O comando tambem grava o esquema raiz e esquemas de
+secao no caminho de esquema selecionado.
 
 ```bash
 demo config-template --output app_config.example.toml --schema schemas/myapp.schema.json
@@ -109,7 +110,7 @@ demo config-template --output app_config.example.toml --schema schemas/myapp.sch
 Gere JSON Schemas raiz e de secao:
 
 ```bash
-demo config-schema --output schemas/myapp.schema.json
+demo config-schema
 ```
 
 Sem `--output`, `config-schema` grava o esquema raiz em

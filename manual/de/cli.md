@@ -89,16 +89,17 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 ## Konfigurationsvorlagen
 
 ```bash
-demo config-template --output app_config.example.yaml
+demo config-template
 ```
 
 Der Befehl schreibt Vorlagen unter `config/<root_config_name>/`. Wenn `--output`
 einen Pfad erhaelt, wird nur der Dateiname verwendet. Wenn kein
 Ausgabe-Dateiname angegeben wird, schreibt der Befehl
 `config/<root_config_name>/<root_config_name>.example.yaml`. Fuege
-`--schema schemas/myapp.schema.json` hinzu, um erzeugte TOML- und YAML-Vorlagen
-an erzeugte JSON-Schemas zu binden. Aufgeteilte YAML-Vorlagen binden das
-passende Abschnittsschema. Der Befehl schreibt ausserdem Root- und
+`--schema schemas/myapp.schema.json` hinzu, um erzeugte TOML-, YAML-, JSON- und
+JSON5-Vorlagen an erzeugte JSON-Schemas zu binden. Aufgeteilte YAML-Vorlagen
+binden das passende Abschnittsschema. JSON- und JSON5-Vorlagen erhalten ein von
+VS Code erkennbares `$schema`-Feld. Der Befehl schreibt ausserdem Root- und
 Abschnittsschemas an den gewaehlten Schemapfad.
 
 ```bash
@@ -108,7 +109,7 @@ demo config-template --output app_config.example.toml --schema schemas/myapp.sch
 Root- und Abschnitts-JSON-Schemas erzeugen:
 
 ```bash
-demo config-schema --output schemas/myapp.schema.json
+demo config-schema
 ```
 
 Ohne `--output` schreibt `config-schema` das Root-Schema nach

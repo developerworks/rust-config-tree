@@ -76,13 +76,22 @@ server:
 
 `write_config_templates_with_schema` adiciona essa modeline automaticamente para
 modelos YAML. Modelos YAML divididos vinculam seu esquema de secao; por exemplo,
-`config/log.yaml` vincula `../schemas/log.schema.json`.
+`log.yaml` vincula `./schemas/log.schema.json`.
 
 ## JSON
 
-JSON nao pode carregar comentarios, e `$schema` e uma propriedade JSON real.
-Mantenha arquivos de configuracao em tempo de execucao limpos e vincule arquivos
-JSON por configuracoes do editor:
+Arquivos JSON e JSON5 podem vincular um schema com um campo raiz `$schema`.
+`write_config_templates_with_schema` o adiciona automaticamente aos modelos
+JSON e JSON5 gerados:
+
+```json
+{
+  "$schema": "./schemas/myapp.schema.json"
+}
+```
+
+As configuracoes do editor continuam uteis quando o projeto nao quer vinculo
+dentro do arquivo:
 
 ```json
 {
@@ -128,11 +137,11 @@ config.toml:
 config.yaml:
   # yaml-language-server: $schema=./schemas/myapp.schema.json
 
-config/server.yaml:
-  # yaml-language-server: $schema=../schemas/server.schema.json
+server.yaml:
+  # yaml-language-server: $schema=./schemas/server.schema.json
 
 config.json:
-  No runtime $schema field; bind with editor settings
+  "$schema": "./schemas/myapp.schema.json"
 ```
 
 Referencias:

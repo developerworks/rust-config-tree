@@ -62,8 +62,8 @@ schema final soit fusionne et valide.
 Utilisez `#[config(nested)]` pour les sections structurees. Les sections
 imbriquees sont toujours utilisees pour le chargement d'execution. Ajoutez
 `#[schemars(extend("x-tree-split" = true))]` lorsqu'un champ imbrique doit aussi
-etre genere comme son propre modele `config/*.yaml` et schema
-`schemas/*.schema.json` :
+etre genere comme son propre modele `*.yaml` et schema
+`<section>.schema.json` :
 
 ```rust
 #[derive(Debug, Config, JsonSchema)]
@@ -107,7 +107,7 @@ configuration finale est chargee par `load_config` ou verifiee par
 
 Lorsqu'une source de modele n'a pas d'inclusions, la crate peut deriver les
 fichiers modeles enfants depuis les sections de schema imbriquees marquees `x-tree-split`. Le chemin de
-premier niveau par defaut est `config/<section>.yaml`.
+premier niveau par defaut est `<section>.yaml`.
 
 Remplacez ce chemin avec `template_path_for_section` :
 

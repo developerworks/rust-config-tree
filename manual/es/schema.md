@@ -61,8 +61,8 @@ el esquema final.
 Usa `#[config(nested)]` para secciones estructuradas. Las secciones anidadas
 siempre se usan para la carga en tiempo de ejecución. Agrega
 `#[schemars(extend("x-tree-split" = true))]` cuando un campo anidado tambien
-deba generarse como su propio template `config/*.yaml` y schema
-`schemas/*.schema.json`:
+deba generarse como su propio template `*.yaml` y schema
+`<section>.schema.json`:
 
 ```rust
 #[derive(Debug, Config, JsonSchema)]
@@ -106,7 +106,7 @@ configuración final se carga con `load_config` o se comprueba con
 
 Cuando una fuente de plantilla no tiene includes, el crate puede derivar
 archivos de plantilla hijos desde secciones anidadas del esquema marcadas con `x-tree-split`. La ruta de
-primer nivel por defecto es `config/<section>.yaml`.
+primer nivel por defecto es `<section>.yaml`.
 
 Sobrescribe esa ruta con `template_path_for_section`:
 

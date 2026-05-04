@@ -27,14 +27,14 @@ write_config_schemas::<AppConfig>("schemas/myapp.schema.json")?;
 ```
 
 Mark a nested field with `#[schemars(extend("x-tree-split" = true))]` when it
-should be generated as its own `config/*.yaml` template and
-`schemas/*.schema.json` schema. Unmarked nested fields stay in the parent
+should be generated as its own `*.yaml` template and
+`<section>.schema.json` schema. Unmarked nested fields stay in the parent
 template and parent schema.
 
 Marca un campo hoja con `#[schemars(extend("x-env-only" = true))]` cuando el valor debe venir solo de variables de entorno. Las plantillas generadas y los JSON Schemas omiten los campos env-only, y tambien se eliminan los objetos padre que queden vacios.
 
 Los esquemas generados omiten restricciones `required`. Los IDE todavía pueden
-ofrecer completado, pero archivos parciales como `config/log.yaml` no informan
+ofrecer completado, pero archivos parciales como `log.yaml` no informan
 campos raíz faltantes. El esquema raíz solo completa campos que pertenecen al
 archivo raíz; los campos de secciones divididas se omiten allí y se completan
 mediante sus propios esquemas de sección. Los campos presentes siguen siendo
@@ -45,7 +45,7 @@ validación de valores debe implementarse en código con
 `#[config(validate = Self::validate)]`; `load_config` y `config-validate`
 ejecutan esa validación en tiempo de ejecución.
 
-Enlaza esos esquemas desde plantillas TOML y YAML generadas:
+Enlaza esos esquemas desde plantillas TOML, YAML, JSON y JSON5 generadas:
 
 ```rust
 use rust_config_tree::write_config_templates_with_schema;
@@ -58,11 +58,11 @@ write_config_templates_with_schema::<AppConfig>(
 # Ok::<(), Box<dyn std::error::Error + Send + Sync>>(())
 ```
 
-Las plantillas TOML/YAML raíz enlazan el esquema raíz y no completan campos de
+Las plantillas raíz TOML y YAML enlazan el esquema raíz y no completan campos de
 secciones hijas. Las plantillas YAML de sección dividida enlazan su esquema de
-sección. Las plantillas JSON y JSON5 se dejan sin cambios para que la
-configuración en tiempo de ejecución no contenga un campo `$schema`. Enlaza
-archivos JSON con ajustes del editor como `json.schemas` de VS Code.
+sección. Las plantillas JSON y JSON5 reciben un campo raíz `$schema` que
+VS Code puede reconocer. VS Code `json.schemas` sigue siendo una ruta de enlace
+alternativa.
 
 El formato de salida se infiere de la ruta de salida:
 
@@ -87,12 +87,12 @@ generadas usan:
 Las plantillas de sección generadas enlazan esquemas de sección:
 
 ```yaml
-# config/log.yaml
-# yaml-language-server: $schema=../schemas/log.schema.json
+# log.yaml
+# yaml-language-server: $schema=./schemas/log.schema.json
 ```
 
-Para JSON, mantén el archivo libre de `$schema` y enlázalo con ajustes del
-editor:
+Las plantillas JSON y JSON5 generadas escriben un campo raíz `$schema` que
+VS Code reconoce. Los ajustes del editor siguen siendo opcionales:
 
 ```json
 {
@@ -128,14 +128,14 @@ rutas de include bajo el directorio de salida.
 ```yaml
 # config.yaml
 include:
-  - config/server.yaml
+  - server.yaml
 ```
 
 Generar `config.example.yaml` escribe:
 
 ```text
 config.example.yaml
-config/server.yaml
+server.yaml
 ```
 
 Los destinos de include relativos se reflejan bajo el directorio padre del
@@ -149,8 +149,8 @@ include desde secciones anidadas del esquema marcadas con `x-tree-split`. Para u
 
 ```text
 config.example.yaml
-config/server.yaml
+server.yaml
 ```
 
-La plantilla raíz recibe un bloque include, y `config/server.yaml` contiene solo
+La plantilla raíz recibe un bloque include, y `server.yaml` contiene solo
 la sección `server`. Las secciones anidadas solo se dividen recursivamente cuando esos campos tambien llevan `x-tree-split`.

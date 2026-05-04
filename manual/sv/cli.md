@@ -87,16 +87,17 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 ## Konfigurationsmallar
 
 ```bash
-demo config-template --output app_config.example.yaml
+demo config-template
 ```
 
 Kommandot skriver mallar under `config/<root_config_name>/`. Om `--output` far
 en sokvag anvands bara filnamnet. Om inget utdatafilnamn anges skriver
 kommandot `config/<root_config_name>/<root_config_name>.example.yaml`. Lagg till
-`--schema schemas/myapp.schema.json` for att binda genererade TOML- och
-YAML-mallar till genererade JSON Schemas. Delade YAML-mallar binder matchande
-sektionsschema. Kommandot skriver ocksa rot- och sektionsscheman till den valda
-schemasokvagen.
+`--schema schemas/myapp.schema.json` for att binda genererade TOML-, YAML-,
+JSON- och JSON5-mallar till genererade JSON Schemas. Delade YAML-mallar binder
+matchande sektionsschema. JSON- och JSON5-mallar far ett `$schema`-falt som
+VS Code kanner igen. Kommandot skriver ocksa rot- och sektionsscheman till den
+valda schemasokvagen.
 
 ```bash
 demo config-template --output app_config.example.toml --schema schemas/myapp.schema.json
@@ -105,7 +106,7 @@ demo config-template --output app_config.example.toml --schema schemas/myapp.sch
 Generera rot- och sektions-JSON Schemas:
 
 ```bash
-demo config-schema --output schemas/myapp.schema.json
+demo config-schema
 ```
 
 Utan `--output` skriver `config-schema` rotschemat till

@@ -27,15 +27,15 @@ write_config_schemas::<AppConfig>("schemas/myapp.schema.json")?;
 ```
 
 Mark a nested field with `#[schemars(extend("x-tree-split" = true))]` when it
-should be generated as its own `config/*.yaml` template and
-`schemas/*.schema.json` schema. Unmarked nested fields stay in the parent
+should be generated as its own `*.yaml` template and
+`<section>.schema.json` schema. Unmarked nested fields stay in the parent
 template and parent schema.
 
 Marquez un champ feuille avec `#[schemars(extend("x-env-only" = true))]` lorsque la valeur doit venir uniquement de variables d environnement. Les modeles generes et les schemas JSON omettent les champs env-only, et les objets parents devenus vides sont supprimes.
 
 Les schemas generes omettent les contraintes `required`. Les IDE peuvent
 toujours proposer la completion, mais les fichiers partiels comme
-`config/log.yaml` ne signalent pas de champs racine manquants. Le schema racine
+`log.yaml` ne signalent pas de champs racine manquants. Le schema racine
 ne complete que les champs qui appartiennent au fichier racine ; les champs de
 sections imbriquees y sont omis et sont completes par leurs propres schemas de
 section. Les champs presents peuvent encore recevoir des controles d'editeur de
@@ -45,7 +45,7 @@ champ concrete est valide pour l'application. La validation de valeur doit etre
 implementee dans le code avec `#[config(validate = Self::validate)]` ; `load_config`
 et `config-validate` executent cette validation d'execution.
 
-Liez ces schemas depuis les modeles TOML et YAML generes :
+Liez ces schemas depuis les modeles TOML, YAML, JSON et JSON5 generes :
 
 ```rust
 use rust_config_tree::write_config_templates_with_schema;
@@ -58,11 +58,11 @@ write_config_templates_with_schema::<AppConfig>(
 # Ok::<(), Box<dyn std::error::Error + Send + Sync>>(())
 ```
 
-Les modeles TOML/YAML racine lient le schema racine et ne completent pas les
+Les modeles racine TOML et YAML lient le schema racine et ne completent pas les
 champs des sections enfants. Les modeles YAML de section separee lient leur
-schema de section. Les modeles JSON et JSON5 restent inchanges afin que la
-configuration d'execution ne contienne pas de champ `$schema`. Liez les fichiers
-JSON avec des parametres d'editeur comme `json.schemas` dans VS Code.
+schema de section. Les modeles JSON et JSON5 recoivent un champ racine
+`$schema` que VS Code peut reconnaitre. VS Code `json.schemas` reste une autre
+facon de lier le schema.
 
 Le format de sortie est deduit du chemin de sortie :
 
@@ -87,12 +87,12 @@ utilisent :
 Les modeles de section generes lient les schemas de section :
 
 ```yaml
-# config/log.yaml
-# yaml-language-server: $schema=../schemas/log.schema.json
+# log.yaml
+# yaml-language-server: $schema=./schemas/log.schema.json
 ```
 
-Pour JSON, gardez le fichier sans `$schema` et liez-le avec les parametres de
-l'editeur :
+Les modeles JSON et JSON5 generes ecrivent un champ racine `$schema` reconnu
+par VS Code. Les parametres d'editeur restent optionnels :
 
 ```json
 {
@@ -128,14 +128,14 @@ ces chemins d'inclusion sous le repertoire de sortie.
 ```yaml
 # config.yaml
 include:
-  - config/server.yaml
+  - server.yaml
 ```
 
 Generer `config.example.yaml` ecrit :
 
 ```text
 config.example.yaml
-config/server.yaml
+server.yaml
 ```
 
 Les cibles d'inclusion relatives sont reproduites sous le repertoire parent du
@@ -149,8 +149,8 @@ section `server` marquee, une source de modele racine vide peut produire :
 
 ```text
 config.example.yaml
-config/server.yaml
+server.yaml
 ```
 
-Le modele racine recoit un bloc d'inclusion, et `config/server.yaml` ne contient
+Le modele racine recoit un bloc d'inclusion, et `server.yaml` ne contient
 que la section `server`. Les sections imbriquees ne sont decoupees recursivement que lorsque ces champs portent aussi `x-tree-split`.

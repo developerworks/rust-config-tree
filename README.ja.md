@@ -17,7 +17,7 @@
   `install-completions`、`uninstall-completions` のコマンド処理
 - エディタ補完と基本的な schema check 向けの Draft 7 root / section JSON Schema 生成
 - YAML、TOML、JSON、JSON5 の設定テンプレート生成
-- TOML / YAML テンプレートへ runtime field を追加せず schema directive を生成
+- TOML、YAML、JSON、JSON5 template の schema 連携
 - 再帰的な include 走査
 - 環境変数をマージする前の `.env` 読み込み
 - Figment metadata による source tracking
@@ -217,8 +217,8 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 ```
 
 Mark a nested field with `#[schemars(extend("x-tree-split" = true))]` when it
-should be generated as its own `config/*.yaml` template and
-`schemas/*.schema.json` schema. Unmarked nested fields stay in the parent
+should be generated as its own `*.yaml` template and
+`<section>.schema.json` schema. Unmarked nested fields stay in the parent
 template and parent schema.
 
 `#[schemars(extend("x-env-only" = true))]` を leaf field に付けると、その値は環境変数からだけ渡すものとして扱われます。生成される template と JSON Schema は env-only field を省略し、その結果空になった parent object も削除します.
@@ -242,7 +242,7 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 }
 ```
 
-TOML / YAML template に schema binding も付ける場合は
+TOML / YAML / JSON / JSON5 template に schema 連携も付ける場合は
 `write_config_templates_with_schema` を使います。
 
 ```rust
@@ -259,9 +259,10 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 }
 ```
 
-root TOML/YAML target は root schema に bind され、split child section field は補完
-しません。split section YAML target は対応する section schema に bind されます。
-JSON / JSON5 target には `$schema` field を追加しません。
+TOML / YAML の root target は root schema に bind され、split child section
+field は補完しません。split section YAML target は対応する section schema に
+bind されます。JSON / JSON5 target は VS Code が認識できる root `$schema`
+field を受け取ります。
 
 ## CLI Integration
 

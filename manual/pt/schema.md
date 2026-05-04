@@ -61,8 +61,8 @@ mesclado e validado.
 Use `#[config(nested)]` para secoes estruturadas. Secoes aninhadas sempre sao
 usadas para carregamento em tempo de execucao. Adicione
 `#[schemars(extend("x-tree-split" = true))]` quando um campo aninhado tambem
-deve ser gerado como seu proprio modelo `config/*.yaml` e schema
-`schemas/*.schema.json`:
+deve ser gerado como seu proprio modelo `*.yaml` e schema
+`<section>.schema.json`:
 
 ```rust
 #[derive(Debug, Config, JsonSchema)]
@@ -106,7 +106,7 @@ configuracao final e carregada por `load_config` ou verificada por
 
 Quando uma origem de modelo nao tem includes, o crate pode derivar arquivos de
 modelo filhos a partir de secoes de esquema aninhadas marcadas com `x-tree-split`. O caminho padrao de
-primeiro nivel e `config/<section>.yaml`.
+primeiro nivel e `<section>.yaml`.
 
 Sobrescreva esse caminho com `template_path_for_section`:
 

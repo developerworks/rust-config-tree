@@ -47,8 +47,8 @@ configuration finale reste une valeur de schema `confique` normale.
   `#[config(validate = Self::validate)]`, executee par `load_config` ou
   `config-validate`.
 - Generation de modeles YAML, TOML, JSON et JSON5.
-- Directives de schema TOML `#:schema` et modelines YAML Language Server pour
-  les modeles generes.
+- Directives de schema TOML `#:schema`, modelines YAML Language Server et
+  champs JSON/JSON5 `$schema` pour les modeles generes.
 - Decoupage opt-in des modeles YAML pour les sections marquees `x-tree-split`.
 - Sous-commandes clap integrees pour les modeles de configuration, les schemas
   JSON et les completions shell.

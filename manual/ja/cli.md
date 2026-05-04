@@ -87,17 +87,18 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 ## Config Templates
 
 ```bash
-demo config-template --output app_config.example.yaml
+demo config-template
 ```
 
 この command は `config/<root_config_name>/` の下に template を書きます。
 `--output` に path を渡した場合は file name だけを使います。output file name
 がない場合は
 `config/<root_config_name>/<root_config_name>.example.yaml` を書きます。
-`--schema schemas/myapp.schema.json` を追加すると、generated TOML / YAML
-template を generated JSON Schema に bind します。split YAML template は
-matching section schema を bind します。この command は root / section schema
-も selected schema path に書きます。
+`--schema schemas/myapp.schema.json` を追加すると、generated TOML / YAML /
+JSON / JSON5 template を generated JSON Schema に bind します。split YAML
+template は matching section schema を bind します。JSON / JSON5 template は
+VS Code が認識する `$schema` field を受け取ります。この command は root /
+section schema も selected schema path に書きます。
 
 ```bash
 demo config-template --output app_config.example.toml --schema schemas/myapp.schema.json
@@ -106,7 +107,7 @@ demo config-template --output app_config.example.toml --schema schemas/myapp.sch
 root / section JSON Schema を生成します。
 
 ```bash
-demo config-schema --output schemas/myapp.schema.json
+demo config-schema
 ```
 
 `--output` がない場合、`config-schema` は root schema を

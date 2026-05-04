@@ -25,14 +25,14 @@ write_config_schemas::<AppConfig>("schemas/myapp.schema.json")?;
 ```
 
 Mark a nested field with `#[schemars(extend("x-tree-split" = true))]` when it
-should be generated as its own `config/*.yaml` template and
-`schemas/*.schema.json` schema. Unmarked nested fields stay in the parent
+should be generated as its own `*.yaml` template and
+`<section>.schema.json` schema. Unmarked nested fields stay in the parent
 template and parent schema.
 
 Markeer een leafveld met `#[schemars(extend("x-env-only" = true))]` wanneer de waarde alleen uit omgevingsvariabelen mag komen. Gegenereerde sjablonen en JSON Schemas laten env-only velden weg, en lege bovenliggende objecten die daardoor overblijven worden verwijderd.
 
 Gegenereerde schema's laten `required`-constraints weg. IDE's kunnen nog steeds
-completion bieden, maar gedeeltelijke bestanden zoals `config/log.yaml`
+completion bieden, maar gedeeltelijke bestanden zoals `log.yaml`
 rapporteren geen ontbrekende rootvelden. Het rootschema vult alleen velden aan
 die in het rootbestand thuishoren; gesplitste sectievelden worden daar weggelaten
 en door hun eigen sectieschema's aangevuld. Aanwezige velden kunnen nog steeds
@@ -43,7 +43,7 @@ de toepassing. Veldwaardevalidatie moet in code worden geimplementeerd met
 `#[config(validate = Self::validate)]`; `load_config` en `config-validate`
 voeren die runtimevalidatie uit.
 
-Koppel die schema's vanuit gegenereerde TOML- en YAML-sjablonen:
+Koppel die schema's vanuit gegenereerde TOML-, YAML-, JSON- en JSON5-sjablonen:
 
 ```rust
 use rust_config_tree::write_config_templates_with_schema;
@@ -56,11 +56,11 @@ write_config_templates_with_schema::<AppConfig>(
 # Ok::<(), Box<dyn std::error::Error + Send + Sync>>(())
 ```
 
-Root-TOML/YAML-sjablonen koppelen het rootschema en vullen geen velden van
-gesplitste kindsecties aan. Gesplitste sectie-YAML-sjablonen koppelen hun sectieschema.
-JSON- en JSON5-sjablonen blijven ongewijzigd zodat de runtimeconfiguratie geen
-`$schema`-veld bevat. Koppel JSON-bestanden met editorinstellingen zoals VS Code
-`json.schemas`.
+TOML- en YAML-rootsjablonen koppelen het rootschema en vullen geen velden van
+gesplitste kindsecties aan. Gesplitste sectie-YAML-sjablonen koppelen hun
+sectieschema. JSON- en JSON5-sjablonen krijgen een rootveld `$schema` dat
+VS Code kan herkennen. VS Code `json.schemas` blijft een alternatieve
+koppelingsroute.
 
 Het uitvoerformaat wordt afgeleid uit het uitvoerpad:
 
@@ -85,11 +85,12 @@ rootsjablonen:
 Gegenereerde sectiesjablonen koppelen sectieschema's:
 
 ```yaml
-# config/log.yaml
-# yaml-language-server: $schema=../schemas/log.schema.json
+# log.yaml
+# yaml-language-server: $schema=./schemas/log.schema.json
 ```
 
-Laat JSON vrij van `$schema` en koppel het met editorinstellingen:
+Gegenereerde JSON- en JSON5-sjablonen schrijven een rootveld `$schema` dat
+VS Code herkent. Editorinstellingen blijven optioneel:
 
 ```json
 {
@@ -125,14 +126,14 @@ include-paden onder de uitvoerdirectory.
 ```yaml
 # config.yaml
 include:
-  - config/server.yaml
+  - server.yaml
 ```
 
 Het genereren van `config.example.yaml` schrijft:
 
 ```text
 config.example.yaml
-config/server.yaml
+server.yaml
 ```
 
 Relatieve include-doelen worden gespiegeld onder de parentdirectory van het
@@ -146,8 +147,8 @@ kan een leeg rootsjabloon bijvoorbeeld produceren:
 
 ```text
 config.example.yaml
-config/server.yaml
+server.yaml
 ```
 
-Het rootsjabloon krijgt een include-blok en `config/server.yaml` bevat alleen
+Het rootsjabloon krijgt een include-blok en `server.yaml` bevat alleen
 de `server`-sectie. Geneste secties worden alleen recursief gesplitst wanneer die velden ook `x-tree-split` dragen.

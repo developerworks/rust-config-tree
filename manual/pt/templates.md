@@ -26,14 +26,14 @@ write_config_schemas::<AppConfig>("schemas/myapp.schema.json")?;
 ```
 
 Mark a nested field with `#[schemars(extend("x-tree-split" = true))]` when it
-should be generated as its own `config/*.yaml` template and
-`schemas/*.schema.json` schema. Unmarked nested fields stay in the parent
+should be generated as its own `*.yaml` template and
+`<section>.schema.json` schema. Unmarked nested fields stay in the parent
 template and parent schema.
 
 Marque um campo folha com `#[schemars(extend("x-env-only" = true))]` quando o valor deve vir somente de variaveis de ambiente. Os modelos gerados e os JSON Schemas omitem campos env-only, e objetos pai que ficarem vazios tambem sao removidos.
 
 Os esquemas gerados omitem restricoes `required`. IDEs ainda podem oferecer
-completamento, mas arquivos parciais como `config/log.yaml` nao relatam campos
+completamento, mas arquivos parciais como `log.yaml` nao relatam campos
 raiz ausentes. O esquema raiz completa apenas campos que pertencem ao arquivo
 raiz; campos de secoes divididas sao omitidos ali e completados por seus
 proprios esquemas de secao. Campos presentes ainda podem receber verificacoes
@@ -43,7 +43,7 @@ campo e valido para a aplicacao. A validacao de valores deve ser implementada no
 codigo com `#[config(validate = Self::validate)]`; `load_config` e
 `config-validate` executam essa validacao em tempo de execucao.
 
-Vincule esses esquemas a partir de modelos TOML e YAML gerados:
+Vincule esses esquemas a partir de modelos TOML, YAML, JSON e JSON5 gerados:
 
 ```rust
 use rust_config_tree::write_config_templates_with_schema;
@@ -56,11 +56,11 @@ write_config_templates_with_schema::<AppConfig>(
 # Ok::<(), Box<dyn std::error::Error + Send + Sync>>(())
 ```
 
-Modelos TOML/YAML raiz vinculam o esquema raiz e nao completam campos de secoes
-filhas. Modelos YAML de secao dividida vinculam seu esquema de secao. Modelos
-JSON e JSON5 ficam inalterados para que a configuracao em tempo de execucao nao
-contenha um campo `$schema`. Vincule arquivos JSON com configuracoes do editor,
-como `json.schemas` do VS Code.
+Modelos raiz TOML e YAML vinculam o esquema raiz e nao completam campos de
+secoes filhas. Modelos YAML de secao dividida vinculam seu esquema de secao.
+Modelos JSON e JSON5 recebem um campo raiz `$schema` que o VS Code pode
+reconhecer. VS Code `json.schemas` continua sendo um caminho alternativo de
+vinculo.
 
 O formato de saida e inferido a partir do caminho de saida:
 
@@ -84,12 +84,12 @@ Com um caminho de esquema `schemas/myapp.schema.json`, modelos raiz gerados usam
 Modelos de secao gerados vinculam esquemas de secao:
 
 ```yaml
-# config/log.yaml
-# yaml-language-server: $schema=../schemas/log.schema.json
+# log.yaml
+# yaml-language-server: $schema=./schemas/log.schema.json
 ```
 
-Para JSON, mantenha o arquivo livre de `$schema` e vincule-o por configuracoes
-do editor:
+Modelos JSON e JSON5 gerados escrevem um campo raiz `$schema` reconhecido pelo
+VS Code. As configuracoes do editor continuam opcionais:
 
 ```json
 {
@@ -125,14 +125,14 @@ de include sob o diretorio de saida.
 ```yaml
 # config.yaml
 include:
-  - config/server.yaml
+  - server.yaml
 ```
 
 Gerar `config.example.yaml` grava:
 
 ```text
 config.example.yaml
-config/server.yaml
+server.yaml
 ```
 
 Destinos de include relativos sao espelhados sob o diretorio pai do arquivo de
@@ -146,8 +146,8 @@ include a partir de secoes de esquema aninhadas marcadas com `x-tree-split`. Par
 
 ```text
 config.example.yaml
-config/server.yaml
+server.yaml
 ```
 
-O modelo raiz recebe um bloco de include, e `config/server.yaml` contem apenas a
+O modelo raiz recebe um bloco de include, e `server.yaml` contem apenas a
 secao `server`. Secoes aninhadas so sao divididas recursivamente quando esses campos tambem carregam `x-tree-split`.

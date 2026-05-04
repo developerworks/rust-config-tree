@@ -77,13 +77,22 @@ server:
 
 `write_config_templates_with_schema` ajoute automatiquement cette modeline pour
 les modeles YAML. Les modeles YAML separes lient leur schema de section, par
-exemple `config/log.yaml` lie `../schemas/log.schema.json`.
+exemple `log.yaml` lie `./schemas/log.schema.json`.
 
 ## JSON
 
-JSON ne peut pas porter de commentaires, et `$schema` est une vraie propriete
-JSON. Gardez les fichiers de configuration d'execution propres et liez les
-fichiers JSON via les parametres de l'editeur :
+Les fichiers JSON et JSON5 peuvent lier un schema avec un champ racine
+`$schema`. `write_config_templates_with_schema` l'ajoute automatiquement aux
+modeles JSON et JSON5 generes :
+
+```json
+{
+  "$schema": "./schemas/myapp.schema.json"
+}
+```
+
+Les parametres de l'editeur restent utiles si un projet ne veut pas de liaison
+dans le fichier :
 
 ```json
 {
@@ -129,11 +138,11 @@ config.toml:
 config.yaml:
   # yaml-language-server: $schema=./schemas/myapp.schema.json
 
-config/server.yaml:
-  # yaml-language-server: $schema=../schemas/server.schema.json
+server.yaml:
+  # yaml-language-server: $schema=./schemas/server.schema.json
 
 config.json:
-  No runtime $schema field; bind with editor settings
+  "$schema": "./schemas/myapp.schema.json"
 ```
 
 References :

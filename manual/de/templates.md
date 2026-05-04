@@ -27,14 +27,14 @@ write_config_schemas::<AppConfig>("schemas/myapp.schema.json")?;
 ```
 
 Mark a nested field with `#[schemars(extend("x-tree-split" = true))]` when it
-should be generated as its own `config/*.yaml` template and
-`schemas/*.schema.json` schema. Unmarked nested fields stay in the parent
+should be generated as its own `*.yaml` template and
+`<section>.schema.json` schema. Unmarked nested fields stay in the parent
 template and parent schema.
 
 Markiere ein Blattfeld mit `#[schemars(extend("x-env-only" = true))]`, wenn der Wert nur aus Umgebungsvariablen kommen darf. Generierte Vorlagen und JSON-Schemas lassen env-only-Felder weg, und dadurch leere Elternobjekte werden entfernt.
 
 Erzeugte Schemas lassen `required`-Einschraenkungen weg. IDEs koennen weiterhin
-Vervollstaendigung anbieten, aber partielle Dateien wie `config/log.yaml`
+Vervollstaendigung anbieten, aber partielle Dateien wie `log.yaml`
 melden keine fehlenden Root-Felder. Das Root-Schema vervollstaendigt nur
 Felder, die in die Root-Datei gehoeren; aufgeteilte Abschnittsfelder werden
 dort weggelassen und durch ihre eigenen Abschnittsschemas vervollstaendigt.
@@ -45,7 +45,7 @@ ob ein konkreter Feldwert fuer die Anwendung gueltig ist. Feldwertvalidierung
 muss im Code mit `#[config(validate = Self::validate)]` implementiert werden;
 `load_config` und `config-validate` fuehren diese Laufzeitvalidierung aus.
 
-Binde diese Schemas aus erzeugten TOML- und YAML-Vorlagen:
+Binde diese Schemas aus erzeugten TOML-, YAML-, JSON- und JSON5-Vorlagen:
 
 ```rust
 use rust_config_tree::write_config_templates_with_schema;
@@ -58,11 +58,11 @@ write_config_templates_with_schema::<AppConfig>(
 # Ok::<(), Box<dyn std::error::Error + Send + Sync>>(())
 ```
 
-Root-TOML/YAML-Vorlagen binden das Root-Schema und vervollstaendigen keine
-aufgeteilten untergeordneten Abschnittsfelder. Aufgeteilte YAML-Abschnittsvorlagen binden
-ihr Abschnittsschema. JSON- und JSON5-Vorlagen bleiben unveraendert, damit die
-Laufzeitkonfiguration kein `$schema`-Feld enthaelt. Binde JSON-Dateien ueber
-Editor-Einstellungen wie VS Code `json.schemas`.
+TOML- und YAML-Root-Vorlagen binden das Root-Schema und vervollstaendigen keine
+aufgeteilten untergeordneten Abschnittsfelder. Aufgeteilte
+YAML-Abschnittsvorlagen binden ihr Abschnittsschema. JSON- und JSON5-Vorlagen
+erhalten ein oberstes `$schema`-Feld, das VS Code erkennen kann. VS Code
+`json.schemas` bleibt als alternative Bindung moeglich.
 
 Das Ausgabeformat wird aus dem Ausgabepfad abgeleitet:
 
@@ -87,12 +87,11 @@ Root-Vorlagen:
 Erzeugte Abschnittsvorlagen binden Abschnittsschemas:
 
 ```yaml
-# config/log.yaml
-# yaml-language-server: $schema=../schemas/log.schema.json
+# log.yaml
+# yaml-language-server: $schema=./schemas/log.schema.json
 ```
 
-Fuer JSON bleibt die Datei frei von `$schema`; binde sie ueber
-Editor-Einstellungen:
+Erzeugte JSON- und JSON5-Vorlagen schreiben ein oberstes `$schema`-Feld, das VS Code erkennt. Editor-Einstellungen bleiben optional:
 
 ```json
 {
@@ -128,14 +127,14 @@ Include-Pfade unter dem Ausgabeverzeichnis.
 ```yaml
 # config.yaml
 include:
-  - config/server.yaml
+  - server.yaml
 ```
 
 Das Erzeugen von `config.example.yaml` schreibt:
 
 ```text
 config.example.yaml
-config/server.yaml
+server.yaml
 ```
 
 Relative Include-Ziele werden unter dem Elternverzeichnis der Ausgabedatei
@@ -149,8 +148,8 @@ mit `x-tree-split` markierten verschachtelten Schemaabschnitten ableiten. Fuer e
 
 ```text
 config.example.yaml
-config/server.yaml
+server.yaml
 ```
 
-Die Root-Vorlage erhaelt einen Include-Block, und `config/server.yaml` enthaelt
+Die Root-Vorlage erhaelt einen Include-Block, und `server.yaml` enthaelt
 nur den Abschnitt `server`. Verschachtelte Abschnitte werden nur rekursiv aufgeteilt, wenn diese Felder ebenfalls `x-tree-split` tragen.

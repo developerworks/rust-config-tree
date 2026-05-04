@@ -75,12 +75,19 @@ server:
 
 `write_config_templates_with_schema` lagger automatiskt till denna modeline for
 YAML-mallar. Delade YAML-mallar binder sitt sektionsschema, till exempel binder
-`config/log.yaml` `../schemas/log.schema.json`.
+`log.yaml` `./schemas/log.schema.json`.
 
 ## JSON
 
-JSON kan inte bara kommentarer, och `$schema` ar en riktig JSON-property. Hall
-runtime-konfigurationsfiler rena och bind JSON-filer via editor-installningar:
+JSON- och JSON5-filer kan binda ett schema med ett rotfalt `$schema`. `write_config_templates_with_schema` lagger till det automatiskt for genererade JSON- och JSON5-mallar:
+
+```json
+{
+  "$schema": "./schemas/myapp.schema.json"
+}
+```
+
+Editor-installningar ar fortfarande anvandbara nar ett projekt inte vill ha bindning i filen:
 
 ```json
 {
@@ -126,11 +133,11 @@ config.toml:
 config.yaml:
   # yaml-language-server: $schema=./schemas/myapp.schema.json
 
-config/server.yaml:
-  # yaml-language-server: $schema=../schemas/server.schema.json
+server.yaml:
+  # yaml-language-server: $schema=./schemas/server.schema.json
 
 config.json:
-  No runtime $schema field; bind with editor settings
+  "$schema": "./schemas/myapp.schema.json"
 ```
 
 Referenser:

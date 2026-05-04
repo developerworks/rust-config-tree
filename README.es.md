@@ -19,8 +19,7 @@ Gestiona:
 - generación de JSON Schema Draft 7 para la raíz y las secciones, útil para
   completado y comprobaciones básicas de esquema en editores
 - generación de plantillas de configuración para YAML, TOML, JSON y JSON5
-- directivas de esquema para plantillas TOML y YAML sin añadir campos en tiempo
-  de ejecución
+- enlaces de esquema para plantillas TOML, YAML, JSON y JSON5
 - recorrido recursivo de includes
 - carga de `.env` antes de fusionar valores de entorno
 - seguimiento de origen mediante metadatos de Figment
@@ -237,8 +236,8 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 ```
 
 Mark a nested field with `#[schemars(extend("x-tree-split" = true))]` when it
-should be generated as its own `config/*.yaml` template and
-`schemas/*.schema.json` schema. Unmarked nested fields stay in the parent
+should be generated as its own `*.yaml` template and
+`<section>.schema.json` schema. Unmarked nested fields stay in the parent
 template and parent schema.
 
 Marca un campo hoja con `#[schemars(extend("x-env-only" = true))]` cuando el valor debe venir solo de variables de entorno. Las plantillas generadas y los JSON Schemas omiten los campos env-only, y tambien se eliminan los objetos padre que queden vacios.
@@ -263,9 +262,9 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 }
 ```
 
-Usa `write_config_templates_with_schema` cuando las plantillas TOML y YAML
-generadas deban enlazar esos esquemas para completado y comprobaciones básicas
-de esquema en el IDE:
+Usa `write_config_templates_with_schema` cuando las plantillas TOML, YAML, JSON
+y JSON5 generadas deban enlazar esos esquemas para completado y comprobaciones
+básicas de esquema en el IDE:
 
 ```rust
 use rust_config_tree::write_config_templates_with_schema;
@@ -281,12 +280,12 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 }
 ```
 
-Los destinos TOML/YAML raíz enlazan el esquema raíz y no completan campos de
+Los destinos raíz TOML y YAML enlazan el esquema raíz y no completan campos de
 secciones hijas. Los destinos YAML de secciones divididas enlazan su esquema de
-sección correspondiente; por ejemplo, `config/log.yaml` recibe
-`# yaml-language-server: $schema=../schemas/log.schema.json`. Los destinos JSON
-y JSON5 no reciben deliberadamente un campo `$schema`; enlázalos con ajustes
-del editor como `json.schemas` de VS Code.
+sección correspondiente; por ejemplo, `log.yaml` recibe
+`# yaml-language-server: $schema=./schemas/log.schema.json`. Los destinos JSON
+y JSON5 reciben un campo raíz `$schema` que VS Code puede reconocer.
+VS Code `json.schemas` sigue siendo una ruta de enlace alternativa.
 
 La generación de plantillas elige su árbol fuente en este orden:
 
@@ -300,11 +299,11 @@ esquema anterior, una fuente `config.example.yaml` vacía produce:
 
 ```text
 config.example.yaml
-config/server.yaml
+server.yaml
 ```
 
-La plantilla raíz recibe un bloque include para `config/server.yaml`. Los
-destinos YAML que se mapean a una sección anidada, como `config/server.yaml`,
+La plantilla raíz recibe un bloque include para `server.yaml`. Los
+destinos YAML que se mapean a una sección anidada, como `server.yaml`,
 contienen solo esa sección. Las secciones anidadas mas profundas solo se dividen
 recursivamente cuando esos campos tambien llevan `x-tree-split`.
 
@@ -331,9 +330,9 @@ impl ConfigSchema for AppConfig {
 }
 ```
 
-La ruta de sección por defecto es `config/<section>.yaml` para secciones
+La ruta de sección por defecto es `<section>.yaml` para secciones
 anidadas de primer nivel. Los hijos anidados se colocan bajo el stem del archivo
-padre; por ejemplo, `config/trading/risk.yaml`.
+padre; por ejemplo, `trading/risk.yaml`.
 
 ## Integración CLI
 
@@ -424,10 +423,10 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 proporciona una ruta, solo se usa su nombre de archivo. Si no se proporciona un
 nombre de archivo de salida, escribe
 `config/<root_config_name>/<root_config_name>.example.yaml`. Añade
-`--schema <path>` para enlazar plantillas TOML y YAML a un conjunto de JSON
-Schema generado sin añadir un campo `$schema` en tiempo de ejecución. Esto
-también escribe el esquema raíz y los esquemas de sección en la ruta de esquema
-seleccionada.
+`--schema <path>` para enlazar plantillas TOML, YAML, JSON y JSON5 a un
+conjunto de JSON Schema generado. Las plantillas JSON y JSON5 reciben un campo
+`$schema` que VS Code reconoce. Esto también escribe el esquema raíz y los
+esquemas de sección en la ruta de esquema seleccionada.
 
 `config-schema --output <path>` escribe el JSON Schema Draft 7 raíz y los
 esquemas de sección. Si no se proporciona ruta de salida, el esquema raíz se

@@ -17,7 +17,7 @@
 - 它会生成 Draft 7 root(根配置) 和 section(配置段) 的
   JSON Schema(JSON 结构定义)，供编辑器补全和基础 schema(结构定义) 检查使用。
 - 它会生成 YAML、TOML、JSON 和 JSON5 配置模板。
-- 它会为 TOML 和 YAML 模板生成 schema directive(结构定义指令)，但不会写入运行时字段。
+- 它会为 TOML、YAML、JSON 和 JSON5 模板生成 schema(结构定义) 绑定。
 - 它会递归遍历 include(包含文件)。
 - 它会在合并环境变量之前加载 `.env` 文件。
 - 它会通过 Figment(配置合并库) metadata(元数据) 追踪配置来源。
@@ -182,7 +182,7 @@ fn load_with_cli_overrides(cli_mode: Option<String>) -> Result<AppConfig, Box<dy
 
 使用 `write_config_schemas` 可以为 root config(根配置) 和显式拆分的嵌套
 section(配置段) 生成 Draft 7 JSON Schema(JSON 结构定义)。如果 nested(嵌套)
-字段需要独立生成 `config/*.yaml` 和 `schemas/*.schema.json`，就使用
+字段需要独立生成 `*.yaml` 和 `<section>.schema.json`，就使用
 `#[schemars(extend("x-tree-split" = true))]` 标记这个字段。没有这个标记的
 nested(嵌套) 字段会留在父模板和父 schema(结构定义) 中。
 
@@ -231,7 +231,7 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 }
 ```
 
-如果生成的 TOML 和 YAML 模板需要绑定这些 schema(结构定义)，可以使用
+如果生成的 TOML、YAML、JSON 和 JSON5 模板需要绑定这些 schema(结构定义)，可以使用
 `write_config_templates_with_schema`：
 
 ```rust
@@ -248,13 +248,13 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 }
 ```
 
-root(根配置) TOML/YAML 目标会绑定 root schema(根结构定义)，并且不会补全被拆分的
+root(根配置) 目标会绑定 root schema(根结构定义)，并且不会补全被拆分的
 child section(子配置段) 字段。拆分出来的 section(配置段) YAML 目标会绑定对应的
 section schema(配置段结构定义)，例如
-`config/log.yaml` 会写入
-`# yaml-language-server: $schema=../schemas/log.schema.json`。JSON 和 JSON5
-目标不会写 `$schema` 字段；这类文件应通过 VS Code(代码编辑器)
-`json.schemas` 等编辑器设置绑定。
+`log.yaml` 会写入
+`# yaml-language-server: $schema=./schemas/log.schema.json`。JSON 和 JSON5
+目标会写入顶层 `$schema` 字段，指向匹配的生成 schema(结构定义)。
+VS Code(代码编辑器) `json.schemas` 等编辑器设置仍可作为替代绑定方式。
 
 模板生成会按以下顺序选择 source tree(来源树)：
 
@@ -347,8 +347,8 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 下写入模板，并使用指定的文件名。如果传入的是路径，只取它的文件名。未提供
 output file name(输出文件名) 时，写入
 `config/<root_config_name>/<root_config_name>.example.yaml`。添加
-`--schema <path>` 后，TOML 和 YAML 模板会绑定生成的 JSON Schema 集合，但
-不会加入运行时 `$schema` 字段。这也会把 root schema(根结构定义) 和
+`--schema <path>` 后，TOML、YAML、JSON 和 JSON5 模板会绑定生成的
+JSON Schema 集合。这也会把 root schema(根结构定义) 和
 section schema(配置段结构定义) 写入指定的 schema path(结构定义路径)。
 
 `config-schema --output <path>` 会写入 root(根配置) 的 Draft 7

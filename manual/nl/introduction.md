@@ -43,7 +43,8 @@ uiteindelijke configuratie is nog steeds een normale `confique`-schemawaarde.
   `#[config(validate = Self::validate)]`, uitgevoerd door `load_config` of
   `config-validate`.
 - YAML-, TOML-, JSON- en JSON5-sjabloongeneratie.
-- TOML `#:schema` en YAML Language Server-schemamodelines voor gegenereerde sjablonen.
+- TOML `#:schema`, YAML Language Server-schemamodelines en JSON/JSON5
+  `$schema`-velden voor gegenereerde sjablonen.
 - Opt-in YAML-sjabloonsplitsing voor secties gemarkeerd met `x-tree-split`.
 - Ingebouwde clap-subcommands voor configuratiesjablonen, JSON Schema en shellcompletions.
 - Een lagere tree-API voor callers die geen `confique` gebruiken.

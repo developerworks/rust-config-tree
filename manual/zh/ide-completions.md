@@ -72,13 +72,21 @@ server:
 ```
 
 `write_config_templates_with_schema` 会为 YAML 模板自动添加这个 modeline(模式声明行)。
-拆分出的 YAML 模板会绑定对应 section schema(配置段结构定义)，例如 `config/log.yaml`
-绑定 `../schemas/log.schema.json`。
+拆分出的 YAML 模板会绑定对应 section schema(配置段结构定义)，例如 `log.yaml`
+绑定 `./schemas/log.schema.json`。
 
 ## JSON
 
-JSON 不能写注释，`$schema` 也是一个真实 JSON 属性。生产配置文件应保持干净，
-通过编辑器设置绑定：
+JSON 和 JSON5 文件可以用顶层 `$schema` 字段绑定 schema(结构定义)。
+`write_config_templates_with_schema` 会为生成的 JSON 和 JSON5 模板自动加入这个字段：
+
+```json
+{
+  "$schema": "./schemas/myapp.schema.json"
+}
+```
+
+如果项目不想在文件内写绑定，也可以通过编辑器设置绑定：
 
 ```json
 {
@@ -124,11 +132,11 @@ config.toml:
 config.yaml:
   # yaml-language-server: $schema=./schemas/myapp.schema.json
 
-config/server.yaml:
-  # yaml-language-server: $schema=../schemas/server.schema.json
+server.yaml:
+  # yaml-language-server: $schema=./schemas/server.schema.json
 
 config.json:
-  不写运行时 $schema 字段，通过编辑器设置绑定
+  "$schema": "./schemas/myapp.schema.json"
 ```
 
 参考：

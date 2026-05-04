@@ -42,7 +42,8 @@ resolved from the file that declared them. The final config is still a normal
   `#[config(validate = Self::validate)]`, executed by `load_config` or
   `config-validate`.
 - YAML, TOML, JSON, and JSON5 template generation.
-- TOML `#:schema` and YAML Language Server schema modelines for generated templates.
+- TOML `#:schema`, YAML Language Server schema modelines, and JSON/JSON5
+  `$schema` fields for generated templates.
 - Opt-in YAML template splitting for nested sections marked with `x-tree-split`.
 - Built-in clap subcommands for config templates, JSON Schema, and shell completions.
 - A lower-level tree API for callers that do not use `confique`.

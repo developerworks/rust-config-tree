@@ -20,8 +20,7 @@ Il gere :
 - la generation de schemas JSON Draft 7 pour la racine et les sections, pour la
   completion et les controles de schema de base dans l'editeur ;
 - la generation de modeles de configuration YAML, TOML, JSON et JSON5 ;
-- les directives de schema pour les modeles TOML et YAML sans ajouter de champs
-  d'execution ;
+- les liaisons de schema pour les modeles TOML, YAML, JSON et JSON5 ;
 - la traversee recursive des inclusions ;
 - le chargement de `.env` avant la fusion des valeurs d'environnement ;
 - le suivi des sources via les metadonnees Figment ;
@@ -240,8 +239,8 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 ```
 
 Mark a nested field with `#[schemars(extend("x-tree-split" = true))]` when it
-should be generated as its own `config/*.yaml` template and
-`schemas/*.schema.json` schema. Unmarked nested fields stay in the parent
+should be generated as its own `*.yaml` template and
+`<section>.schema.json` schema. Unmarked nested fields stay in the parent
 template and parent schema.
 
 Marquez un champ feuille avec `#[schemars(extend("x-env-only" = true))]` lorsque la valeur doit venir uniquement de variables d environnement. Les modeles generes et les schemas JSON omettent les champs env-only, et les objets parents devenus vides sont supprimes.
@@ -267,9 +266,9 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 }
 ```
 
-Utilisez `write_config_templates_with_schema` lorsque les modeles TOML et YAML
-generes doivent lier ces schemas pour la completion et les controles de schema
-de base dans l'IDE :
+Utilisez `write_config_templates_with_schema` lorsque les modeles TOML, YAML,
+JSON et JSON5 generes doivent lier ces schemas pour la completion et les
+controles de schema de base dans l'IDE :
 
 ```rust
 use rust_config_tree::write_config_templates_with_schema;
@@ -285,12 +284,12 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 }
 ```
 
-Les cibles TOML/YAML racine lient le schema racine et ne completent pas les
+Les cibles racine TOML et YAML lient le schema racine et ne completent pas les
 champs des sections enfants. Les cibles YAML de section separee lient leur
-schema de section correspondant ; par exemple `config/log.yaml` recoit
-`# yaml-language-server: $schema=../schemas/log.schema.json`. Les cibles JSON et
-JSON5 ne recoivent volontairement pas de champ `$schema` ; liez-les avec des
-parametres d'editeur comme `json.schemas` dans VS Code.
+schema de section correspondant ; par exemple `log.yaml` recoit
+`# yaml-language-server: $schema=./schemas/log.schema.json`. Les cibles JSON et
+JSON5 recoivent un champ racine `$schema` que VS Code peut reconnaitre.
+VS Code `json.schemas` reste une autre facon de lier le schema.
 
 La generation de modeles choisit son arbre source dans cet ordre :
 
@@ -304,12 +303,12 @@ schema ci-dessus, une source `config.example.yaml` vide produit :
 
 ```text
 config.example.yaml
-config/server.yaml
+server.yaml
 ```
 
-Le modele racine recoit un bloc d'inclusion pour `config/server.yaml`. Les
+Le modele racine recoit un bloc d'inclusion pour `server.yaml`. Les
 cibles YAML qui correspondent a une section imbriquee, comme
-`config/server.yaml`, ne contiennent que cette section. Les sections encore plus
+`server.yaml`, ne contiennent que cette section. Les sections encore plus
 imbriquees ne sont separees recursivement que lorsque ces champs portent aussi `x-tree-split`.
 
 Remplacez `template_path_for_section` lorsqu'une section doit etre generee a un
@@ -335,9 +334,9 @@ impl ConfigSchema for AppConfig {
 }
 ```
 
-Le chemin de section par defaut est `config/<section>.yaml` pour les sections
+Le chemin de section par defaut est `<section>.yaml` pour les sections
 imbriquees de premier niveau. Les enfants imbriques sont places sous le stem du
-fichier parent, par exemple `config/trading/risk.yaml`.
+fichier parent, par exemple `trading/risk.yaml`.
 
 ## Integration CLI
 
@@ -429,9 +428,10 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 fourni, seul son nom de fichier est utilise. Si aucun nom de fichier de sortie
 n'est fourni, il ecrit
 `config/<root_config_name>/<root_config_name>.example.yaml`. Ajoutez
-`--schema <path>` pour lier les modeles TOML et YAML a un ensemble de schemas
-JSON generes sans ajouter de champ `$schema` d'execution. Cela ecrit aussi le
-schema racine et les schemas de section au chemin de schema choisi.
+`--schema <path>` pour lier les modeles TOML, YAML, JSON et JSON5 a un ensemble
+de schemas JSON generes. Les modeles JSON et JSON5 recoivent un champ `$schema`
+reconnu par VS Code. Cela ecrit aussi le schema racine et les schemas de
+section au chemin de schema choisi.
 
 `config-schema --output <path>` ecrit le schema JSON Draft 7 racine et les
 schemas de section. Les sections imbriquees non marquees restent dans le schema racine. Si aucun chemin de sortie n'est fourni, le schema racine est

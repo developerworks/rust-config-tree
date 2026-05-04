@@ -45,8 +45,8 @@ configuración final sigue siendo un valor normal de esquema `confique`.
   `#[config(validate = Self::validate)]`, ejecutada por `load_config` o
   `config-validate`.
 - Generación de plantillas YAML, TOML, JSON y JSON5.
-- Directivas TOML `#:schema` y modelines de YAML Language Server para
-  plantillas generadas.
+- Directivas TOML `#:schema`, modelines de YAML Language Server y campos
+  JSON/JSON5 `$schema` para plantillas generadas.
 - División opt-in de plantillas YAML para secciones marcadas con `x-tree-split`.
 - Subcomandos clap incorporados para plantillas de configuración, JSON Schema y
   completions de shell.

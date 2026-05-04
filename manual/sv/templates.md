@@ -25,14 +25,14 @@ write_config_schemas::<AppConfig>("schemas/myapp.schema.json")?;
 ```
 
 Mark a nested field with `#[schemars(extend("x-tree-split" = true))]` when it
-should be generated as its own `config/*.yaml` template and
-`schemas/*.schema.json` schema. Unmarked nested fields stay in the parent
+should be generated as its own `*.yaml` template and
+`<section>.schema.json` schema. Unmarked nested fields stay in the parent
 template and parent schema.
 
 Markera ett bladfalt med `#[schemars(extend("x-env-only" = true))]` nar vardet bara ska komma fran miljovariabler. Genererade mallar och JSON Schemas utelamnar env-only-falt, och foralderobjekt som blir tomma tas bort.
 
 Genererade scheman utelamnar `required`-begransningar. IDE:er kan fortfarande
-erbjuda komplettering, men partiella filer som `config/log.yaml` rapporterar
+erbjuda komplettering, men partiella filer som `log.yaml` rapporterar
 inte saknade rotfalt. Rotschemat kompletterar bara falt som hor hemma i
 rotfilen; delade sektionsfalt utelamnas dar och kompletteras av sina egna
 sektionsscheman. Befintliga falt kan fortfarande fa grundlaggande
@@ -42,7 +42,7 @@ faltvarde ar giltigt for programmet. Faltvardevalidering ska implementeras i kod
 med `#[config(validate = Self::validate)]`; `load_config` och `config-validate`
 kor den runtime-valideringen.
 
-Bind dessa scheman fran genererade TOML- och YAML-mallar:
+Bind dessa scheman fran genererade TOML-, YAML-, JSON- och JSON5-mallar:
 
 ```rust
 use rust_config_tree::write_config_templates_with_schema;
@@ -55,11 +55,10 @@ write_config_templates_with_schema::<AppConfig>(
 # Ok::<(), Box<dyn std::error::Error + Send + Sync>>(())
 ```
 
-Rotmallar for TOML/YAML binder rotschemat och kompletterar inte delade barnsektioners
-falt. Delade YAML-sektionsmallar binder sina sektionsscheman. JSON- och
-JSON5-mallar lamnas oforandrade sa runtime-konfigurationen inte innehaller ett
-`$schema`-falt. Bind JSON-filer med editor-installningar som VS Code
-`json.schemas`.
+Rotmallar for TOML och YAML binder rotschemat och kompletterar inte delade
+barnsektioners falt. Delade YAML-sektionsmallar binder sina sektionsscheman.
+JSON- och JSON5-mallar far ett rotfalt `$schema` som VS Code kan kanna igen.
+VS Code `json.schemas` ar fortfarande en alternativ bindningsvag.
 
 Utdataformatet harleds fran utdatasokvagen:
 
@@ -83,11 +82,12 @@ Med schemasokvagen `schemas/myapp.schema.json` anvander genererade rotmallar:
 Genererade sektionsmallar binder sektionsscheman:
 
 ```yaml
-# config/log.yaml
-# yaml-language-server: $schema=../schemas/log.schema.json
+# log.yaml
+# yaml-language-server: $schema=./schemas/log.schema.json
 ```
 
-For JSON, hall filen fri fran `$schema` och bind den med editor-installningar:
+Genererade JSON- och JSON5-mallar skriver ett rotfalt `$schema` som VS Code
+kanner igen. Editor-installningar ar fortfarande valfria:
 
 ```json
 {
@@ -123,14 +123,14 @@ include-sokvagar under utdatakatalogen.
 ```yaml
 # config.yaml
 include:
-  - config/server.yaml
+  - server.yaml
 ```
 
 Generering av `config.example.yaml` skriver:
 
 ```text
 config.example.yaml
-config/server.yaml
+server.yaml
 ```
 
 Relativa include-mal speglas under utdatafilens foraldrakatalog. Absoluta
@@ -144,8 +144,8 @@ producera:
 
 ```text
 config.example.yaml
-config/server.yaml
+server.yaml
 ```
 
-Rotmallen far ett include-block, och `config/server.yaml` innehaller bara
+Rotmallen far ett include-block, och `server.yaml` innehaller bara
 `server`-sektionen. Nastlade sektioner delas rekursivt bara nar de falten ocksa bar `x-tree-split`.

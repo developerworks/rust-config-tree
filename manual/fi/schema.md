@@ -56,7 +56,7 @@ Lataaja saa jokaisesta tiedostosta osittain ladatun kerroksen. Sen avulla se voi
 Kayta `#[config(nested)]`-attribuuttia rakenteisille osioille. Sisakkaisia
 osioita kaytetaan aina runtime-lataukseen. Lisaa
 `#[schemars(extend("x-tree-split" = true))]`, kun nested-kentta tulee luoda
-myos omaksi `config/*.yaml`-malliksi ja `schemas/*.schema.json`-skeemaksi:
+myos omaksi `*.yaml`-malliksi ja `<section>.schema.json`-skeemaksi:
 
 ```rust
 #[derive(Debug, Config, JsonSchema)]
@@ -98,7 +98,7 @@ kun lopullinen konfiguraatio ladataan `load_config`-funktiolla tai tarkistetaan
 
 ## Malliosioiden ohitukset
 
-Kun mallilahteella ei ole includeja, crate voi johtaa lapsimallitiedostot `x-tree-split`-merkityista sisakkaisista skeemaosioista. Oletuspolku ylatasolla on `config/<section>.yaml`.
+Kun mallilahteella ei ole includeja, crate voi johtaa lapsimallitiedostot `x-tree-split`-merkityista sisakkaisista skeemaosioista. Oletuspolku ylatasolla on `<section>.yaml`.
 
 Ohita polku `template_path_for_section`-funktiolla:
 

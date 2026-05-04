@@ -61,7 +61,7 @@ valideras.
 Anvand `#[config(nested)]` for strukturerade sektioner. Nastlade sektioner
 anvands alltid for runtime-laddning. Lagg till
 `#[schemars(extend("x-tree-split" = true))]` nar ett nastlat falt ocksa ska
-genereras som egen `config/*.yaml`-mall och `schemas/*.schema.json`-schema:
+genereras som egen `*.yaml`-mall och `<section>.schema.json`-schema:
 
 ```rust
 #[derive(Debug, Config, JsonSchema)]
@@ -104,7 +104,7 @@ konfigurationen laddas med `load_config` eller kontrolleras med
 ## Overstyrning av mallsektioner
 
 Nar en mallkalla saknar includes kan craten harleda barnmallfiler fran nastlade
-schemasektioner markerade med `x-tree-split`. Standardsokvagen pa toppniva ar `config/<section>.yaml`.
+schemasektioner markerade med `x-tree-split`. Standardsokvagen pa toppniva ar `<section>.yaml`.
 
 Overstyr den sokvagen med `template_path_for_section`:
 
