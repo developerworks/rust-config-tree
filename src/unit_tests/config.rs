@@ -440,11 +440,8 @@ fn template_targets_for_paths_recurses_and_renders_templates() {
     assert_eq!(targets.len(), 2);
     assert_eq!(targets[0].path, output_path);
     assert!(targets[0].content.contains("include:\n"));
-    assert!(targets[0].content.contains("\"config/server.yaml\""));
-    assert_eq!(
-        targets[1].path,
-        root.join("examples").join("config").join("server.yaml")
-    );
+    assert!(targets[0].content.contains("\"server.yaml\""));
+    assert_eq!(targets[1].path, root.join("examples").join("server.yaml"));
     assert!(targets[1].content.contains("server:"));
 
     let _ = fs::remove_dir_all(root);
@@ -481,12 +478,7 @@ fn write_config_templates_creates_parent_directories() {
     write_config_templates::<TestConfig>(&config_path, &output_path).unwrap();
 
     assert!(output_path.exists());
-    assert!(
-        root.join("examples")
-            .join("config")
-            .join("server.yaml")
-            .exists()
-    );
+    assert!(root.join("examples").join("server.yaml").exists());
 
     let _ = fs::remove_dir_all(root);
 }
@@ -644,11 +636,11 @@ fn template_targets_with_schema_add_toml_and_yaml_directives() {
     );
     assert!(!targets[0].content.contains("$schema"));
 
-    assert_eq!(targets[1].path, root.join("config").join("server.yaml"));
+    assert_eq!(targets[1].path, root.join("server.yaml"));
     assert!(
         targets[1]
             .content
-            .starts_with("# yaml-language-server: $schema=../schemas/server.schema.json\n\n")
+            .starts_with("# yaml-language-server: $schema=./schemas/server.schema.json\n\n")
     );
 
     let _ = fs::remove_dir_all(root);
@@ -685,22 +677,25 @@ fn split_yaml_templates_bind_nested_section_schemas() {
 
     let outer = targets
         .iter()
-        .find(|target| target.path == root.join("config").join("outer.yaml"))
+        .find(|target| target.path == root.join("outer.yaml"))
         .unwrap();
     assert!(
         outer
             .content
-            .starts_with("# yaml-language-server: $schema=../schemas/outer.schema.json\n\n")
+            .starts_with("# yaml-language-server: $schema=./schemas/outer.schema.json\n\n")
     );
 
     let inner = targets
         .iter()
-        .find(|target| target.path == root.join("config").join("outer").join("inner.yaml"))
+        .find(|target| {
+            target.path
+                == root.join("outer").join("inner.yaml")
+        })
         .unwrap();
     assert!(
-        inner.content.starts_with(
-            "# yaml-language-server: $schema=../../schemas/outer/inner.schema.json\n\n"
-        )
+        inner
+            .content
+            .starts_with("# yaml-language-server: $schema=../schemas/outer/inner.schema.json\n\n")
     );
 
     let _ = fs::remove_dir_all(root);
@@ -797,8 +792,40 @@ fn template_targets_use_schema_default_includes_when_source_has_none() {
 
     assert_eq!(targets.len(), 2);
     assert_eq!(targets[0].path, output_path);
-    assert!(targets[0].content.contains("\"config/server.yaml\""));
-    assert_eq!(targets[1].path, root.join("config").join("server.yaml"));
+    assert!(targets[0].content.contains("\"server.yaml\""));
+    assert_eq!(targets[1].path, root.join("server.yaml"));
+
+    let _ = fs::remove_dir_all(root);
+}
+
+/// Verifies custom root output names do not rename schema-derived section dirs.
+///
+/// # Arguments
+///
+/// This test has no arguments.
+///
+/// # Returns
+///
+/// Returns no value; failed assertions panic.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
+#[test]
+fn output_path_only_changes_root_template_file_name() {
+    let root = temp_dir_path("custom-root-template-name");
+    fs::create_dir_all(&root).unwrap();
+    let output_path = root.join("renamed.example.yaml");
+
+    let targets =
+        template_targets_for_paths::<TestConfig>(root.join("config.yaml"), &output_path).unwrap();
+
+    assert_eq!(targets.len(), 2);
+    assert_eq!(targets[0].path, output_path);
+    assert!(targets[0].content.contains("\"server.yaml\""));
+    assert_eq!(targets[1].path, root.join("server.yaml"));
 
     let _ = fs::remove_dir_all(root);
 }
@@ -887,15 +914,20 @@ fn template_targets_append_missing_schema_default_includes() {
     assert_eq!(targets.len(), 4);
     assert_eq!(targets[0].path, output_path);
     assert!(targets[0].content.contains("\"config/custom-branch.yaml\""));
-    assert!(targets[0].content.contains("\"config/outer.yaml\""));
+    assert!(
+        targets[0].content.contains("\"outer.yaml\"")
+    );
     assert_eq!(
         targets[1].path,
         root.join("config").join("custom-branch.yaml")
     );
-    assert_eq!(targets[2].path, root.join("config").join("outer.yaml"));
+    assert_eq!(
+        targets[2].path,
+        root.join("outer.yaml")
+    );
     assert_eq!(
         targets[3].path,
-        root.join("config").join("outer").join("inner.yaml")
+        root.join("outer").join("inner.yaml")
     );
 
     let _ = fs::remove_dir_all(root);
@@ -931,7 +963,9 @@ fn template_targets_auto_split_nested_schema_sections() {
     assert_eq!(targets.len(), 4);
     assert_eq!(targets[0].path, output_path);
     assert!(targets[0].content.contains("\"config/custom-branch.yaml\""));
-    assert!(targets[0].content.contains("\"config/outer.yaml\""));
+    assert!(
+        targets[0].content.contains("\"outer.yaml\"")
+    );
     assert!(targets[0].content.contains("root_value"));
     assert!(!targets[0].content.contains("branch:"));
     assert!(!targets[0].content.contains("outer:"));
@@ -946,7 +980,10 @@ fn template_targets_auto_split_nested_schema_sections() {
     assert!(!targets[1].content.contains("root_value"));
     assert!(!targets[1].content.contains("outer:"));
 
-    assert_eq!(targets[2].path, root.join("config").join("outer.yaml"));
+    assert_eq!(
+        targets[2].path,
+        root.join("outer.yaml")
+    );
     assert!(targets[2].content.contains("\"outer/inner.yaml\""));
     assert!(targets[2].content.contains("outer:"));
     assert!(!targets[2].content.contains("\nouter:"));
@@ -956,7 +993,7 @@ fn template_targets_auto_split_nested_schema_sections() {
 
     assert_eq!(
         targets[3].path,
-        root.join("config").join("outer").join("inner.yaml")
+        root.join("outer").join("inner.yaml")
     );
     assert!(targets[3].content.contains("outer:"));
     assert!(targets[3].content.contains("inner:"));

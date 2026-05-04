@@ -20,8 +20,8 @@ use schemars::JsonSchema;
 use crate::{
     ConfigResult, ConfigSchema,
     config::{
-        load_config, resolve_config_template_output, write_config_schemas, write_config_templates,
-        write_config_templates_with_schema,
+        default_config_schema_output, load_config, resolve_config_template_output,
+        write_config_schemas, write_config_templates_with_schema,
     },
 };
 
@@ -32,21 +32,21 @@ pub enum ConfigCommand {
     ///
     /// The output format is inferred from the extension; unknown or missing extensions use YAML.
     ConfigTemplate {
-        /// Template output path. Defaults to `config.example.yaml`.
+        /// Template file name. Defaults to `config/<root-config-name>/<root-config-name>.example.yaml`.
         #[arg(long)]
         output: Option<PathBuf>,
 
         /// Root JSON Schema path to write and bind from TOML/YAML templates.
-        #[arg(long, default_value = "schemas/config.schema.json")]
+        #[arg(long)]
         schema: Option<PathBuf>,
     },
 
     /// Generate JSON Schema files for editor completion and validation.
     #[command(name = "config-schema")]
     JsonSchema {
-        /// Root schema output path. Defaults to `schemas/config.schema.json`.
-        #[arg(long, default_value = "schemas/config.schema.json")]
-        output: PathBuf,
+        /// Root schema output path. Defaults to `config/<root-config-name>/<root-config-name>.schema.json`.
+        #[arg(long)]
+        output: Option<PathBuf>,
     },
 
     /// Validate the full runtime config tree.
@@ -141,16 +141,14 @@ where
 {
     match command {
         ConfigCommand::ConfigTemplate { output, schema } => {
-            let output = resolve_config_template_output(output)?;
-            match schema {
-                Some(schema) => {
-                    write_config_schemas::<S>(&schema)?;
-                    write_config_templates_with_schema::<S>(config_path, output, schema)
-                }
-                None => write_config_templates::<S>(config_path, output),
-            }
+            let output = resolve_config_template_output::<S>(output)?;
+            let schema = schema.unwrap_or_else(default_config_schema_output::<S>);
+            write_config_schemas::<S>(&schema)?;
+            write_config_templates_with_schema::<S>(config_path, output, schema)
         }
-        ConfigCommand::JsonSchema { output } => write_config_schemas::<S>(output),
+        ConfigCommand::JsonSchema { output } => {
+            write_config_schemas::<S>(output.unwrap_or_else(default_config_schema_output::<S>))
+        }
         ConfigCommand::ConfigValidate => {
             load_config::<S>(config_path)?;
             println!("Configuration is ok");

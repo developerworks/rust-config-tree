@@ -15,7 +15,9 @@ pub use crate::config_format::ConfigFormat;
 pub use crate::config_load::{
     build_config_figment, load_config, load_config_from_figment, load_config_with_figment,
 };
-pub(crate) use crate::config_output::resolve_config_template_output;
+pub(crate) use crate::config_output::{
+    default_config_schema_output, resolve_config_template_output,
+};
 pub use crate::config_schema::{
     ConfigSchemaTarget, config_schema_targets_for_path, write_config_schema, write_config_schemas,
 };
@@ -78,7 +80,7 @@ pub trait ConfigSchema: Config + Sized {
     /// `#[schemars(extend("x-tree-split" = true))]`. By default, top-level
     /// split sections are generated as `config/<field>.yaml` and nested split
     /// sections as children of their parent section file stem, e.g.
-    /// `config/trading/risk.yaml`.
+    /// `app_config/trading/risk.yaml`.
     ///
     /// # Arguments
     ///

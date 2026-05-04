@@ -117,7 +117,7 @@ where
     };
 
     if parent_path.is_empty() {
-        return PathBuf::from("config").join(format!("{last}.yaml"));
+        return PathBuf::from(format!("{last}.yaml"));
     }
 
     let parent_template_path = template_path_for_section::<S>(parent_path);

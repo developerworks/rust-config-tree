@@ -1,6 +1,7 @@
 use std::{
     fs, io,
     path::{Path, PathBuf},
+    sync::Mutex,
     time::{SystemTime, UNIX_EPOCH},
 };
 
@@ -10,7 +11,9 @@ use confique::Config;
 use schemars::JsonSchema;
 
 use super::*;
-use crate::ConfigSchema;
+use crate::{ConfigSchema, config_output::default_config_template_output};
+
+static CURRENT_DIR_LOCK: Mutex<()> = Mutex::new(());
 
 #[derive(Debug, Parser)]
 #[command(name = "demo")]
@@ -50,6 +53,32 @@ impl ConfigSchema for TestConfig {
     /// ```no_run
     /// let _ = ();
     /// ```
+    fn include_paths(layer: &<Self as Config>::Layer) -> Vec<PathBuf> {
+        layer.include.clone().unwrap_or_default()
+    }
+}
+
+#[derive(Debug, Config, JsonSchema)]
+#[allow(dead_code)]
+struct RecorderConfig {
+    #[config(default = [])]
+    include: Vec<PathBuf>,
+}
+
+impl ConfigSchema for RecorderConfig {
+    fn include_paths(layer: &<Self as Config>::Layer) -> Vec<PathBuf> {
+        layer.include.clone().unwrap_or_default()
+    }
+}
+
+#[derive(Debug, Config, JsonSchema)]
+#[allow(dead_code)]
+struct EngineConfig {
+    #[config(default = [])]
+    include: Vec<PathBuf>,
+}
+
+impl ConfigSchema for EngineConfig {
     fn include_paths(layer: &<Self as Config>::Layer) -> Vec<PathBuf> {
         layer.include.clone().unwrap_or_default()
     }
@@ -107,10 +136,81 @@ fn config_command_can_be_flattened_into_a_consumer_cli() {
     match cli.command {
         DemoCommand::Config(ConfigCommand::ConfigTemplate { output, schema }) => {
             assert_eq!(output, Some(PathBuf::from("config.yaml")));
-            assert_eq!(schema, Some(PathBuf::from("schemas/config.schema.json")));
+            assert_eq!(schema, None);
         }
         command => panic!("unexpected command: {command:?}"),
     }
+}
+
+/// Verifies config template defaults are derived from the root config type name.
+///
+/// # Arguments
+///
+/// This test has no arguments.
+///
+/// # Returns
+///
+/// Returns no value; failed assertions panic.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
+#[test]
+fn config_template_defaults_use_root_config_snake_case_name() {
+    let cli = DemoCli::parse_from(["demo", "config-template"]);
+
+    match cli.command {
+        DemoCommand::Config(ConfigCommand::ConfigTemplate { output, schema }) => {
+            assert_eq!(output, None);
+            assert_eq!(schema, None);
+        }
+        command => panic!("unexpected command: {command:?}"),
+    }
+
+    let output = resolve_config_template_output::<TestConfig>(None).unwrap();
+
+    assert_eq!(output.file_name().unwrap(), "test_config.example.yaml");
+    assert_eq!(
+        default_config_schema_output::<TestConfig>(),
+        PathBuf::from("config/test_config/test_config.schema.json")
+    );
+}
+
+/// Verifies default target names follow any root ConfigSchema structure name.
+///
+/// # Arguments
+///
+/// This test has no arguments.
+///
+/// # Returns
+///
+/// Returns no value; failed assertions panic.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
+#[test]
+fn default_targets_use_any_root_config_snake_case_name() {
+    assert_eq!(
+        default_config_template_output::<RecorderConfig>(),
+        PathBuf::from("config/recorder_config/recorder_config.example.yaml")
+    );
+    assert_eq!(
+        default_config_schema_output::<RecorderConfig>(),
+        PathBuf::from("config/recorder_config/recorder_config.schema.json")
+    );
+    assert_eq!(
+        default_config_template_output::<EngineConfig>(),
+        PathBuf::from("config/engine_config/engine_config.example.yaml")
+    );
+    assert_eq!(
+        default_config_schema_output::<EngineConfig>(),
+        PathBuf::from("config/engine_config/engine_config.schema.json")
+    );
 }
 
 /// Verifies the template command accepts a custom schema output path.
@@ -174,7 +274,34 @@ fn config_schema_command_is_flattened_into_consumer_cli() {
 
     match cli.command {
         DemoCommand::Config(ConfigCommand::JsonSchema { output }) => {
-            assert_eq!(output, PathBuf::from("schemas/myapp.schema.json"));
+            assert_eq!(output, Some(PathBuf::from("schemas/myapp.schema.json")));
+        }
+        command => panic!("unexpected command: {command:?}"),
+    }
+}
+
+/// Verifies the schema command default is handled from the consumer config type.
+///
+/// # Arguments
+///
+/// This test has no arguments.
+///
+/// # Returns
+///
+/// Returns no value; failed assertions panic.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
+#[test]
+fn config_schema_command_defers_default_output_to_handler() {
+    let cli = DemoCli::parse_from(["demo", "config-schema"]);
+
+    match cli.command {
+        DemoCommand::Config(ConfigCommand::JsonSchema { output }) => {
+            assert_eq!(output, None);
         }
         command => panic!("unexpected command: {command:?}"),
     }
@@ -249,6 +376,8 @@ fn uninstall_completions_command_is_flattened_into_consumer_cli() {
 /// ```
 #[test]
 fn handle_config_command_writes_templates_for_consumer_schema() {
+    let _guard = CURRENT_DIR_LOCK.lock().unwrap();
+    let current_dir = std::env::current_dir().unwrap();
     let root = temp_dir_path("handle-config-template");
     fs::create_dir_all(root.join("config")).unwrap();
     let config_path = root.join("config.yaml");
@@ -260,28 +389,95 @@ fn handle_config_command_writes_templates_for_consumer_schema() {
     .unwrap();
     fs::write(root.join("config").join("server.yaml"), "").unwrap();
 
-    handle_config_command::<DemoCli, TestConfig>(
+    std::env::set_current_dir(&root).unwrap();
+    let result = handle_config_command::<DemoCli, TestConfig>(
         ConfigCommand::ConfigTemplate {
             output: Some(output_path.clone()),
-            schema: Some(root.join("schemas").join("config.schema.json")),
+            schema: Some(PathBuf::from("schemas/config.schema.json")),
         },
         &config_path,
-    )
-    .unwrap();
+    );
+    std::env::set_current_dir(current_dir).unwrap();
+    result.unwrap();
+
+    let expected_output = root
+        .join("config")
+        .join("test_config")
+        .join("config.example.yaml");
 
     assert!(root.join("schemas").join("config.schema.json").exists());
-    assert!(output_path.exists());
+    assert!(!output_path.exists());
+    assert!(expected_output.exists());
     assert!(
-        fs::read_to_string(&output_path)
+        fs::read_to_string(&expected_output)
             .unwrap()
-            .starts_with("# yaml-language-server: $schema=../schemas/config.schema.json\n\n")
+            .starts_with("# yaml-language-server: $schema=../../schemas/config.schema.json\n\n")
     );
     assert!(
-        root.join("examples")
+        root.join("config")
+            .join("test_config")
             .join("config")
             .join("server.yaml")
             .exists()
     );
+
+    let _ = fs::remove_dir_all(root);
+}
+
+/// Verifies omitted config-template paths use the root ConfigSchema type name.
+///
+/// # Arguments
+///
+/// This test has no arguments.
+///
+/// # Returns
+///
+/// Returns no value; failed assertions panic.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
+#[test]
+fn handle_config_template_defaults_to_root_config_named_targets() {
+    let _guard = CURRENT_DIR_LOCK.lock().unwrap();
+    let current_dir = std::env::current_dir().unwrap();
+    let root = temp_dir_path("handle-config-template-defaults");
+    fs::create_dir_all(&root).unwrap();
+    std::env::set_current_dir(&root).unwrap();
+
+    let result = handle_config_command::<DemoCli, RecorderConfig>(
+        ConfigCommand::ConfigTemplate {
+            output: None,
+            schema: None,
+        },
+        Path::new("recorder.yaml"),
+    );
+
+    std::env::set_current_dir(current_dir).unwrap();
+    result.unwrap();
+
+    assert!(
+        root.join("config")
+            .join("recorder_config")
+            .join("recorder_config.example.yaml")
+            .exists()
+    );
+    assert!(
+        root.join("config")
+            .join("recorder_config")
+            .join("recorder_config.schema.json")
+            .exists()
+    );
+
+    let template = fs::read_to_string(
+        root.join("config")
+            .join("recorder_config")
+            .join("recorder_config.example.yaml"),
+    )
+    .unwrap();
+    assert!(template.starts_with("# yaml-language-server: $schema=./recorder_config.schema.json\n\n"));
 
     let _ = fs::remove_dir_all(root);
 }
@@ -309,13 +505,54 @@ fn handle_config_command_writes_json_schema_for_consumer_schema() {
 
     handle_config_command::<DemoCli, TestConfig>(
         ConfigCommand::JsonSchema {
-            output: schema_path.clone(),
+            output: Some(schema_path.clone()),
         },
         PathBuf::from("config.yaml").as_path(),
     )
     .unwrap();
 
     let schema = fs::read_to_string(&schema_path).unwrap();
+    assert!(schema.contains("http://json-schema.org/draft-07/schema#"));
+
+    let _ = fs::remove_dir_all(root);
+}
+
+/// Verifies omitted config-schema output uses the root ConfigSchema type name.
+///
+/// # Arguments
+///
+/// This test has no arguments.
+///
+/// # Returns
+///
+/// Returns no value; failed assertions panic.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
+#[test]
+fn handle_config_schema_defaults_to_root_config_named_subdirectory() {
+    let _guard = CURRENT_DIR_LOCK.lock().unwrap();
+    let current_dir = std::env::current_dir().unwrap();
+    let root = temp_dir_path("handle-config-schema-defaults");
+    fs::create_dir_all(&root).unwrap();
+    std::env::set_current_dir(&root).unwrap();
+
+    let result = handle_config_command::<DemoCli, EngineConfig>(
+        ConfigCommand::JsonSchema { output: None },
+        PathBuf::from("config.yaml").as_path(),
+    );
+
+    std::env::set_current_dir(current_dir).unwrap();
+    result.unwrap();
+
+    let schema_path = root
+        .join("config")
+        .join("engine_config")
+        .join("engine_config.schema.json");
+    let schema = fs::read_to_string(schema_path).unwrap();
     assert!(schema.contains("http://json-schema.org/draft-07/schema#"));
 
     let _ = fs::remove_dir_all(root);
