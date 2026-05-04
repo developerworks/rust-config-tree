@@ -34,8 +34,8 @@ log:
 - 它会从声明 include(包含) 的文件解析相对路径。
 - 它会在环境变量 provider(值提供器) 求值之前加载 `.env` 文件。
 - 它会使用 schema(结构定义) 中声明的环境变量名，并且不会按分隔符拆分变量名。
-- 它会通过 Figment metadata(元数据) 追踪运行时来源。
-- 通过 `tracing` 输出 TRACE 级别的来源追踪事件。
+- 它会通过 Figment(配置合并库) metadata(元数据) 追踪运行时来源。
+- 它会通过 `tracing` 输出 TRACE(追踪级别) 的来源追踪事件。
 - 它会生成 Draft 7 JSON Schema(JSON 结构定义)，供编辑器补全和基础
   schema(结构定义) 检查使用。
 - 应用代码通过 `#[config(validate = Self::validate)]` 实现字段值合法性校验，
@@ -54,7 +54,7 @@ log:
 
 - `load_config::<S>(path)` 会加载最终 schema(结构定义)。
 - `load_config_with_figment::<S>(path)` 会加载 schema(结构定义)，并返回用于
-  来源追踪的 Figment graph(配置图)。
+  来源追踪的 Figment(配置合并库) graph(配置图)。
 - `write_config_templates::<S>(config_path, output_path)` 会写入 root(根配置)
   模板和递归发现的子模板。
 - `write_config_schemas::<S>(output_path)` 会写入 root(根配置) 和

@@ -4,7 +4,7 @@
 
 这些示例是小型可运行程序，会创建自己的临时配置文件。
 
-在仓库根目录运行：
+可以在仓库根目录运行这些示例：
 
 ```bash
 cargo run --example basic_loading
@@ -16,11 +16,15 @@ cargo run --example generate_templates
 cargo run --example tree_api
 ```
 
-示例覆盖：
+这些示例覆盖以下内容：
 
-- `basic_loading.rs`：从递归 config tree 加载 `confique` schema。
-- `cli_overrides.rs`：将应用 CLI 参数作为最高优先级 Figment provider 合并。
-- `config_commands.rs`：把 `ConfigCommand` flatten 到应用 clap CLI。
-- `generate_templates.rs`：从 schema 写入 root/section JSON Schema，以及绑定
-  schema 的 TOML/YAML 模板。
-- `tree_api.rs`：使用低层、格式无关的 include tree API。
+- `basic_loading.rs` 会从递归 config tree(配置树) 加载 `confique`
+  schema(结构定义)。
+- `cli_overrides.rs` 会将应用 CLI(命令行接口) 参数作为最高优先级
+  Figment(配置合并库) provider(值提供器) 合并。
+- `config_commands.rs` 会把 `ConfigCommand` flatten(展开) 到应用的
+  clap(命令行解析库) CLI(命令行接口) 中。
+- `generate_templates.rs` 会从 schema(结构定义) 写入 root(根配置) 和
+  section(配置段) 的 JSON Schema(JSON 结构定义)，也会写入绑定
+  schema(结构定义) 的 TOML/YAML 模板。
+- `tree_api.rs` 会使用低层、格式无关的 include tree API(包含树接口)。

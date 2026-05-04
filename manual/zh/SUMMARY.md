@@ -1,4 +1,4 @@
-# Summary
+# 目录
 
 - [首页](README.md)
 - [简介](introduction.md)
@@ -8,8 +8,8 @@
 - [环境变量](environment.md)
 - [来源追踪](source-tracking.md)
 - [模板生成](templates.md)
-- [IDE 补全](ide-completions.md)
-- [CLI 集成](cli.md)
+- [IDE(集成开发环境) 补全](ide-completions.md)
+- [CLI(命令行接口) 集成](cli.md)
 - [示例](examples.md)
-- [Tree API](tree-api.md)
-- [GitHub Pages](github-pages.md)
+- [Tree API(树形接口)](tree-api.md)
+- [GitHub Pages(静态站点托管)](github-pages.md)

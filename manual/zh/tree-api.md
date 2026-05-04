@@ -1,8 +1,9 @@
-# Tree API
+# Tree API(树形接口)
 
 [English](../en/tree-api.html) | [中文](tree-api.html) | [日本語](../ja/tree-api.html) | [한국어](../ko/tree-api.html) | [Français](../fr/tree-api.html) | [Deutsch](../de/tree-api.html) | [Español](../es/tree-api.html) | [Português](../pt/tree-api.html) | [Svenska](../sv/tree-api.html) | [Suomi](../fi/tree-api.html) | [Nederlands](../nl/tree-api.html)
 
-应用不使用 `confique`，或者需要直接访问遍历结果时，可以使用低层 tree API。
+当应用不使用 `confique`，或者需要直接访问遍历结果时，应用可以使用低层
+tree API(树形接口)。
 
 ```rust
 use std::{
@@ -34,16 +35,16 @@ for node in tree.nodes() {
 
 ## 遍历规则
 
-tree loader 会：
+tree loader(树形加载器) 会执行以下操作：
 
-- 对 source path 做词法归一化；
-- 拒绝空 include path；
-- 从声明文件解析相对 include；
-- 保留绝对 include path；
-- 检测递归 include 循环；
-- 跳过已经从其他 include 分支加载过的文件。
+- 它会对 source path(来源路径) 做词法归一化。
+- 它会拒绝空 include path(包含路径)。
+- 它会从声明文件解析相对 include(包含)。
+- 它会保留绝对 include path(包含路径)。
+- 它会检测递归 include(包含) 循环。
+- 它会跳过已经从其他 include(包含) 分支加载过的文件。
 
-`ConfigTreeOptions` 可以反转同级 include 遍历顺序：
+`ConfigTreeOptions` 可以反转同级 include(包含) 的遍历顺序：
 
 ```rust
 use rust_config_tree::{ConfigTreeOptions, IncludeOrder};
@@ -56,6 +57,7 @@ let options = ConfigTreeOptions::default().include_order(IncludeOrder::Reverse);
 
 路径辅助函数只做词法处理。它们不解析符号链接，也不要求路径存在：
 
-- `absolutize_lexical(path)`
-- `normalize_lexical(path)`
-- `resolve_include_path(parent_path, include_path)`
+- `absolutize_lexical(path)` 会把路径转换成词法绝对路径。
+- `normalize_lexical(path)` 会对路径做词法归一化。
+- `resolve_include_path(parent_path, include_path)` 会根据父路径解析 include(包含)
+  路径。
