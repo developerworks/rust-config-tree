@@ -123,10 +123,10 @@ De uiteindelijke indeling is:
 
 ```text
 schemas/myapp.schema.json:
-  Root file fields only
+  Alleen velden van het rootbestand
 
 schemas/server.schema.json:
-  Server section schema
+  Schema voor de sectie server
 
 config.toml:
   #:schema ./schemas/myapp.schema.json

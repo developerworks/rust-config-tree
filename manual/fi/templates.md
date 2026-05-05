@@ -22,10 +22,10 @@ write_config_schemas::<AppConfig>("schemas/myapp.schema.json")?;
 # Ok::<(), Box<dyn std::error::Error + Send + Sync>>(())
 ```
 
-Mark a nested field with `#[schemars(extend("x-tree-split" = true))]` when it
-should be generated as its own `*.yaml` template and
-`<section>.schema.json` schema. Unmarked nested fields stay in the parent
-template and parent schema.
+Merkitse sisakkainen kentta `#[schemars(extend("x-tree-split" = true))]`-
+attribuutilla, kun se tulee luoda omana `*.yaml`-mallina ja omana
+`<section>.schema.json`-skeemana. Merkitsemattomat sisakkaiset kentat pysyvat
+emomallissa ja emoskeemassa.
 
 Merkitse lehtikentta `#[schemars(extend("x-env-only" = true))]`, kun arvon tulee tulla vain ymparistomuuttujista. Luodut mallit ja JSON Schema -skeemat jattavat env-only-kentat pois, ja niiden takia tyhjiksi jaavat ylaobjektit poistetaan.
 

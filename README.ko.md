@@ -218,10 +218,9 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 }
 ```
 
-Mark a nested field with `#[schemars(extend("x-tree-split" = true))]` when it
-should be generated as its own `*.yaml` template and
-`<section>.schema.json` schema. Unmarked nested fields stay in the parent
-template and parent schema.
+중첩 필드를 자체 `*.yaml` 템플릿과 자체 `<section>.schema.json` 스키마로
+생성하려면 `#[schemars(extend("x-tree-split" = true))]`를 붙입니다. 표시하지 않은
+중첩 필드는 부모 템플릿과 부모 스키마에 남습니다.
 
 값을 환경 변수로만 제공해야 하는 leaf 필드에는 `#[schemars(extend("x-env-only" = true))]`를 붙입니다. 생성된 템플릿과 JSON Schema는 env-only 필드를 생략하며, 이 생략으로 비게 된 부모 객체도 함께 제거합니다.
 

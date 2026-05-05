@@ -121,10 +121,10 @@ YAML도 VS Code 설정으로 바인딩할 수 있습니다.
 
 ```text
 schemas/myapp.schema.json:
-  Root file fields only
+  루트 파일 필드만
 
 schemas/server.schema.json:
-  Server section schema
+  server 섹션 스키마
 
 config.toml:
   #:schema ./schemas/myapp.schema.json

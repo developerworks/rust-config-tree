@@ -19,7 +19,7 @@ Es unterstuetzt:
 - Erzeugung von Draft-7-JSON-Schemas fuer Root- und Abschnittsschemas zur
   Editor-Vervollstaendigung und grundlegenden Schema-Pruefung
 - Erzeugung von Konfigurationsvorlagen fuer YAML, TOML, JSON und JSON5
-- Schema-Bindings fuer TOML-, YAML-, JSON- und JSON5-Vorlagen
+- Schema-Bindungen fuer TOML-, YAML-, JSON- und JSON5-Vorlagen
 - rekursive Include-Traversierung
 - Laden von `.env`, bevor Umgebungswerte zusammengefuehrt werden
 - Quellenverfolgung ueber Figment-Metadaten
@@ -214,14 +214,15 @@ gerendert. Das Ausgabeformat wird aus dem Ausgabepfad abgeleitet:
 - unbekannte oder fehlende Erweiterungen erzeugen YAML
 
 Verwende `write_config_schemas`, um Draft-7-JSON-Schemas fuer die
-Root-Konfiguration und explizit aufgeteilte verschachtelte Abschnitte zu erzeugen. Die erzeugten
-Schemas lassen `required`-Einschraenkungen weg, damit IDEs Vervollstaendigung
-fuer partielle Konfigurationsdateien anbieten koennen, ohne fehlende Felder zu
-melden. Die erzeugten `*.schema.json`-Dateien sind nur fuer IDE-Vervollstaendigung
-und grundlegende Editor-Pruefungen gedacht; sie entscheiden nicht, ob ein
-konkreter Feldwert fuer die Anwendung gueltig ist. Feldwertvalidierung muss im
-Code mit `#[config(validate = Self::validate)]` implementiert und dann ueber
-`load_config` oder `config-validate` ausgefuehrt werden:
+Root-Konfiguration und explizit aufgeteilte verschachtelte Abschnitte zu
+erzeugen. Die erzeugten Schemas lassen `required`-Einschraenkungen weg, damit
+IDEs Vervollstaendigung fuer partielle Konfigurationsdateien anbieten koennen,
+ohne fehlende Felder zu melden. Die erzeugten `*.schema.json`-Dateien sind nur
+fuer IDE-Vervollstaendigung und grundlegende Editor-Pruefungen gedacht; sie
+entscheiden nicht, ob ein konkreter Feldwert fuer die Anwendung gueltig ist.
+Feldwertvalidierung muss im Code mit `#[config(validate = Self::validate)]`
+implementiert und dann ueber `load_config` oder `config-validate` ausgefuehrt
+werden:
 
 ```rust
 use rust_config_tree::write_config_schemas;
@@ -233,12 +234,16 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 }
 ```
 
-Mark a nested field with `#[schemars(extend("x-tree-split" = true))]` when it
-should be generated as its own `*.yaml` template and
-`<section>.schema.json` schema. Unmarked nested fields stay in the parent
-template and parent schema.
+Markiere ein verschachteltes Feld mit
+`#[schemars(extend("x-tree-split" = true))]`, wenn es als eigene
+`*.yaml`-Vorlage und als eigenes `<section>.schema.json`-Schema erzeugt werden
+soll. Nicht markierte verschachtelte Felder bleiben in der Elternvorlage und im
+Elternschema.
 
-Markiere ein Blattfeld mit `#[schemars(extend("x-env-only" = true))]`, wenn der Wert nur aus Umgebungsvariablen kommen darf. Generierte Vorlagen und JSON-Schemas lassen env-only-Felder weg, und dadurch leere Elternobjekte werden entfernt.
+Markiere ein Blattfeld mit `#[schemars(extend("x-env-only" = true))]`, wenn der
+Wert nur aus Umgebungsvariablen kommen darf. Generierte Vorlagen und
+JSON-Schemas lassen env-only-Felder weg, und dadurch leere Elternobjekte werden
+entfernt.
 
 Bei einem Schema mit den mit `x-tree-split` markierten Abschnitten `server` und `log` schreibt dies
 `schemas/myapp.schema.json`, `schemas/server.schema.json` und
@@ -427,7 +432,10 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 angegeben wird, wird nur dessen Dateiname verwendet. Wird kein Ausgabe-Dateiname
 angegeben, schreibt der Befehl
 `config/<root_config_name>/<root_config_name>.example.yaml`. Fuege
-`--schema <path>` hinzu, um TOML-, YAML-, JSON- und JSON5-Vorlagen an ein erzeugtes JSON-Schema-Set zu binden. JSON- und JSON5-Vorlagen erhalten ein von VS Code erkennbares `$schema`-Feld. Dabei werden auch das Root-Schema und Abschnittsschemas an den gewaehlten Schemapfad geschrieben.
+`--schema <path>` hinzu, um TOML-, YAML-, JSON- und JSON5-Vorlagen an ein
+erzeugtes JSON-Schema-Set zu binden. JSON- und JSON5-Vorlagen erhalten ein von
+VS Code erkennbares `$schema`-Feld. Dabei werden auch das Root-Schema und
+Abschnittsschemas an den gewaehlten Schemapfad geschrieben.
 
 `config-schema --output <path>` schreibt das Root-Draft-7-JSON-Schema und
 Abschnittsschemas. Wird kein Ausgabepfad angegeben, wird das Root-Schema nach

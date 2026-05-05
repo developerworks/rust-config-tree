@@ -232,10 +232,10 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 }
 ```
 
-Mark a nested field with `#[schemars(extend("x-tree-split" = true))]` when it
-should be generated as its own `*.yaml` template and
-`<section>.schema.json` schema. Unmarked nested fields stay in the parent
-template and parent schema.
+Markeer een genest veld met `#[schemars(extend("x-tree-split" = true))]`
+wanneer het als eigen `*.yaml`-sjabloon en eigen
+`<section>.schema.json`-schema moet worden gegenereerd. Ongemarkeerde geneste
+velden blijven in het oudersjabloon en het ouderschema.
 
 Markeer een leafveld met `#[schemars(extend("x-env-only" = true))]` wanneer de waarde alleen uit omgevingsvariabelen mag komen. Gegenereerde sjablonen en JSON Schemas laten env-only velden weg, en lege bovenliggende objecten die daardoor overblijven worden verwijderd.
 

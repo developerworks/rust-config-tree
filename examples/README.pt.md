@@ -25,7 +25,6 @@ Os exemplos cobrem:
   de maior prioridade.
 - `config_commands.rs`: achata `ConfigCommand` em uma CLI clap da aplicacao.
 - `generate_templates.rs`: grava JSON Schemas raiz e de secao, alem de modelos
-  TOML/YAML vinculados a esquemas a partir de um esquema.
+  TOML, YAML, JSON e JSON5 vinculados a esquemas a partir de um esquema.
 - `tree_api.rs`: usa a API de arvore de includes de nivel mais baixo e
   independente de formato.
-

@@ -126,10 +126,10 @@ O layout final e:
 
 ```text
 schemas/myapp.schema.json:
-  Root file fields only
+  Somente campos do arquivo raiz
 
 schemas/server.schema.json:
-  Server section schema
+  Schema da secao server
 
 config.toml:
   #:schema ./schemas/myapp.schema.json

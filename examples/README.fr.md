@@ -26,7 +26,6 @@ Les exemples couvrent :
 - `config_commands.rs` : aplatir `ConfigCommand` dans une CLI clap
   d'application.
 - `generate_templates.rs` : ecrire les schemas JSON racine et de section ainsi
-  que des modeles TOML/YAML lies aux schemas depuis un schema.
+  que des modeles TOML, YAML, JSON et JSON5 lies aux schemas depuis un schema.
 - `tree_api.rs` : utiliser l'API d'arbre d'inclusion de plus bas niveau,
   independante du format.
-

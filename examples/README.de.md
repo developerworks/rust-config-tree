@@ -26,6 +26,6 @@ Die Beispiele decken ab:
 - `config_commands.rs`: bindet `ConfigCommand` flach in eine clap-CLI der
   Anwendung ein.
 - `generate_templates.rs`: schreibt Root- und Abschnitts-JSON-Schemas sowie
-  schemagebundene TOML/YAML-Vorlagen aus einem Schema.
+  schemagebundene TOML-, YAML-, JSON- und JSON5-Vorlagen aus einem Schema.
 - `tree_api.rs`: verwendet die untergeordnete, formatunabhaengige
   Include-Tree-API.

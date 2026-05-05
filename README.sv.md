@@ -225,10 +225,10 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 }
 ```
 
-Mark a nested field with `#[schemars(extend("x-tree-split" = true))]` when it
-should be generated as its own `*.yaml` template and
-`<section>.schema.json` schema. Unmarked nested fields stay in the parent
-template and parent schema.
+Markera ett nastlat falt med `#[schemars(extend("x-tree-split" = true))]` nar
+det ska genereras som en egen `*.yaml`-mall och ett eget
+`<section>.schema.json`-schema. Omarkerade nastlade falt stannar i
+foraldramallen och foraldraschemat.
 
 Markera ett bladfalt med `#[schemars(extend("x-env-only" = true))]` nar vardet bara ska komma fran miljovariabler. Genererade mallar och JSON Schemas utelamnar env-only-falt, och foralderobjekt som blir tomma tas bort.
 

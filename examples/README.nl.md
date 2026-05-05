@@ -24,5 +24,5 @@ De voorbeelden behandelen:
   met de hoogste prioriteit.
 - `config_commands.rs`: flatten `ConfigCommand` in een clap-CLI van een toepassing.
 - `generate_templates.rs`: schrijf root- en sectie-JSON Schemas plus
-  schemagekoppelde TOML/YAML-sjablonen vanuit een schema.
+  schemagekoppelde TOML-, YAML-, JSON- en JSON5-sjablonen vanuit een schema.
 - `tree_api.rs`: gebruik de lagere, formaatonafhankelijke include-tree-API.

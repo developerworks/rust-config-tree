@@ -26,10 +26,10 @@ write_config_schemas::<AppConfig>("schemas/myapp.schema.json")?;
 # Ok::<(), Box<dyn std::error::Error + Send + Sync>>(())
 ```
 
-Mark a nested field with `#[schemars(extend("x-tree-split" = true))]` when it
-should be generated as its own `*.yaml` template and
-`<section>.schema.json` schema. Unmarked nested fields stay in the parent
-template and parent schema.
+Marquez un champ imbrique avec `#[schemars(extend("x-tree-split" = true))]`
+lorsqu'il doit etre genere comme son propre modele `*.yaml` et son propre
+schema `<section>.schema.json`. Les champs imbriques non marques restent dans
+le modele parent et le schema parent.
 
 Marquez un champ feuille avec `#[schemars(extend("x-env-only" = true))]` lorsque la valeur doit venir uniquement de variables d environnement. Les modeles generes et les schemas JSON omettent les champs env-only, et les objets parents devenus vides sont supprimes.
 

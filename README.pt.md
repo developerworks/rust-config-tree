@@ -231,10 +231,10 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 }
 ```
 
-Mark a nested field with `#[schemars(extend("x-tree-split" = true))]` when it
-should be generated as its own `*.yaml` template and
-`<section>.schema.json` schema. Unmarked nested fields stay in the parent
-template and parent schema.
+Marque um campo aninhado com `#[schemars(extend("x-tree-split" = true))]`
+quando ele deve ser gerado como seu proprio modelo `*.yaml` e seu proprio
+schema `<section>.schema.json`. Campos aninhados nao marcados permanecem no
+modelo pai e no schema pai.
 
 Marque um campo folha com `#[schemars(extend("x-env-only" = true))]` quando o valor deve vir somente de variaveis de ambiente. Os modelos gerados e os JSON Schemas omitem campos env-only, e objetos pai que ficarem vazios tambem sao removidos.
 

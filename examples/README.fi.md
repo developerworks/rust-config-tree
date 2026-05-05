@@ -21,5 +21,5 @@ Esimerkit kattavat:
 - `basic_loading.rs`: lataa `confique`-skeema rekursiivisesta konfiguraatiopuusta.
 - `cli_overrides.rs`: yhdista sovelluksen CLI-liput korkeimman prioriteetin Figment-provideriksi.
 - `config_commands.rs`: litista `ConfigCommand` sovelluksen clap-CLI:hin.
-- `generate_templates.rs`: kirjoita juuri- ja osio-JSON Schema -skeemat seka skeemaan sidotut TOML/YAML-mallit skeemasta.
+- `generate_templates.rs`: kirjoita juuri- ja osio-JSON Schema -skeemat seka skeemaan sidotut TOML-, YAML-, JSON- ja JSON5-mallit skeemasta.
 - `tree_api.rs`: kayta alemman tason, formaattiriippumatonta include-puu-APIa.

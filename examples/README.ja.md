@@ -24,6 +24,5 @@ cargo run --example tree_api
   merge する。
 - `config_commands.rs`: `ConfigCommand` を application clap CLI に flatten する。
 - `generate_templates.rs`: schema から root / section JSON Schema と
-  schema-bound TOML/YAML template を書き出す。
+  schema-bound TOML / YAML / JSON / JSON5 template を書き出す。
 - `tree_api.rs`: format-agnostic な低レベル include tree API を使う。
-

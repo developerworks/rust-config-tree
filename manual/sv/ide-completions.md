@@ -122,10 +122,10 @@ Den slutliga layouten ar:
 
 ```text
 schemas/myapp.schema.json:
-  Root file fields only
+  Endast rotfilens falt
 
 schemas/server.schema.json:
-  Server section schema
+  Schema for sektionen server
 
 config.toml:
   #:schema ./schemas/myapp.schema.json

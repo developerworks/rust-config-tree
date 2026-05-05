@@ -127,10 +127,10 @@ La disposition finale est :
 
 ```text
 schemas/myapp.schema.json:
-  Root file fields only
+  Champs du fichier racine uniquement
 
 schemas/server.schema.json:
-  Server section schema
+  Schema de la section server
 
 config.toml:
   #:schema ./schemas/myapp.schema.json

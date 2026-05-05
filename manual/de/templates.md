@@ -26,12 +26,16 @@ write_config_schemas::<AppConfig>("schemas/myapp.schema.json")?;
 # Ok::<(), Box<dyn std::error::Error + Send + Sync>>(())
 ```
 
-Mark a nested field with `#[schemars(extend("x-tree-split" = true))]` when it
-should be generated as its own `*.yaml` template and
-`<section>.schema.json` schema. Unmarked nested fields stay in the parent
-template and parent schema.
+Markiere ein verschachteltes Feld mit
+`#[schemars(extend("x-tree-split" = true))]`, wenn es als eigene
+`*.yaml`-Vorlage und als eigenes `<section>.schema.json`-Schema erzeugt werden
+soll. Nicht markierte verschachtelte Felder bleiben in der Elternvorlage und im
+Elternschema.
 
-Markiere ein Blattfeld mit `#[schemars(extend("x-env-only" = true))]`, wenn der Wert nur aus Umgebungsvariablen kommen darf. Generierte Vorlagen und JSON-Schemas lassen env-only-Felder weg, und dadurch leere Elternobjekte werden entfernt.
+Markiere ein Blattfeld mit `#[schemars(extend("x-env-only" = true))]`, wenn der
+Wert nur aus Umgebungsvariablen kommen darf. Generierte Vorlagen und
+JSON-Schemas lassen env-only-Felder weg, und dadurch leere Elternobjekte werden
+entfernt.
 
 Erzeugte Schemas lassen `required`-Einschraenkungen weg. IDEs koennen weiterhin
 Vervollstaendigung anbieten, aber partielle Dateien wie `log.yaml`
@@ -91,7 +95,8 @@ Erzeugte Abschnittsvorlagen binden Abschnittsschemas:
 # yaml-language-server: $schema=./schemas/log.schema.json
 ```
 
-Erzeugte JSON- und JSON5-Vorlagen schreiben ein oberstes `$schema`-Feld, das VS Code erkennt. Editor-Einstellungen bleiben optional:
+Erzeugte JSON- und JSON5-Vorlagen schreiben ein oberstes `$schema`-Feld, das
+VS Code erkennt. Editor-Einstellungen bleiben optional:
 
 ```json
 {

@@ -22,5 +22,5 @@ Exemplen tacker:
 - `basic_loading.rs`: ladda ett `confique`-schema fran ett rekursivt konfigurationstrad.
 - `cli_overrides.rs`: sla samman programmets CLI-flaggor som Figment-provider med hogsta prioritet.
 - `config_commands.rs`: platta ut `ConfigCommand` i ett programs clap-CLI.
-- `generate_templates.rs`: skriv rot- och sektions-JSON Schemas samt schemabundna TOML/YAML-mallar fran ett schema.
+- `generate_templates.rs`: skriv rot- och sektions-JSON Schemas samt schemabundna TOML-, YAML-, JSON- och JSON5-mallar fran ett schema.
 - `tree_api.rs`: anvand det lagre niva, formatoberoende include-trad-API:t.

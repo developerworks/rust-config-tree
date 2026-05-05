@@ -29,5 +29,5 @@ cargo run --example tree_api
   clap(命令行解析库) CLI(命令行接口) 中。
 - `generate_templates.rs` 会从 schema(结构定义) 写入 root(根配置) 和
   section(配置段) 的 JSON Schema(JSON 结构定义)，也会写入绑定
-  schema(结构定义) 的 TOML/YAML 模板。
+  schema(结构定义) 的 TOML、YAML、JSON 和 JSON5 模板。
 - `tree_api.rs` 会使用低层、格式无关的 include tree API(包含树接口)。

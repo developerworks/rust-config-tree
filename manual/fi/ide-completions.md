@@ -104,10 +104,10 @@ Lopullinen asettelu on:
 
 ```text
 schemas/myapp.schema.json:
-  Root file fields only
+  Vain juuritiedoston kentat
 
 schemas/server.schema.json:
-  Server section schema
+  server-osion skeema
 
 config.toml:
   #:schema ./schemas/myapp.schema.json

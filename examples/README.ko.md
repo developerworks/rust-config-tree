@@ -21,5 +21,5 @@ cargo run --example tree_api
 - `basic_loading.rs`: 재귀 설정 트리에서 `confique` 스키마를 로드합니다.
 - `cli_overrides.rs`: 애플리케이션 CLI 플래그를 가장 높은 우선순위의 Figment 프로바이더로 병합합니다.
 - `config_commands.rs`: `ConfigCommand`를 애플리케이션 clap CLI에 flatten합니다.
-- `generate_templates.rs`: 스키마에서 루트 및 섹션 JSON Schema와 스키마 바인딩 TOML/YAML 템플릿을 씁니다.
+- `generate_templates.rs`: 스키마에서 루트 및 섹션 JSON Schema와 스키마 바인딩 TOML, YAML, JSON, JSON5 템플릿을 씁니다.
 - `tree_api.rs`: 더 낮은 수준의 형식 독립 include 트리 API를 사용합니다.

@@ -119,10 +119,10 @@ YAML も VS Code settings で bind できます。
 
 ```text
 schemas/myapp.schema.json:
-  Root file fields only
+  root file の field のみ
 
 schemas/server.schema.json:
-  Server section schema
+  server section schema
 
 config.toml:
   #:schema ./schemas/myapp.schema.json

@@ -216,10 +216,9 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 }
 ```
 
-Mark a nested field with `#[schemars(extend("x-tree-split" = true))]` when it
-should be generated as its own `*.yaml` template and
-`<section>.schema.json` schema. Unmarked nested fields stay in the parent
-template and parent schema.
+nested field を独立した `*.yaml` template と `<section>.schema.json` schema として
+生成したい場合は `#[schemars(extend("x-tree-split" = true))]` を付けます。
+mark していない nested field は parent template と parent schema に残ります。
 
 `#[schemars(extend("x-env-only" = true))]` を leaf field に付けると、その値は環境変数からだけ渡すものとして扱われます。生成される template と JSON Schema は env-only field を省略し、その結果空になった parent object も削除します.
 
