@@ -1,0 +1,20 @@
+# Supervisor process manager configuration.
+
+general:
+  name: "my-supervisor"
+  environment: "production"
+  log_level: "info"
+
+processes:
+  web:
+    command: "cargo run --release"
+    numprocs: 2
+    autorestart: true
+
+rpc:
+  enabled: true
+  port: 9001
+
+include:
+  files:
+    - "/etc/supervisor/conf.d/*.conf"

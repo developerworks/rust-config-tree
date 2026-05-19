@@ -16,7 +16,7 @@ pub use crate::config_load::{
     build_config_figment, load_config, load_config_from_figment, load_config_with_figment,
 };
 pub(crate) use crate::config_output::{
-    default_config_schema_output, resolve_config_template_output,
+    default_config_schema_output,
 };
 pub use crate::config_schema::{
     ConfigSchemaTarget, config_schema_targets_for_path, write_config_schema, write_config_schemas,

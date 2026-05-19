@@ -60,6 +60,7 @@ pub(crate) fn write_template(path: &Path, content: &str) -> ConfigResult<()> {
 /// ```no_run
 /// let _ = ();
 /// ```
+#[allow(dead_code)]
 pub(crate) fn resolve_config_template_output<S>(output: Option<PathBuf>) -> ConfigResult<PathBuf> {
     let current_dir = std::env::current_dir()?;
     let output = output
@@ -90,6 +91,7 @@ pub(crate) fn resolve_config_template_output<S>(output: Option<PathBuf>) -> Conf
 /// ```no_run
 /// let _ = ();
 /// ```
+#[allow(dead_code)]
 pub(crate) fn default_config_template_output<S>() -> PathBuf {
     let target_name = root_config_target_name::<S>();
     default_config_output_dir::<S>().join(format!("{target_name}.example.yaml"))

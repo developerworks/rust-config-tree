@@ -11,7 +11,10 @@ use confique::Config;
 use schemars::JsonSchema;
 
 use super::*;
-use crate::{ConfigSchema, config_output::default_config_template_output};
+use crate::{
+    ConfigSchema,
+    config_output::{default_config_template_output, resolve_config_template_output},
+};
 
 static CURRENT_DIR_LOCK: Mutex<()> = Mutex::new(());
 
@@ -131,10 +134,10 @@ impl ConfigSchema for RequiredConfig {
 /// ```
 #[test]
 fn config_command_can_be_flattened_into_a_consumer_cli() {
-    let cli = DemoCli::parse_from(["demo", "config-template", "--output", "config.yaml"]);
+    let cli = DemoCli::parse_from(["demo", "generate-template", "--output", "config.yaml"]);
 
     match cli.command {
-        DemoCommand::Config(ConfigCommand::ConfigTemplate { output, schema }) => {
+        DemoCommand::Config(ConfigCommand::GenerateTemplate { output, schema, .. }) => {
             assert_eq!(output, Some(PathBuf::from("config.yaml")));
             assert_eq!(schema, None);
         }
@@ -159,10 +162,10 @@ fn config_command_can_be_flattened_into_a_consumer_cli() {
 /// ```
 #[test]
 fn config_template_defaults_use_root_config_snake_case_name() {
-    let cli = DemoCli::parse_from(["demo", "config-template"]);
+    let cli = DemoCli::parse_from(["demo", "generate-template"]);
 
     match cli.command {
-        DemoCommand::Config(ConfigCommand::ConfigTemplate { output, schema }) => {
+        DemoCommand::Config(ConfigCommand::GenerateTemplate { output, schema, .. }) => {
             assert_eq!(output, None);
             assert_eq!(schema, None);
         }
@@ -232,7 +235,7 @@ fn default_targets_use_any_root_config_snake_case_name() {
 fn config_template_command_accepts_schema_path() {
     let cli = DemoCli::parse_from([
         "demo",
-        "config-template",
+        "generate-template",
         "--output",
         "config.example.toml",
         "--schema",
@@ -240,7 +243,7 @@ fn config_template_command_accepts_schema_path() {
     ]);
 
     match cli.command {
-        DemoCommand::Config(ConfigCommand::ConfigTemplate { output, schema }) => {
+        DemoCommand::Config(ConfigCommand::GenerateTemplate { output, schema, .. }) => {
             assert_eq!(output, Some(PathBuf::from("config.example.toml")));
             assert_eq!(schema, Some(PathBuf::from("schemas/myapp.schema.json")));
         }
@@ -267,13 +270,13 @@ fn config_template_command_accepts_schema_path() {
 fn config_schema_command_is_flattened_into_consumer_cli() {
     let cli = DemoCli::parse_from([
         "demo",
-        "config-schema",
+        "generate-schema",
         "--output",
         "schemas/myapp.schema.json",
     ]);
 
     match cli.command {
-        DemoCommand::Config(ConfigCommand::JsonSchema { output }) => {
+        DemoCommand::Config(ConfigCommand::GenerateSchema { output }) => {
             assert_eq!(output, Some(PathBuf::from("schemas/myapp.schema.json")));
         }
         command => panic!("unexpected command: {command:?}"),
@@ -297,10 +300,10 @@ fn config_schema_command_is_flattened_into_consumer_cli() {
 /// ```
 #[test]
 fn config_schema_command_defers_default_output_to_handler() {
-    let cli = DemoCli::parse_from(["demo", "config-schema"]);
+    let cli = DemoCli::parse_from(["demo", "generate-schema"]);
 
     match cli.command {
-        DemoCommand::Config(ConfigCommand::JsonSchema { output }) => {
+        DemoCommand::Config(ConfigCommand::GenerateSchema { output }) => {
             assert_eq!(output, None);
         }
         command => panic!("unexpected command: {command:?}"),
@@ -324,10 +327,10 @@ fn config_schema_command_defers_default_output_to_handler() {
 /// ```
 #[test]
 fn config_validate_command_is_flattened_into_consumer_cli() {
-    let cli = DemoCli::parse_from(["demo", "config-validate"]);
+    let cli = DemoCli::parse_from(["demo", "validate-config"]);
 
     match cli.command {
-        DemoCommand::Config(ConfigCommand::ConfigValidate) => {}
+        DemoCommand::Config(ConfigCommand::ValidateConfig) => {}
         command => panic!("unexpected command: {command:?}"),
     }
 }
@@ -391,9 +394,10 @@ fn handle_config_command_writes_templates_for_consumer_schema() {
 
     std::env::set_current_dir(&root).unwrap();
     let result = handle_config_command::<DemoCli, TestConfig>(
-        ConfigCommand::ConfigTemplate {
+        ConfigCommand::GenerateTemplate {
             output: Some(output_path.clone()),
             schema: Some(PathBuf::from("schemas/config.schema.json")),
+            r#type: "test::Config".to_owned(),
         },
         &config_path,
     );
@@ -448,9 +452,10 @@ fn handle_config_template_defaults_to_root_config_named_targets() {
     std::env::set_current_dir(&root).unwrap();
 
     let result = handle_config_command::<DemoCli, RecorderConfig>(
-        ConfigCommand::ConfigTemplate {
+        ConfigCommand::GenerateTemplate {
             output: None,
             schema: None,
+            r#type: "test::Config".to_owned(),
         },
         Path::new("recorder.yaml"),
     );
@@ -506,7 +511,7 @@ fn handle_config_command_writes_json_schema_for_consumer_schema() {
     let schema_path = root.join("schemas").join("myapp.schema.json");
 
     handle_config_command::<DemoCli, TestConfig>(
-        ConfigCommand::JsonSchema {
+        ConfigCommand::GenerateSchema {
             output: Some(schema_path.clone()),
         },
         PathBuf::from("config.yaml").as_path(),
@@ -543,7 +548,7 @@ fn handle_config_schema_defaults_to_root_config_named_subdirectory() {
     std::env::set_current_dir(&root).unwrap();
 
     let result = handle_config_command::<DemoCli, EngineConfig>(
-        ConfigCommand::JsonSchema { output: None },
+        ConfigCommand::GenerateSchema { output: None },
         PathBuf::from("config.yaml").as_path(),
     );
 
@@ -583,7 +588,7 @@ fn handle_config_command_validates_full_runtime_config() {
     fs::write(&config_path, "required_value: present\n").unwrap();
 
     handle_config_command::<DemoCli, RequiredConfig>(
-        ConfigCommand::ConfigValidate,
+        ConfigCommand::ValidateConfig,
         config_path.as_path(),
     )
     .unwrap();
@@ -614,7 +619,7 @@ fn handle_config_command_rejects_invalid_runtime_config() {
     fs::write(&config_path, "").unwrap();
 
     let result = handle_config_command::<DemoCli, RequiredConfig>(
-        ConfigCommand::ConfigValidate,
+        ConfigCommand::ValidateConfig,
         config_path.as_path(),
     );
 
