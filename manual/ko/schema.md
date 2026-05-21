@@ -95,7 +95,7 @@ secret: String,
 필드 값이 애플리케이션에서 유효한지는 판단하지 않습니다.
 
 필드 값 유효성 검사는 코드에서 `#[config(validate = Self::validate)]`로
-구현합니다. 최종 설정을 `load_config`로 로드하거나 `config-validate`로 검사할 때
+구현합니다. 최종 설정을 `load_config`로 로드하거나 `validate-config`로 검사할 때
 이 런타임 검증이 실행됩니다.
 
 ## 템플릿 섹션 override

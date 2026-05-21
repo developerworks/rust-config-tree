@@ -40,7 +40,7 @@ basale editorcontroles krijgen, zoals type-, enum- en onbekende-eigenschapcontro
 die door het gegenereerde schema worden ondersteund. Gegenereerde
 `*.schema.json`-bestanden bepalen niet of een concrete veldwaarde geldig is voor
 de toepassing. Veldwaardevalidatie moet in code worden geimplementeerd met
-`#[config(validate = Self::validate)]`; `load_config` en `config-validate`
+`#[config(validate = Self::validate)]`; `load_config` en `validate-config`
 voeren die runtimevalidatie uit.
 
 Koppel die schema's vanuit gegenereerde TOML-, YAML-, JSON- en JSON5-sjablonen:

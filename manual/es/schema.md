@@ -100,7 +100,7 @@ válido para la aplicación.
 La validación de valores debe implementarse en código con
 `#[config(validate = Self::validate)]`. El validador se ejecuta cuando la
 configuración final se carga con `load_config` o se comprueba con
-`config-validate`.
+`validate-config`.
 
 ## Overrides de sección de plantilla
 

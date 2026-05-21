@@ -43,7 +43,7 @@ configuracao final continua sendo um valor normal de esquema `confique`.
 - Geracao de JSON Schema Draft 7 para completamento e verificacoes basicas de esquema no editor.
 - Validacao de valores de campo no codigo da aplicacao com
   `#[config(validate = Self::validate)]`, executada por `load_config` ou
-  `config-validate`.
+  `validate-config`.
 - Geracao de modelos YAML, TOML, JSON e JSON5.
 - Diretivas TOML `#:schema`, modelines YAML Language Server e campos
   JSON/JSON5 `$schema` para modelos gerados.

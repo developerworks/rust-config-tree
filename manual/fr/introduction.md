@@ -45,7 +45,7 @@ configuration finale reste une valeur de schema `confique` normale.
   schema de base dans l'editeur.
 - Validation des valeurs de champ dans le code applicatif avec
   `#[config(validate = Self::validate)]`, executee par `load_config` ou
-  `config-validate`.
+  `validate-config`.
 - Generation de modeles YAML, TOML, JSON et JSON5.
 - Directives de schema TOML `#:schema`, modelines YAML Language Server et
   champs JSON/JSON5 `$schema` pour les modeles generes.

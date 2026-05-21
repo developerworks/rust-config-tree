@@ -47,7 +47,7 @@ etwa Typ-, Enum- und Unbekannte-Eigenschaft-Pruefungen, soweit sie vom erzeugten
 Schema unterstuetzt werden. Erzeugte `*.schema.json`-Dateien entscheiden nicht,
 ob ein konkreter Feldwert fuer die Anwendung gueltig ist. Feldwertvalidierung
 muss im Code mit `#[config(validate = Self::validate)]` implementiert werden;
-`load_config` und `config-validate` fuehren diese Laufzeitvalidierung aus.
+`load_config` und `validate-config` fuehren diese Laufzeitvalidierung aus.
 
 Binde diese Schemas aus erzeugten TOML-, YAML-, JSON- und JSON5-Vorlagen:
 

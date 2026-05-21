@@ -1,0 +1,1979 @@
+{
+  "type": "excalidraw",
+  "version": 2,
+  "source": "https://excalidraw.com",
+  "elements": [
+    {
+      "id": "title-text",
+      "type": "text",
+      "x": -182.38241904226606,
+      "y": -59.661964606530375,
+      "width": 760,
+      "height": 45,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 0,
+      "opacity": 100,
+      "groupIds": [
+        "l8zqcTDOsSgdChxkpDXve"
+      ],
+      "frameId": null,
+      "roundness": null,
+      "seed": 101001,
+      "version": 92,
+      "versionNonce": 1331800609,
+      "isDeleted": false,
+      "boundElements": [],
+      "updated": 1779248194546,
+      "link": null,
+      "locked": false,
+      "text": "rust-config-tree 当前项目架构",
+      "fontSize": 32,
+      "fontFamily": 2,
+      "textAlign": "left",
+      "verticalAlign": "top",
+      "containerId": null,
+      "originalText": "rust-config-tree 当前项目架构",
+      "lineHeight": 1.25,
+      "baseline": 38,
+      "index": "a0",
+      "autoResize": true
+    },
+    {
+      "id": "subtitle-text",
+      "type": "text",
+      "x": -180.38241904226606,
+      "y": -11.661964606530375,
+      "width": 1110,
+      "height": 28,
+      "angle": 0,
+      "strokeColor": "#495057",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 0,
+      "opacity": 100,
+      "groupIds": [
+        "l8zqcTDOsSgdChxkpDXve"
+      ],
+      "frameId": null,
+      "roundness": null,
+      "seed": 101002,
+      "version": 92,
+      "versionNonce": 276710511,
+      "isDeleted": false,
+      "boundElements": [],
+      "updated": 1779248194546,
+      "link": null,
+      "locked": false,
+      "text": "图中显示调用方接入, 公共 API(应用程序接口), CLI(命令行接口), 运行时加载, 模板和 JSON Schema(JSON 架构) 生成, 以及底层工具边界.",
+      "fontSize": 16,
+      "fontFamily": 2,
+      "textAlign": "left",
+      "verticalAlign": "top",
+      "containerId": null,
+      "originalText": "图中显示调用方接入, 公共 API(应用程序接口), CLI(命令行接口), 运行时加载, 模板和 JSON Schema(JSON 架构) 生成, 以及底层工具边界.",
+      "lineHeight": 1.25,
+      "baseline": 20,
+      "index": "a1",
+      "autoResize": true
+    },
+    {
+      "id": "consumer-box",
+      "type": "rectangle",
+      "x": -108.6063043333591,
+      "y": 206.672243950147,
+      "width": 401.024234757956,
+      "height": 221.59858463728642,
+      "angle": 0,
+      "strokeColor": "#1971c2",
+      "backgroundColor": "#e7f5ff",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "0XGHUNpuq60eJRJEJpOhj"
+      ],
+      "frameId": null,
+      "roundness": {
+        "type": 3
+      },
+      "seed": 102001,
+      "version": 432,
+      "versionNonce": 1142851055,
+      "isDeleted": false,
+      "boundElements": [
+        {
+          "id": "arrow-consumer-lib",
+          "type": "arrow"
+        }
+      ],
+      "updated": 1779248326637,
+      "link": null,
+      "locked": false,
+      "index": "a1V"
+    },
+    {
+      "id": "consumer-text",
+      "type": "text",
+      "x": -88.49598103450687,
+      "y": 224.95435604001267,
+      "width": 351.1093909758773,
+      "height": 146.2568967189254,
+      "angle": 0,
+      "strokeColor": "#0b4f8a",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 0,
+      "opacity": 100,
+      "groupIds": [
+        "0XGHUNpuq60eJRJEJpOhj"
+      ],
+      "frameId": null,
+      "roundness": null,
+      "seed": 102002,
+      "version": 378,
+      "versionNonce": 878384687,
+      "isDeleted": false,
+      "boundElements": [],
+      "updated": 1779248326638,
+      "link": null,
+      "locked": false,
+      "text": "调用方工程\n\n- 定义配置结构体\n- 派生 `confique::Config(配置派生)`\n- 派生 `JsonSchema(JSON 架构派生)`\n- 实现 `ConfigSchema(配置模式契约)`\n- 提供 `include_paths(包含路径发现)`\n- 可选提供 `template_path_for_section(分片模板路径)`",
+      "fontSize": 14.625689671892541,
+      "fontFamily": 2,
+      "textAlign": "left",
+      "verticalAlign": "top",
+      "containerId": null,
+      "originalText": "调用方工程\n\n- 定义配置结构体\n- 派生 `confique::Config(配置派生)`\n- 派生 `JsonSchema(JSON 架构派生)`\n- 实现 `ConfigSchema(配置模式契约)`\n- 提供 `include_paths(包含路径发现)`\n- 可选提供 `template_path_for_section(分片模板路径)`",
+      "lineHeight": 1.25,
+      "baseline": 190,
+      "index": "a2",
+      "autoResize": true
+    },
+    {
+      "id": "binary-box",
+      "type": "rectangle",
+      "x": -85.97596573641829,
+      "y": 530.9462275768724,
+      "width": 314.75,
+      "height": 163.61718750000003,
+      "angle": 0,
+      "strokeColor": "#5f3dc4",
+      "backgroundColor": "#f3f0ff",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "lcLwJJlxM8nKrpSbsYaIJ"
+      ],
+      "frameId": null,
+      "roundness": {
+        "type": 3
+      },
+      "seed": 102003,
+      "version": 321,
+      "versionNonce": 1932600175,
+      "isDeleted": false,
+      "boundElements": [
+        {
+          "id": "arrow-binary-cli",
+          "type": "arrow"
+        }
+      ],
+      "updated": 1779248112948,
+      "link": null,
+      "locked": false,
+      "index": "a3V"
+    },
+    {
+      "id": "binary-text",
+      "type": "text",
+      "x": -62.35877823641829,
+      "y": 560.7743525768724,
+      "width": 256.04608154296875,
+      "height": 114.88593750000001,
+      "angle": 0,
+      "strokeColor": "#3b2c7a",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 0,
+      "opacity": 100,
+      "groupIds": [
+        "lcLwJJlxM8nKrpSbsYaIJ"
+      ],
+      "frameId": null,
+      "roundness": null,
+      "seed": 102004,
+      "version": 403,
+      "versionNonce": 1652839343,
+      "isDeleted": false,
+      "boundElements": [],
+      "updated": 1779248112949,
+      "link": null,
+      "locked": false,
+      "text": "本仓库 Binary(二进制入口)\n\n`src/main.rs`\n- 演示 `AppConfig(应用配置)`\n- 解析 `--config(配置路径)`\n- 转发到 `ConfigCommand(配置命令)`",
+      "fontSize": 15.318125,
+      "fontFamily": 2,
+      "textAlign": "left",
+      "verticalAlign": "top",
+      "containerId": null,
+      "originalText": "本仓库 Binary(二进制入口)\n\n`src/main.rs`\n- 演示 `AppConfig(应用配置)`\n- 解析 `--config(配置路径)`\n- 转发到 `ConfigCommand(配置命令)`",
+      "lineHeight": 1.25,
+      "baseline": 92,
+      "index": "a4",
+      "autoResize": true
+    },
+    {
+      "id": "lib-box",
+      "type": "rectangle",
+      "x": 332.3033557480768,
+      "y": 175.35469075458911,
+      "width": 332.5159254361584,
+      "height": 198.32508433144244,
+      "angle": 0,
+      "strokeColor": "#e67700",
+      "backgroundColor": "#fff4e6",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "4g1K-d734l-Luw2BC9ub5"
+      ],
+      "frameId": null,
+      "roundness": {
+        "type": 3
+      },
+      "seed": 103001,
+      "version": 330,
+      "versionNonce": 901833601,
+      "isDeleted": false,
+      "boundElements": [
+        {
+          "id": "arrow-consumer-lib",
+          "type": "arrow"
+        },
+        {
+          "id": "arrow-lib-runtime",
+          "type": "arrow"
+        },
+        {
+          "id": "arrow-lib-generation",
+          "type": "arrow"
+        }
+      ],
+      "updated": 1779248336653,
+      "link": null,
+      "locked": false,
+      "index": "a4V"
+    },
+    {
+      "id": "lib-text",
+      "type": "text",
+      "x": 354.3033557480768,
+      "y": 195.12422200458911,
+      "width": 242.6640625,
+      "height": 120,
+      "angle": 0,
+      "strokeColor": "#8a4b00",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 0,
+      "opacity": 100,
+      "groupIds": [
+        "4g1K-d734l-Luw2BC9ub5"
+      ],
+      "frameId": null,
+      "roundness": null,
+      "seed": 103002,
+      "version": 267,
+      "versionNonce": 768725263,
+      "isDeleted": false,
+      "boundElements": [
+        {
+          "id": "arrow-consumer-lib",
+          "type": "arrow"
+        }
+      ],
+      "updated": 1779248336653,
+      "link": null,
+      "locked": false,
+      "text": "公共入口\n\n`src/lib.rs`\n- 导出高层配置 API(应用程序接口)\n- 导出底层树 API(应用程序接口)\n- 导出 CLI(命令行接口) 辅助函数",
+      "fontSize": 16,
+      "fontFamily": 2,
+      "textAlign": "left",
+      "verticalAlign": "top",
+      "containerId": null,
+      "originalText": "公共入口\n\n`src/lib.rs`\n- 导出高层配置 API(应用程序接口)\n- 导出底层树 API(应用程序接口)\n- 导出 CLI(命令行接口) 辅助函数",
+      "lineHeight": 1.25,
+      "baseline": 82,
+      "index": "a5",
+      "autoResize": true
+    },
+    {
+      "id": "cli-box",
+      "type": "rectangle",
+      "x": 306.1501682677631,
+      "y": 486.98936035083324,
+      "width": 320,
+      "height": 250,
+      "angle": 0,
+      "strokeColor": "#e67700",
+      "backgroundColor": "#fff9db",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "4XSMzm20gOll9hF6ldLZH"
+      ],
+      "frameId": null,
+      "roundness": {
+        "type": 3
+      },
+      "seed": 103003,
+      "version": 453,
+      "versionNonce": 270531791,
+      "isDeleted": false,
+      "boundElements": [
+        {
+          "id": "arrow-binary-cli",
+          "type": "arrow"
+        },
+        {
+          "id": "arrow-cli-runtime",
+          "type": "arrow"
+        },
+        {
+          "id": "arrow-cli-outputs",
+          "type": "arrow"
+        },
+        {
+          "id": "arrow-cli-generation",
+          "type": "arrow"
+        }
+      ],
+      "updated": 1779248199732,
+      "link": null,
+      "locked": false,
+      "index": "a7V"
+    },
+    {
+      "id": "cli-text",
+      "type": "text",
+      "x": 328.1501682677631,
+      "y": 506.98936035083324,
+      "width": 276,
+      "height": 205,
+      "angle": 0,
+      "strokeColor": "#7a5000",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 0,
+      "opacity": 100,
+      "groupIds": [
+        "4XSMzm20gOll9hF6ldLZH"
+      ],
+      "frameId": null,
+      "roundness": null,
+      "seed": 103004,
+      "version": 449,
+      "versionNonce": 1205672815,
+      "isDeleted": false,
+      "boundElements": [],
+      "updated": 1779248199733,
+      "link": null,
+      "locked": false,
+      "text": "命令层\n\n`src/cli.rs`\n- `generate-template(生成模板)`\n- `generate-schema(生成架构)`\n- `validate-config(验证配置)`\n- `completions(生成补全)`\n- `install-completions(安装补全)`\n- `uninstall-completions(卸载补全)`\n- `handle_config_command(处理配置命令)`",
+      "fontSize": 16,
+      "fontFamily": 2,
+      "textAlign": "left",
+      "verticalAlign": "top",
+      "containerId": null,
+      "originalText": "命令层\n\n`src/cli.rs`\n- `generate-template(生成模板)`\n- `generate-schema(生成架构)`\n- `validate-config(验证配置)`\n- `completions(生成补全)`\n- `install-completions(安装补全)`\n- `uninstall-completions(卸载补全)`\n- `handle_config_command(处理配置命令)`",
+      "lineHeight": 1.25,
+      "baseline": 198,
+      "index": "a8",
+      "autoResize": true
+    },
+    {
+      "id": "runtime-box",
+      "type": "rectangle",
+      "x": 833.827345987185,
+      "y": 2.571544702415707,
+      "width": 469.6574133565772,
+      "height": 407.86038528334336,
+      "angle": 0,
+      "strokeColor": "#2b8a3e",
+      "backgroundColor": "#ebfbee",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "IqDrojosK3RTQ5wZDJ6GS",
+        "IW4wN4z1x9XP4LY5Hx2oc"
+      ],
+      "frameId": null,
+      "roundness": {
+        "type": 3
+      },
+      "seed": 104001,
+      "version": 768,
+      "versionNonce": 1318457569,
+      "isDeleted": false,
+      "boundElements": [
+        {
+          "id": "arrow-lib-runtime",
+          "type": "arrow"
+        },
+        {
+          "id": "arrow-runtime-traversal",
+          "type": "arrow"
+        },
+        {
+          "id": "arrow-cli-runtime",
+          "type": "arrow"
+        },
+        {
+          "id": "arrow-runtime-external",
+          "type": "arrow"
+        },
+        {
+          "id": "arrow-runtime-outputs",
+          "type": "arrow"
+        }
+      ],
+      "updated": 1779248274482,
+      "link": null,
+      "locked": false,
+      "index": "a8V"
+    },
+    {
+      "id": "runtime-text",
+      "type": "text",
+      "x": 867.5104354519527,
+      "y": 28.818368741049426,
+      "width": 424.1407365069579,
+      "height": 370.78216843940305,
+      "angle": 0,
+      "strokeColor": "#1b5e20",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 0,
+      "opacity": 100,
+      "groupIds": [
+        "IqDrojosK3RTQ5wZDJ6GS",
+        "IW4wN4z1x9XP4LY5Hx2oc"
+      ],
+      "frameId": null,
+      "roundness": null,
+      "seed": 104002,
+      "version": 711,
+      "versionNonce": 225850401,
+      "isDeleted": false,
+      "boundElements": [],
+      "updated": 1779248274482,
+      "link": null,
+      "locked": false,
+      "text": "运行时加载链路\n\n`src/config_load.rs`\n- `load_dotenv_for_path(加载环境文件)`\n- `load_layer_tree(加载配置层级树)`\n- 使用反向包含顺序合并文件\n- `merge_file_provider(合并文件提供器)`\n- 合并 `ConfiqueEnvProvider(环境变量提供器)`\n- `load_config_from_figment(从来源图提取配置)`\n- `trace_config_sources(跟踪配置来源)`\n\n对外函数\n- `load_config(加载配置)`\n- `build_config_figment(构建来源图)`\n- `load_config_with_figment(加载并返回来源图)`",
+      "fontSize": 19.77504898343483,
+      "fontFamily": 2,
+      "textAlign": "left",
+      "verticalAlign": "top",
+      "containerId": null,
+      "originalText": "运行时加载链路\n\n`src/config_load.rs`\n- `load_dotenv_for_path(加载环境文件)`\n- `load_layer_tree(加载配置层级树)`\n- 使用反向包含顺序合并文件\n- `merge_file_provider(合并文件提供器)`\n- 合并 `ConfiqueEnvProvider(环境变量提供器)`\n- `load_config_from_figment(从来源图提取配置)`\n- `trace_config_sources(跟踪配置来源)`\n\n对外函数\n- `load_config(加载配置)`\n- `build_config_figment(构建来源图)`\n- `load_config_with_figment(加载并返回来源图)`",
+      "lineHeight": 1.25,
+      "baseline": 258,
+      "index": "a9",
+      "autoResize": true
+    },
+    {
+      "id": "generation-box",
+      "type": "rectangle",
+      "x": 861.5823409339373,
+      "y": 766.1941710905384,
+      "width": 380,
+      "height": 350,
+      "angle": 0,
+      "strokeColor": "#6741d9",
+      "backgroundColor": "#f3f0ff",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "h8qN1dMKa-QDmMHL9Y9ri"
+      ],
+      "frameId": null,
+      "roundness": {
+        "type": 3
+      },
+      "seed": 104003,
+      "version": 570,
+      "versionNonce": 1151691151,
+      "isDeleted": false,
+      "boundElements": [
+        {
+          "id": "arrow-lib-generation",
+          "type": "arrow"
+        },
+        {
+          "id": "arrow-cli-generation",
+          "type": "arrow"
+        },
+        {
+          "id": "arrow-support-generation",
+          "type": "arrow"
+        },
+        {
+          "id": "arrow-generation-outputs",
+          "type": "arrow"
+        },
+        {
+          "id": "arrow-generation-traversal",
+          "type": "arrow"
+        }
+      ],
+      "updated": 1779248203216,
+      "link": null,
+      "locked": false,
+      "index": "a9V"
+    },
+    {
+      "id": "generation-text",
+      "type": "text",
+      "x": 885.5823409339373,
+      "y": 788.1941710905384,
+      "width": 334,
+      "height": 292,
+      "angle": 0,
+      "strokeColor": "#3f2b86",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 0,
+      "opacity": 100,
+      "groupIds": [
+        "h8qN1dMKa-QDmMHL9Y9ri"
+      ],
+      "frameId": null,
+      "roundness": null,
+      "seed": 104004,
+      "version": 565,
+      "versionNonce": 1071821391,
+      "isDeleted": false,
+      "boundElements": [],
+      "updated": 1779248203217,
+      "link": null,
+      "locked": false,
+      "text": "模板和架构生成链路\n\n`src/config_templates.rs`\n- 收集模板目标\n- 保留已有 `include(包含)` 结构\n- 补齐 `x-tree-split(树分片)` 子模板\n- 注入 `schema(架构)` 引用\n\n`src/config_schema.rs`\n- 生成 Draft 7 `JSON Schema(JSON 架构)`\n- 删除 `required(必填)` 约束\n- 删除 `x-env-only(仅环境变量)` 字段\n- 拆分分区架构\n\n`src/config_output.rs`\n- 推导默认输出目录\n- 创建父目录并写入文件",
+      "fontSize": 16,
+      "fontFamily": 2,
+      "textAlign": "left",
+      "verticalAlign": "top",
+      "containerId": null,
+      "originalText": "模板和架构生成链路\n\n`src/config_templates.rs`\n- 收集模板目标\n- 保留已有 `include(包含)` 结构\n- 补齐 `x-tree-split(树分片)` 子模板\n- 注入 `schema(架构)` 引用\n\n`src/config_schema.rs`\n- 生成 Draft 7 `JSON Schema(JSON 架构)`\n- 删除 `required(必填)` 约束\n- 删除 `x-env-only(仅环境变量)` 字段\n- 拆分分区架构\n\n`src/config_output.rs`\n- 推导默认输出目录\n- 创建父目录并写入文件",
+      "lineHeight": 1.25,
+      "baseline": 285,
+      "index": "aA",
+      "autoResize": true
+    },
+    {
+      "id": "traversal-box",
+      "type": "rectangle",
+      "x": 1434.3524335851685,
+      "y": 33.98414004073436,
+      "width": 513.5190998776607,
+      "height": 412.5824166496911,
+      "angle": 0,
+      "strokeColor": "#087f5b",
+      "backgroundColor": "#e6fcf5",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "AraIPzQkuzVZAX8-cxebH"
+      ],
+      "frameId": null,
+      "roundness": {
+        "type": 3
+      },
+      "seed": 105001,
+      "version": 242,
+      "versionNonce": 1698135489,
+      "isDeleted": false,
+      "boundElements": [
+        {
+          "id": "arrow-runtime-traversal",
+          "type": "arrow"
+        },
+        {
+          "id": "arrow-generation-outputs",
+          "type": "arrow"
+        }
+      ],
+      "updated": 1779248304172,
+      "link": null,
+      "locked": false,
+      "index": "aAV"
+    },
+    {
+      "id": "traversal-text",
+      "type": "text",
+      "x": 1456.3524335851685,
+      "y": 55.98414004073436,
+      "width": 462.5390625,
+      "height": 340,
+      "angle": 0,
+      "strokeColor": "#064e3b",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 0,
+      "opacity": 100,
+      "groupIds": [
+        "AraIPzQkuzVZAX8-cxebH"
+      ],
+      "frameId": null,
+      "roundness": null,
+      "seed": 105002,
+      "version": 141,
+      "versionNonce": 1247345359,
+      "isDeleted": false,
+      "boundElements": [
+        {
+          "id": "arrow-generation-traversal",
+          "type": "arrow"
+        }
+      ],
+      "updated": 1779248304172,
+      "link": null,
+      "locked": false,
+      "text": "底层遍历和路径工具\n\n`src/tree.rs`\n- `ConfigTreeOptions(树加载选项)`\n- `TraversalState(遍历状态)`\n- 包含循环检测和去重\n- `IncludeOrder(包含顺序)`\n\n`src/template_tree.rs`\n- 源配置到输出模板的映射\n\n`src/path.rs`\n- 词法归一化\n- 相对包含路径解析\n\n`src/config_format.rs`\n- 统一 YAML(配置格式), TOML(配置格式), JSON5(配置格式) 推断",
+      "fontSize": 16,
+      "fontFamily": 2,
+      "textAlign": "left",
+      "verticalAlign": "top",
+      "containerId": null,
+      "originalText": "底层遍历和路径工具\n\n`src/tree.rs`\n- `ConfigTreeOptions(树加载选项)`\n- `TraversalState(遍历状态)`\n- 包含循环检测和去重\n- `IncludeOrder(包含顺序)`\n\n`src/template_tree.rs`\n- 源配置到输出模板的映射\n\n`src/path.rs`\n- 词法归一化\n- 相对包含路径解析\n\n`src/config_format.rs`\n- 统一 YAML(配置格式), TOML(配置格式), JSON5(配置格式) 推断",
+      "lineHeight": 1.25,
+      "baseline": 222,
+      "index": "aB",
+      "autoResize": true
+    },
+    {
+      "id": "outputs-box",
+      "type": "rectangle",
+      "x": 1501.8557147598565,
+      "y": 541.8336786178967,
+      "width": 340,
+      "height": 265,
+      "angle": 0,
+      "strokeColor": "#c92a2a",
+      "backgroundColor": "#fff5f5",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "69O8r7xFcJbyFqHeNviva"
+      ],
+      "frameId": null,
+      "roundness": {
+        "type": 3
+      },
+      "seed": 105003,
+      "version": 113,
+      "versionNonce": 451466945,
+      "isDeleted": false,
+      "boundElements": [
+        {
+          "id": "arrow-runtime-outputs",
+          "type": "arrow"
+        },
+        {
+          "id": "arrow-cli-outputs",
+          "type": "arrow"
+        }
+      ],
+      "updated": 1779248208516,
+      "link": null,
+      "locked": false,
+      "index": "aEV"
+    },
+    {
+      "id": "outputs-text",
+      "type": "text",
+      "x": 1523.8557147598565,
+      "y": 563.8336786178967,
+      "width": 296,
+      "height": 208,
+      "angle": 0,
+      "strokeColor": "#8a1f1f",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 0,
+      "opacity": 100,
+      "groupIds": [
+        "69O8r7xFcJbyFqHeNviva"
+      ],
+      "frameId": null,
+      "roundness": null,
+      "seed": 105004,
+      "version": 111,
+      "versionNonce": 8643169,
+      "isDeleted": false,
+      "boundElements": [],
+      "updated": 1779248208516,
+      "link": null,
+      "locked": false,
+      "text": "输出和可观测结果\n\n- 最终 `S(配置结构体)`\n- `Figment(配置来源图)`\n- 模板文件, YAML(配置格式), TOML(配置格式), JSON5(配置格式)\n- `JSON Schema(JSON 架构)` 文件\n- Shell(命令行外壳) 补全文件\n- Trace(跟踪日志) 来源事件\n- `ConfigError(配置错误)` 和 `ConfigTreeError(树错误)`",
+      "fontSize": 16,
+      "fontFamily": 2,
+      "textAlign": "left",
+      "verticalAlign": "top",
+      "containerId": null,
+      "originalText": "输出和可观测结果\n\n- 最终 `S(配置结构体)`\n- `Figment(配置来源图)`\n- 模板文件, YAML(配置格式), TOML(配置格式), JSON5(配置格式)\n- `JSON Schema(JSON 架构)` 文件\n- Shell(命令行外壳) 补全文件\n- Trace(跟踪日志) 来源事件\n- `ConfigError(配置错误)` 和 `ConfigTreeError(树错误)`",
+      "lineHeight": 1.25,
+      "baseline": 200,
+      "index": "aF",
+      "autoResize": true
+    },
+    {
+      "id": "external-box",
+      "type": "rectangle",
+      "x": 1236.0048014857782,
+      "y": -239.88160194385046,
+      "width": 690,
+      "height": 190,
+      "angle": 0,
+      "strokeColor": "#495057",
+      "backgroundColor": "#f8f9fa",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "dashed",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "O_VG4Nbxqzogu_iVCleQ-"
+      ],
+      "frameId": null,
+      "roundness": {
+        "type": 3
+      },
+      "seed": 106001,
+      "version": 1106,
+      "versionNonce": 689470255,
+      "isDeleted": false,
+      "boundElements": [
+        {
+          "id": "arrow-runtime-external",
+          "type": "arrow"
+        }
+      ],
+      "updated": 1779248182237,
+      "link": null,
+      "locked": false,
+      "index": "aHV"
+    },
+    {
+      "id": "external-text",
+      "type": "text",
+      "x": 1258.0048014857782,
+      "y": -217.88160194385046,
+      "width": 640,
+      "height": 142,
+      "angle": 0,
+      "strokeColor": "#343a40",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 0,
+      "opacity": 100,
+      "groupIds": [
+        "O_VG4Nbxqzogu_iVCleQ-"
+      ],
+      "frameId": null,
+      "roundness": null,
+      "seed": 106002,
+      "version": 1101,
+      "versionNonce": 1019788143,
+      "isDeleted": false,
+      "boundElements": [],
+      "updated": 1779248182237,
+      "link": null,
+      "locked": false,
+      "text": "外部依赖\n\n- `confique(配置派生和校验)`, `figment(配置来源合并)`, `dotenvy(环境文件加载)`\n- `schemars(JSON 架构生成)`, `serde_json(JSON 序列化)`, `serde_yaml(YAML 序列化)`\n- `clap(命令行解析)`, `clap_complete(命令补全生成)`\n- `tracing(跟踪事件)`",
+      "fontSize": 16,
+      "fontFamily": 2,
+      "textAlign": "left",
+      "verticalAlign": "top",
+      "containerId": null,
+      "originalText": "外部依赖\n\n- `confique(配置派生和校验)`, `figment(配置来源合并)`, `dotenvy(环境文件加载)`\n- `schemars(JSON 架构生成)`, `serde_json(JSON 序列化)`, `serde_yaml(YAML 序列化)`\n- `clap(命令行解析)`, `clap_complete(命令补全生成)`\n- `tracing(跟踪事件)`",
+      "lineHeight": 1.25,
+      "baseline": 135,
+      "index": "aI",
+      "autoResize": true
+    },
+    {
+      "id": "support-box",
+      "type": "rectangle",
+      "x": 609.7161556275885,
+      "y": 1183.152105315148,
+      "width": 780,
+      "height": 136.28125000000006,
+      "angle": 0,
+      "strokeColor": "#495057",
+      "backgroundColor": "#f1f3f5",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "dashed",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "PtHCSI4-A7Pq5UWYC-iUH"
+      ],
+      "frameId": null,
+      "roundness": {
+        "type": 3
+      },
+      "seed": 106003,
+      "version": 167,
+      "versionNonce": 1646610447,
+      "isDeleted": false,
+      "boundElements": [
+        {
+          "id": "arrow-support-generation",
+          "type": "arrow"
+        }
+      ],
+      "updated": 1779248082538,
+      "link": null,
+      "locked": false,
+      "index": "aIV"
+    },
+    {
+      "id": "support-text",
+      "type": "text",
+      "x": 631.7161556275885,
+      "y": 1205.152105315148,
+      "width": 728,
+      "height": 80,
+      "angle": 0,
+      "strokeColor": "#343a40",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 0,
+      "opacity": 100,
+      "groupIds": [
+        "PtHCSI4-A7Pq5UWYC-iUH"
+      ],
+      "frameId": null,
+      "roundness": null,
+      "seed": 106004,
+      "version": 55,
+      "versionNonce": 1740772399,
+      "isDeleted": false,
+      "boundElements": [],
+      "updated": 1779248079010,
+      "link": null,
+      "locked": false,
+      "text": "项目支撑资产\n\n`src/unit_tests/*(单元测试)`, `examples/*(用法示例)`, `manual/*(多语言手册)`, `README.*.md(多语言说明)`, `schemas/app.schema.json(示例架构)`",
+      "fontSize": 16,
+      "fontFamily": 2,
+      "textAlign": "left",
+      "verticalAlign": "top",
+      "containerId": null,
+      "originalText": "项目支撑资产\n\n`src/unit_tests/*(单元测试)`, `examples/*(用法示例)`, `manual/*(多语言手册)`, `README.*.md(多语言说明)`, `schemas/app.schema.json(示例架构)`",
+      "lineHeight": 1.25,
+      "baseline": 74,
+      "index": "aJ",
+      "autoResize": true
+    },
+    {
+      "id": "arrow-consumer-lib",
+      "type": "arrow",
+      "x": 298.4179304245969,
+      "y": 305.9267393292303,
+      "width": 36.67579403379176,
+      "height": 70.70455418701388,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": {
+        "type": 2
+      },
+      "seed": 107001,
+      "version": 701,
+      "versionNonce": 1645647951,
+      "isDeleted": false,
+      "boundElements": [],
+      "updated": 1779248333789,
+      "link": null,
+      "locked": false,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          36.67579403379176,
+          -70.70455418701388
+        ]
+      ],
+      "lastCommittedPoint": null,
+      "startBinding": {
+        "elementId": "consumer-box",
+        "mode": "orbit",
+        "fixedPoint": [
+          1,
+          0.5001
+        ]
+      },
+      "endBinding": {
+        "elementId": "lib-box",
+        "mode": "inside",
+        "fixedPoint": [
+          0.008391684418277734,
+          0.30186546794845326
+        ]
+      },
+      "startArrowhead": null,
+      "endArrowhead": "arrow",
+      "index": "aM",
+      "moveMidPointsWithElement": false
+    },
+    {
+      "id": "arrow-binary-cli",
+      "type": "arrow",
+      "x": 234.77403426358168,
+      "y": 597.2599563439185,
+      "width": 65.37613400418147,
+      "height": 48.04030319687536,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": {
+        "type": 2
+      },
+      "seed": 107002,
+      "version": 547,
+      "versionNonce": 1338346223,
+      "isDeleted": false,
+      "boundElements": [],
+      "updated": 1779248199732,
+      "link": null,
+      "locked": false,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          65.37613400418147,
+          -48.04030319687536
+        ]
+      ],
+      "lastCommittedPoint": null,
+      "startBinding": {
+        "elementId": "binary-box",
+        "mode": "orbit",
+        "fixedPoint": [
+          0.7647673596741147,
+          0.7647673596741139
+        ]
+      },
+      "endBinding": {
+        "elementId": "cli-box",
+        "mode": "orbit",
+        "fixedPoint": [
+          0.1191834795904155,
+          0.11918347959041557
+        ]
+      },
+      "startArrowhead": null,
+      "endArrowhead": "arrow",
+      "index": "aN",
+      "moveMidPointsWithElement": false
+    },
+    {
+      "id": "arrow-lib-runtime",
+      "type": "arrow",
+      "x": 662.6660035494408,
+      "y": 245.69016687523444,
+      "width": 175.07666485897232,
+      "height": 160.2684365439842,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": {
+        "type": 2
+      },
+      "seed": 107003,
+      "version": 1038,
+      "versionNonce": 1868346991,
+      "isDeleted": false,
+      "boundElements": [],
+      "updated": 1779248333789,
+      "link": null,
+      "locked": false,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          175.07666485897232,
+          -160.2684365439842
+        ]
+      ],
+      "lastCommittedPoint": null,
+      "startBinding": {
+        "elementId": "lib-box",
+        "mode": "inside",
+        "fixedPoint": [
+          0.9935242871992674,
+          0.35464740306425446
+        ]
+      },
+      "endBinding": {
+        "elementId": "runtime-box",
+        "mode": "inside",
+        "fixedPoint": [
+          0.008336549812438414,
+          0.2031336913764693
+        ]
+      },
+      "startArrowhead": null,
+      "endArrowhead": "arrow",
+      "index": "aO",
+      "moveMidPointsWithElement": false
+    },
+    {
+      "id": "arrow-lib-generation",
+      "type": "arrow",
+      "x": 670.8192811842351,
+      "y": 272.04472879245856,
+      "width": 184.76305974970217,
+      "height": 690.5042428022439,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": {
+        "type": 2
+      },
+      "seed": 107004,
+      "version": 769,
+      "versionNonce": 1182404751,
+      "isDeleted": false,
+      "boundElements": [],
+      "updated": 1779248333789,
+      "link": null,
+      "locked": false,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          89.18071881576486,
+          -37.04472879245856
+        ],
+        [
+          89.18071881576486,
+          402.9552712075413
+        ],
+        [
+          184.76305974970217,
+          653.4595140097854
+        ]
+      ],
+      "lastCommittedPoint": null,
+      "startBinding": {
+        "elementId": "lib-box",
+        "mode": "orbit",
+        "fixedPoint": [
+          1,
+          0.5001
+        ]
+      },
+      "endBinding": {
+        "elementId": "generation-box",
+        "mode": "orbit",
+        "fixedPoint": [
+          0,
+          0.5001
+        ]
+      },
+      "startArrowhead": null,
+      "endArrowhead": "arrow",
+      "index": "aP",
+      "moveMidPointsWithElement": false
+    },
+    {
+      "id": "arrow-cli-runtime",
+      "type": "arrow",
+      "x": 631.3759167420776,
+      "y": 509.2794529798346,
+      "width": 196.45142924510742,
+      "height": 200.02280760148784,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": {
+        "type": 2
+      },
+      "seed": 107005,
+      "version": 896,
+      "versionNonce": 425054337,
+      "isDeleted": false,
+      "boundElements": [],
+      "updated": 1779248274482,
+      "link": null,
+      "locked": false,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          196.45142924510742,
+          -200.02280760148784
+        ]
+      ],
+      "lastCommittedPoint": null,
+      "startBinding": {
+        "elementId": "cli-box",
+        "mode": "orbit",
+        "fixedPoint": [
+          0.6137857522554302,
+          0.6137857522554298
+        ]
+      },
+      "endBinding": {
+        "elementId": "runtime-box",
+        "mode": "orbit",
+        "fixedPoint": [
+          0.3392290325828041,
+          0.339229032582804
+        ]
+      },
+      "startArrowhead": null,
+      "endArrowhead": "arrow",
+      "index": "aQ",
+      "moveMidPointsWithElement": false
+    },
+    {
+      "id": "arrow-cli-generation",
+      "type": "arrow",
+      "x": 632.1501682677632,
+      "y": 619.2795937643481,
+      "width": 229.58461243417298,
+      "height": 277.9976329142663,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": {
+        "type": 2
+      },
+      "seed": 107006,
+      "version": 747,
+      "versionNonce": 435524047,
+      "isDeleted": false,
+      "boundElements": [],
+      "updated": 1779248203217,
+      "link": null,
+      "locked": false,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          229.58461243417298,
+          277.9976329142663
+        ]
+      ],
+      "lastCommittedPoint": null,
+      "startBinding": {
+        "elementId": "cli-box",
+        "mode": "orbit",
+        "fixedPoint": [
+          1,
+          0.5001
+        ]
+      },
+      "endBinding": {
+        "elementId": "generation-box",
+        "mode": "inside",
+        "fixedPoint": [
+          0.0004011572842075925,
+          0.3745230159659315
+        ]
+      },
+      "startArrowhead": null,
+      "endArrowhead": "arrow",
+      "index": "aR",
+      "moveMidPointsWithElement": false
+    },
+    {
+      "id": "arrow-generation-traversal",
+      "type": "arrow",
+      "x": 1046.3664486518226,
+      "y": 760.1941710905385,
+      "width": 403.9859849333459,
+      "height": 390.1941710905385,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": {
+        "type": 2
+      },
+      "seed": 107008,
+      "version": 454,
+      "versionNonce": 105524111,
+      "isDeleted": false,
+      "boundElements": [],
+      "updated": 1779248287939,
+      "link": null,
+      "locked": false,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          153.63355134817743,
+          -150.19417109053848
+        ],
+        [
+          153.63355134817743,
+          -390.1941710905385
+        ],
+        [
+          403.9859849333459,
+          -371.4802568698348
+        ]
+      ],
+      "lastCommittedPoint": null,
+      "startBinding": {
+        "elementId": "generation-box",
+        "mode": "orbit",
+        "fixedPoint": [
+          0.24206384388035793,
+          0.24206384388035726
+        ]
+      },
+      "endBinding": {
+        "elementId": "traversal-text",
+        "mode": "orbit",
+        "fixedPoint": [
+          0.01821190825034662,
+          0.9817880917496545
+        ]
+      },
+      "startArrowhead": null,
+      "endArrowhead": "arrow",
+      "index": "aT",
+      "moveMidPointsWithElement": false
+    },
+    {
+      "id": "arrow-runtime-outputs",
+      "type": "arrow",
+      "x": 1149.391799331164,
+      "y": 409.00040238360407,
+      "width": 354.4027587279279,
+      "height": 171.03722326574166,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": {
+        "type": 2
+      },
+      "seed": 107009,
+      "version": 785,
+      "versionNonce": 216687681,
+      "isDeleted": false,
+      "boundElements": [],
+      "updated": 1779248274482,
+      "link": null,
+      "locked": false,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          354.4027587279279,
+          171.03722326574166
+        ]
+      ],
+      "lastCommittedPoint": null,
+      "startBinding": {
+        "elementId": "runtime-box",
+        "mode": "inside",
+        "fixedPoint": [
+          0.6719034861787512,
+          0.9964901528714036
+        ]
+      },
+      "endBinding": {
+        "elementId": "outputs-box",
+        "mode": "inside",
+        "fixedPoint": [
+          0.005702480291869078,
+          0.14416583785452472
+        ]
+      },
+      "startArrowhead": null,
+      "endArrowhead": "arrow",
+      "index": "aU",
+      "moveMidPointsWithElement": false
+    },
+    {
+      "id": "arrow-generation-outputs",
+      "type": "arrow",
+      "x": 1207.7466947365238,
+      "y": 760.1941710905385,
+      "width": 349.44461247828394,
+      "height": 314.91862894804626,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": {
+        "type": 2
+      },
+      "seed": 107010,
+      "version": 511,
+      "versionNonce": 453584449,
+      "isDeleted": false,
+      "boundElements": [],
+      "updated": 1779248301068,
+      "link": null,
+      "locked": false,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          349.44461247828394,
+          -314.91862894804626
+        ]
+      ],
+      "lastCommittedPoint": null,
+      "startBinding": {
+        "elementId": "generation-box",
+        "mode": "orbit",
+        "fixedPoint": [
+          0.4418517264236279,
+          0.4418517264236279
+        ]
+      },
+      "endBinding": {
+        "elementId": "traversal-box",
+        "mode": "inside",
+        "fixedPoint": [
+          0.23920994108866447,
+          0.9968708929517242
+        ]
+      },
+      "startArrowhead": null,
+      "endArrowhead": "arrow",
+      "index": "aV",
+      "moveMidPointsWithElement": false
+    },
+    {
+      "id": "arrow-cli-outputs",
+      "type": "arrow",
+      "x": 623.0966091650357,
+      "y": 550.6466449595385,
+      "width": 881.2600705385521,
+      "height": 80.83813256615781,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "dashed",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": {
+        "type": 2
+      },
+      "seed": 107011,
+      "version": 509,
+      "versionNonce": 444088161,
+      "isDeleted": false,
+      "boundElements": [],
+      "updated": 1779248212166,
+      "link": null,
+      "locked": false,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          271.7731998329882,
+          39.980068420255066
+        ],
+        [
+          356.9033908349643,
+          49.35335504046145
+        ],
+        [
+          881.2600705385521,
+          80.83813256615781
+        ]
+      ],
+      "lastCommittedPoint": null,
+      "startBinding": {
+        "elementId": "cli-box",
+        "mode": "inside",
+        "fixedPoint": [
+          0.990457627803977,
+          0.25462913843482127
+        ]
+      },
+      "endBinding": {
+        "elementId": "outputs-box",
+        "mode": "inside",
+        "fixedPoint": [
+          0.007355779246268626,
+          0.3383060336143384
+        ]
+      },
+      "startArrowhead": null,
+      "endArrowhead": "arrow",
+      "index": "aW",
+      "moveMidPointsWithElement": false
+    },
+    {
+      "id": "arrow-runtime-external",
+      "type": "arrow",
+      "x": 1309.4150086917411,
+      "y": 31.510335210374492,
+      "width": 363.2091934531827,
+      "height": 75.39193715422492,
+      "angle": 0,
+      "strokeColor": "#868e96",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "dashed",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": {
+        "type": 2
+      },
+      "seed": 107012,
+      "version": 2260,
+      "versionNonce": 170530913,
+      "isDeleted": false,
+      "boundElements": [],
+      "updated": 1779248274482,
+      "link": null,
+      "locked": false,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          277.62219327489265,
+          -66.11515168553383
+        ],
+        [
+          363.2091934531827,
+          -75.39193715422492
+        ]
+      ],
+      "lastCommittedPoint": null,
+      "startBinding": {
+        "elementId": "runtime-box",
+        "mode": "orbit",
+        "fixedPoint": [
+          0.8974690381486258,
+          0.10253096185137382
+        ]
+      },
+      "endBinding": {
+        "elementId": "external-box",
+        "mode": "inside",
+        "fixedPoint": [
+          0.6327817400857183,
+          1.0315789473684212
+        ]
+      },
+      "startArrowhead": null,
+      "endArrowhead": "arrow",
+      "index": "aX",
+      "moveMidPointsWithElement": false
+    },
+    {
+      "id": "eaeH4RXUsdTCJiXIdBXMh",
+      "type": "text",
+      "x": 1062.409510128442,
+      "y": -25.074685560011915,
+      "width": 8,
+      "height": 25,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "index": "aXV",
+      "roundness": null,
+      "seed": 912042209,
+      "version": 3,
+      "versionNonce": 1413857839,
+      "isDeleted": true,
+      "boundElements": null,
+      "updated": 1779248180040,
+      "link": null,
+      "locked": false,
+      "text": "",
+      "fontSize": 20,
+      "fontFamily": 5,
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "arrow-runtime-external",
+      "originalText": "",
+      "autoResize": true,
+      "lineHeight": 1.25
+    },
+    {
+      "id": "arrow-generation-external",
+      "type": "arrow",
+      "x": 790,
+      "y": 700,
+      "width": 60,
+      "height": 0,
+      "angle": 0,
+      "strokeColor": "#868e96",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "dashed",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": {
+        "type": 2
+      },
+      "seed": 107013,
+      "version": 2,
+      "versionNonce": 1270948879,
+      "isDeleted": false,
+      "boundElements": [],
+      "updated": 1779247901290,
+      "link": null,
+      "locked": false,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          -60,
+          0
+        ]
+      ],
+      "lastCommittedPoint": null,
+      "startBinding": null,
+      "endBinding": null,
+      "startArrowhead": null,
+      "endArrowhead": "arrow",
+      "index": "aY"
+    },
+    {
+      "id": "arrow-support-generation",
+      "type": "arrow",
+      "x": 905.4916921306921,
+      "y": 1177.152105315148,
+      "width": 8.275571046768277,
+      "height": 62.76339272684618,
+      "angle": 0,
+      "strokeColor": "#868e96",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "dashed",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": {
+        "type": 2
+      },
+      "seed": 107014,
+      "version": 551,
+      "versionNonce": 337674223,
+      "isDeleted": false,
+      "boundElements": [],
+      "updated": 1779248203217,
+      "link": null,
+      "locked": false,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          8.275571046768277,
+          -62.76339272684618
+        ]
+      ],
+      "lastCommittedPoint": null,
+      "startBinding": {
+        "elementId": "support-box",
+        "mode": "orbit",
+        "fixedPoint": [
+          0.3696689447689307,
+          0.36966894476893003
+        ]
+      },
+      "endBinding": {
+        "elementId": "generation-box",
+        "mode": "inside",
+        "fixedPoint": [
+          0.13732874274611326,
+          0.994841547136467
+        ]
+      },
+      "startArrowhead": null,
+      "endArrowhead": "arrow",
+      "index": "aZ",
+      "moveMidPointsWithElement": false
+    },
+    {
+      "id": "label-api",
+      "type": "text",
+      "x": 327.2797809379557,
+      "y": 127.86057041360567,
+      "width": 126,
+      "height": 20,
+      "angle": 0,
+      "strokeColor": "#495057",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 0,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": null,
+      "seed": 108001,
+      "version": 93,
+      "versionNonce": 667090945,
+      "isDeleted": false,
+      "boundElements": [],
+      "updated": 1779247989105,
+      "link": null,
+      "locked": false,
+      "text": "调用 API(应用程序接口)",
+      "fontSize": 14,
+      "fontFamily": 2,
+      "textAlign": "center",
+      "verticalAlign": "top",
+      "containerId": null,
+      "originalText": "调用 API(应用程序接口)",
+      "lineHeight": 1.25,
+      "baseline": 17,
+      "index": "aa",
+      "autoResize": true
+    },
+    {
+      "id": "label-validate",
+      "type": "text",
+      "x": 724,
+      "y": 334,
+      "width": 88,
+      "height": 20,
+      "angle": 0,
+      "strokeColor": "#495057",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 0,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": null,
+      "seed": 108002,
+      "version": 2,
+      "versionNonce": 152859713,
+      "isDeleted": false,
+      "boundElements": [],
+      "updated": 1779247901290,
+      "link": null,
+      "locked": false,
+      "text": "验证配置",
+      "fontSize": 14,
+      "fontFamily": 2,
+      "textAlign": "center",
+      "verticalAlign": "top",
+      "containerId": null,
+      "originalText": "验证配置",
+      "lineHeight": 1.25,
+      "baseline": 17,
+      "index": "ab",
+      "autoResize": true
+    },
+    {
+      "id": "label-generate",
+      "type": "text",
+      "x": 724,
+      "y": 578,
+      "width": 88,
+      "height": 20,
+      "angle": 0,
+      "strokeColor": "#495057",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 0,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": null,
+      "seed": 108003,
+      "version": 2,
+      "versionNonce": 2084875343,
+      "isDeleted": false,
+      "boundElements": [],
+      "updated": 1779247901290,
+      "link": null,
+      "locked": false,
+      "text": "生成文件",
+      "fontSize": 14,
+      "fontFamily": 2,
+      "textAlign": "center",
+      "verticalAlign": "top",
+      "containerId": null,
+      "originalText": "生成文件",
+      "lineHeight": 1.25,
+      "baseline": 17,
+      "index": "ac",
+      "autoResize": true
+    },
+    {
+      "id": "label-shared",
+      "type": "text",
+      "x": 1180,
+      "y": 232,
+      "width": 92,
+      "height": 20,
+      "angle": 0,
+      "strokeColor": "#495057",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 0,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": null,
+      "seed": 108004,
+      "version": 2,
+      "versionNonce": 1491485729,
+      "isDeleted": false,
+      "boundElements": [],
+      "updated": 1779247901290,
+      "link": null,
+      "locked": false,
+      "text": "共享底层能力",
+      "fontSize": 14,
+      "fontFamily": 2,
+      "textAlign": "center",
+      "verticalAlign": "top",
+      "containerId": null,
+      "originalText": "共享底层能力",
+      "lineHeight": 1.25,
+      "baseline": 17,
+      "index": "ad",
+      "autoResize": true
+    },
+    {
+      "id": "arrow-runtime-traversal",
+      "type": "arrow",
+      "x": 1301.1739175398156,
+      "y": 138.0631735183446,
+      "width": 127.17851604535281,
+      "height": 7.282474786612596,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": {
+        "type": 2
+      },
+      "seed": 107007,
+      "version": 1062,
+      "versionNonce": 360258145,
+      "isDeleted": false,
+      "boundElements": [],
+      "updated": 1779248301068,
+      "link": null,
+      "locked": false,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          127.17851604535281,
+          -7.282474786612596
+        ]
+      ],
+      "lastCommittedPoint": null,
+      "startBinding": {
+        "elementId": "runtime-box",
+        "mode": "inside",
+        "fixedPoint": [
+          0.9950797288869957,
+          0.33220100236457617
+        ]
+      },
+      "endBinding": {
+        "elementId": "traversal-box",
+        "mode": "orbit",
+        "fixedPoint": [
+          0.21822562000981754,
+          0.21822562000981774
+        ]
+      },
+      "startArrowhead": null,
+      "endArrowhead": "arrow",
+      "index": "ae",
+      "moveMidPointsWithElement": false
+    }
+  ],
+  "appState": {
+    "gridSize": 20,
+    "gridStep": 5,
+    "gridModeEnabled": false,
+    "viewBackgroundColor": "#ffffff",
+    "lockedMultiSelections": {}
+  },
+  "files": {}
+}

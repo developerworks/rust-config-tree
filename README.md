@@ -13,7 +13,7 @@ It handles:
 
 - loading a `confique` schema into a directly usable config object through
   Figment runtime providers
-- `config-template`, `config-schema`, `config-validate`, `completions`,
+- `generate-template`, `generate-schema`, `validate-config`, `completions`,
   `install-completions`, and `uninstall-completions` command handlers
 - Draft 7 root and section JSON Schema generation for editor completion and basic schema checks
 - config template generation for YAML, TOML, JSON, and JSON5
@@ -220,7 +220,7 @@ for partial config files without reporting missing fields. The generated
 `*.schema.json` files are for IDE completion and basic editor checks only; they
 do not decide whether a concrete field value is legal for the application.
 Implement field value validation in code with `#[config(validate = Self::validate)]`,
-then run it through `load_config` or `config-validate`:
+then run it through `load_config` or `validate-config`:
 
 ```rust
 use rust_config_tree::write_config_schemas;
@@ -333,9 +333,9 @@ parent file stem, for example `trading/risk.yaml`.
 
 Flatten `ConfigCommand` into your existing clap command enum to add:
 
-- `config-template`
-- `config-schema`
-- `config-validate`
+- `generate-template`
+- `generate-schema`
+- `validate-config`
 - `completions`
 - `install-completions`
 - `uninstall-completions`
@@ -349,6 +349,12 @@ The consuming application keeps its own `Parser` type and its own command enum.
 3. Clap expands the flattened variants into the same subcommand level as the
    application's own commands.
 4. Match that variant and call `handle_config_command::<Cli, AppConfig>`.
+
+The `AppConfig` type argument in `handle_config_command::<Cli, AppConfig>`
+is the schema that supplies fields, defaults, validation, and template output.
+`generate-template` does not discover arbitrary Rust structs at runtime. If an
+application exposes multiple config schemas, add an application level selector
+and dispatch to different `handle_config_command::<Cli, S>` calls.
 
 Application-specific config override flags stay on the application's own parser.
 For example, `--server-port` can map to `server.port` by building a nested
@@ -411,19 +417,19 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 }
 ```
 
-`config-template --output <file-name>` writes templates under
-`config/<root_config_name>/` using the selected file name. If a path is
+`generate-template --output <file-name>`
+writes templates under `config/<root_config_name>/` using the selected file name. If a path is
 provided, only its file name is used. If no output file name is provided, it
 writes `config/<root_config_name>/<root_config_name>.example.yaml`. Add
 `--schema <path>` to bind TOML, YAML, JSON, and JSON5 templates to a generated
 JSON Schema set. This also writes the root schema and section schemas to the
 selected schema path.
 
-`config-schema --output <path>` writes the root Draft 7 JSON Schema and
+`generate-schema --output <path>` writes the root Draft 7 JSON Schema and
 section schemas. If no output path is provided, the root schema is written to
 `config/<root_config_name>/<root_config_name>.schema.json`.
 
-`config-validate` loads the full runtime config tree and runs `confique`
+`validate-config` loads the full runtime config tree and runs `confique`
 defaults and validation, including validators declared with
 `#[config(validate = Self::validate)]`. Use editor schemas for non-noisy
 completion while editing split files; use this command for required fields and

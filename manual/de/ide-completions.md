@@ -43,7 +43,7 @@ etwa Typ-, Enum- und Unbekannte-Eigenschaft-Pruefungen, soweit sie vom erzeugten
 Schema unterstuetzt werden. Sie entscheiden nicht, ob ein konkreter Feldwert fuer
 die Anwendung gueltig ist. Feldwertvalidierung muss im Code mit
 `#[config(validate = Self::validate)]` implementiert und dann ueber
-`load_config` oder `config-validate` ausgefuehrt werden. Pflichtfelder und die
+`load_config` oder `validate-config` ausgefuehrt werden. Pflichtfelder und die
 finale Validierung der zusammengefuehrten Konfiguration verwenden ebenfalls
 diese Laufzeitpfade.
 

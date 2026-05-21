@@ -11,8 +11,8 @@ publiceras som fristaende mdBook-webbplatser med spraklankar.
 Det hanterar:
 
 - laddning av ett `confique`-schema till ett direkt anvandbart konfigurationsobjekt via Figment-runtime providers
-- kommandohanterare for `config-template`, `config-schema`,
-  `config-validate`, `completions`, `install-completions` och
+- kommandohanterare for `generate-template`, `generate-schema`,
+  `validate-config`, `completions`, `install-completions` och
   `uninstall-completions`
 - generering av Draft 7 JSON Schema for rot och sektioner for editor-komplettering och grundlaggande schemakontroller
 - generering av konfigurationsmallar for YAML, TOML, JSON och JSON5
@@ -213,7 +213,7 @@ konfigurationsfiler utan att rapportera saknade falt. Genererade
 editor-kontroller; de avgor inte om ett konkret faltvarde ar giltigt for
 programmet. Faltvardevalidering ska implementeras i kod med
 `#[config(validate = Self::validate)]` och koras via `load_config` eller
-`config-validate`:
+`validate-config`:
 
 ```rust
 use rust_config_tree::write_config_schemas;
@@ -328,9 +328,9 @@ pa toppniva. Nastlade barn placeras under foraldrafilens stam, till exempel
 Platta ut `ConfigCommand` i programmets befintliga clap-kommandoenum for att
 lagga till:
 
-- `config-template`
-- `config-schema`
-- `config-validate`
+- `generate-template`
+- `generate-schema`
+- `validate-config`
 - `completions`
 - `install-completions`
 - `uninstall-completions`
@@ -406,7 +406,7 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 }
 ```
 
-`config-template --output <file-name>` skriver mallar under
+`generate-template --output <file-name>` skriver mallar under
 `config/<root_config_name>/` med det valda filnamnet. Om en sokvag anges anvands
 bara filnamnet. Om inget utdatafilnamn anges skriver det
 `config/<root_config_name>/<root_config_name>.example.yaml`. Lagg till
@@ -415,11 +415,11 @@ genererad JSON Schema-uppsattning. JSON- och JSON5-mallar far ett `$schema`-falt
 som VS Code kanner igen. Detta skriver ocksa rotschemat och sektionsscheman till
 den valda schemasokvagen.
 
-`config-schema --output <path>` skriver rotens Draft 7 JSON Schema och
+`generate-schema --output <path>` skriver rotens Draft 7 JSON Schema och
 sektionsscheman. Om ingen utdatasokvag anges skrivs rotschemat till
 `config/<root_config_name>/<root_config_name>.schema.json`.
 
-`config-validate` laddar hela runtime-konfigurationstradet och kor `confique`
+`validate-config` laddar hela runtime-konfigurationstradet och kor `confique`
 standardvarden och validering, inklusive validatorer deklarerade med
 `#[config(validate = Self::validate)]`. Anvand editorscheman for tyst
 komplettering medan delade filer redigeras; anvand detta kommando for

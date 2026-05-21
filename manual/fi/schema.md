@@ -94,7 +94,7 @@ sovellukselle kelvollinen.
 Kentta-arvojen validointi toteutetaan koodissa
 `#[config(validate = Self::validate)]`-attribuutilla. Validaattori suoritetaan,
 kun lopullinen konfiguraatio ladataan `load_config`-funktiolla tai tarkistetaan
-`config-validate`-komennolla.
+`validate-config`-komennolla.
 
 ## Malliosioiden ohitukset
 

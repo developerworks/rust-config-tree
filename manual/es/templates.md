@@ -42,7 +42,7 @@ comprobados de forma básica por el editor, por ejemplo tipo, enum y propiedades
 desconocidas admitidas por el esquema generado. Los `*.schema.json` generados no
 deciden si un valor concreto de campo es válido para la aplicación. La
 validación de valores debe implementarse en código con
-`#[config(validate = Self::validate)]`; `load_config` y `config-validate`
+`#[config(validate = Self::validate)]`; `load_config` y `validate-config`
 ejecutan esa validación en tiempo de ejecución.
 
 Enlaza esos esquemas desde plantillas TOML, YAML, JSON y JSON5 generadas:

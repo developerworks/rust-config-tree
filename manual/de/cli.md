@@ -4,9 +4,9 @@
 
 `ConfigCommand` stellt wiederverwendbare clap-Unterbefehle bereit:
 
-- `config-template`
-- `config-schema`
-- `config-validate`
+- `generate-template`
+- `generate-schema`
+- `validate-config`
 - `completions`
 - `install-completions`
 - `uninstall-completions`
@@ -89,7 +89,7 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 ## Konfigurationsvorlagen
 
 ```bash
-demo config-template
+demo generate-template
 ```
 
 Der Befehl schreibt Vorlagen unter `config/<root_config_name>/`. Wenn `--output`
@@ -103,26 +103,26 @@ VS Code erkennbares `$schema`-Feld. Der Befehl schreibt ausserdem Root- und
 Abschnittsschemas an den gewaehlten Schemapfad.
 
 ```bash
-demo config-template --output app_config.example.toml --schema schemas/myapp.schema.json
+demo generate-template --output app_config.example.toml --schema schemas/myapp.schema.json
 ```
 
 Root- und Abschnitts-JSON-Schemas erzeugen:
 
 ```bash
-demo config-schema
+demo generate-schema
 ```
 
-Ohne `--output` schreibt `config-schema` das Root-Schema nach
+Ohne `--output` schreibt `generate-schema` das Root-Schema nach
 `config/<root_config_name>/<root_config_name>.schema.json`.
 
 Den vollstaendigen Laufzeit-Konfigurationsbaum validieren:
 
 ```bash
-demo config-validate
+demo validate-config
 ```
 
 Erzeugte Editor-Schemas vermeiden bewusst Pflichtfeld-Diagnosen fuer
-aufgeteilte Dateien. `config-validate` laedt Includes, wendet Defaults an und
+aufgeteilte Dateien. `validate-config` laedt Includes, wendet Defaults an und
 fuehrt die finale `confique`-Validierung aus, einschliesslich Validatoren aus
 `#[config(validate = Self::validate)]`. Erzeugte `*.schema.json`-Dateien bleiben
 fuer IDE-Vervollstaendigung und grundlegende Editor-Pruefungen gedacht, nicht

@@ -101,7 +101,7 @@ concrete est valide pour l'application.
 La validation des valeurs doit etre implementee dans le code avec
 `#[config(validate = Self::validate)]`. Ce validateur s'execute quand la
 configuration finale est chargee par `load_config` ou verifiee par
-`config-validate`.
+`validate-config`.
 
 ## Remplacements de chemin de section pour les modeles
 

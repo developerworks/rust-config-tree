@@ -37,7 +37,7 @@ write_config_schemas::<AppConfig>("schemas/myapp.schema.json")?;
 같은 기본 에디터 검사를 받을 수 있습니다. 생성된 `*.schema.json`은 구체적인
 필드 값이 애플리케이션에서 유효한지는 판단하지 않습니다. 필드 값 유효성 검사는
 코드에서 `#[config(validate = Self::validate)]`로 구현하고, `load_config` 또는
-`config-validate`로 실행합니다.
+`validate-config`로 실행합니다.
 
 생성된 TOML, YAML, JSON 및 JSON5 템플릿에서 이 스키마를 바인딩합니다.
 

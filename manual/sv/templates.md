@@ -39,7 +39,7 @@ sektionsscheman. Befintliga falt kan fortfarande fa grundlaggande
 editor-kontroller, som typ, enum och okanda properties som stods av det
 genererade schemat. Genererade `*.schema.json`-filer avgor inte om ett konkret
 faltvarde ar giltigt for programmet. Faltvardevalidering ska implementeras i kod
-med `#[config(validate = Self::validate)]`; `load_config` och `config-validate`
+med `#[config(validate = Self::validate)]`; `load_config` och `validate-config`
 kor den runtime-valideringen.
 
 Bind dessa scheman fran genererade TOML-, YAML-, JSON- och JSON5-mallar:

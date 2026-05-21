@@ -19,7 +19,11 @@ use schemars::JsonSchema;
 
 use crate::{
     ConfigResult, ConfigSchema,
-    config::{default_config_schema_output, load_config, write_config_schemas},
+    config::{
+        default_config_schema_output, load_config, write_config_schemas,
+        write_config_templates_with_schema,
+    },
+    config_output,
 };
 
 /// Built-in clap subcommands for config templates and shell completions.
@@ -29,11 +33,6 @@ pub enum ConfigCommand {
     ///
     /// The output format is inferred from the extension; unknown or missing extensions use YAML.
     GenerateTemplate {
-        /// Fully qualified Rust type path (e.g. `my_crate::config::AppConfig`).
-        /// Written as a `# @type` comment in the generated template.
-        #[arg(long, required = true)]
-        r#type: String,
-
         /// Template file name. Defaults to `config/<root-config-name>/<root-config-name>.example.yaml`.
         #[arg(long)]
         output: Option<PathBuf>,
@@ -92,7 +91,7 @@ pub enum ConfigCommand {
 ///
 /// - `command`: Built-in subcommand selected by the consumer CLI.
 /// - `config_path`: Root config path used as the template source when handling
-///   `config-template`.
+///   `generate-template`.
 ///
 /// # Returns
 ///
@@ -131,7 +130,7 @@ pub enum ConfigCommand {
 /// }
 ///
 /// handle_config_command::<Cli, AppConfig>(
-///     ConfigCommand::ConfigValidate,
+///     ConfigCommand::ValidateConfig,
 ///     std::path::Path::new("config.yaml"),
 /// )?;
 /// # Ok::<(), rust_config_tree::ConfigError>(())
@@ -142,11 +141,12 @@ where
     S: ConfigSchema + JsonSchema,
 {
     match command {
-        ConfigCommand::GenerateTemplate {
-            output,
-            schema,
-            r#type: type_path,
-        } => handle_generate_template(output, schema, &type_path),
+        ConfigCommand::GenerateTemplate { output, schema } => {
+            let output = config_output::resolve_config_template_output::<S>(output)?;
+            let schema = schema.unwrap_or_else(default_config_schema_output::<S>);
+            write_config_schemas::<S>(&schema)?;
+            write_config_templates_with_schema::<S>(config_path, output, schema)
+        }
         ConfigCommand::GenerateSchema { output } => {
             write_config_schemas::<S>(output.unwrap_or_else(default_config_schema_output::<S>))
         }
@@ -161,85 +161,6 @@ where
         }
         ConfigCommand::InstallCompletions { shell } => install_shell_completion::<C>(shell),
         ConfigCommand::UninstallCompletions { shell } => uninstall_shell_completion::<C>(shell),
-    }
-}
-
-/// Handles the `generate-template` subcommand in standalone mode.
-///
-/// Reads `config.yaml` from the current directory (if it exists) as a
-/// structural reference, strips all leaf values to defaults, and writes the
-/// result annotated with a `# @type` header.
-///
-/// # Arguments
-///
-/// - `output`: Optional output path.  Defaults to `config.template.yaml`.
-/// - `_schema`: Ignored (kept for API compatibility with [`handle_config_command`]).
-/// - `type_path`: Fully qualified Rust type path for the `# @type` annotation.
-///
-/// # Returns
-///
-/// Returns `Ok(())` after the template file has been written.
-pub fn handle_generate_template(
-    output: Option<PathBuf>,
-    _schema: Option<PathBuf>,
-    type_path: &str,
-) -> ConfigResult<()> {
-    let template = match fs::read_to_string("config.yaml") {
-        Ok(content) => serde_yaml::from_str::<serde_yaml::Value>(&content)
-            .map(strip_yaml_values)
-            .unwrap_or_else(|e| {
-                eprintln!(
-                    "Warning: failed to parse config.yaml as YAML ({e}), \
-                     falling back to empty template"
-                );
-                serde_yaml::Value::Mapping(serde_yaml::Mapping::new())
-            }),
-        Err(_) => serde_yaml::Value::Mapping(serde_yaml::Mapping::new()),
-    };
-
-    let yaml = serde_yaml::to_string(&template)
-        .map_err(|e| crate::ConfigError::Io(Box::new(io::Error::other(e))))?;
-
-    let output_content = format!("# @type {type_path}\n{yaml}");
-
-    let output_path = output.unwrap_or_else(|| PathBuf::from("config.template.yaml"));
-
-    if let Some(parent) = output_path.parent() {
-        fs::create_dir_all(parent)?;
-    }
-
-    fs::write(&output_path, &output_content)?;
-    eprintln!("Generated config template: {}", output_path.display());
-
-    Ok(())
-}
-
-/// Recursively replaces every leaf (scalar) value with a default so the
-/// structure is preserved but no real configuration values remain.
-fn strip_yaml_values(value: serde_yaml::Value) -> serde_yaml::Value {
-    match value {
-        serde_yaml::Value::Mapping(map) => {
-            let stripped: serde_yaml::Mapping = map
-                .into_iter()
-                .map(|(k, v)| (k, strip_yaml_values(v)))
-                .collect();
-            serde_yaml::Value::Mapping(stripped)
-        }
-        serde_yaml::Value::Sequence(seq) => {
-            let stripped: Vec<_> = seq.into_iter().map(strip_yaml_values).collect();
-            serde_yaml::Value::Sequence(stripped)
-        }
-        serde_yaml::Value::String(_) => serde_yaml::Value::String(String::new()),
-        serde_yaml::Value::Number(_) => serde_yaml::Value::Number(serde_yaml::Number::from(0)),
-        serde_yaml::Value::Bool(_) => serde_yaml::Value::Bool(false),
-        serde_yaml::Value::Null => serde_yaml::Value::Null,
-        serde_yaml::Value::Tagged(tagged) => {
-            let inner = strip_yaml_values(tagged.value);
-            serde_yaml::Value::Tagged(Box::new(serde_yaml::value::TaggedValue {
-                tag: tagged.tag,
-                value: inner,
-            }))
-        }
     }
 }
 

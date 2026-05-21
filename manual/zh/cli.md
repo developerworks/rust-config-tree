@@ -4,9 +4,9 @@
 
 `ConfigCommand` 提供以下可复用的 clap(命令行解析库) 子命令：
 
-- `config-template` 会生成配置模板。
-- `config-schema` 会生成 JSON Schema(JSON 结构定义)。
-- `config-validate` 会校验最终配置。
+- `generate-template` 会生成配置模板。
+- `generate-schema` 会生成 JSON Schema(JSON 结构定义)。
+- `validate-config` 会校验最终配置。
 - `completions` 会输出 completion(补全脚本)。
 - `install-completions` 会安装 completion(补全脚本)。
 - `uninstall-completions` 会卸载 completion(补全脚本)。
@@ -27,6 +27,11 @@
    展开到应用自己的同一层命令。
 5. 应用在 `match` 里处理 `Config(command)` variant(变体)，并交给
    `handle_config_command`。
+
+`handle_config_command::<Cli, AppConfig>` 中的 `AppConfig` 是提供字段,
+默认值, 校验规则和模板输出的 schema(结构定义) 类型. `generate-template`
+不会在运行时发现任意 Rust(编程语言) 结构体的字段. 如果应用需要暴露多个配置结构体, 应用应增加自己的
+选择参数, 并在 `match` 中分发到不同的 `handle_config_command::<Cli, S>` 调用.
 
 ```rust
 use std::path::PathBuf;
@@ -86,7 +91,7 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 ## 配置模板
 
 ```bash
-demo config-template
+demo generate-template
 ```
 
 命令会在 `config/<root_config_name>/` 下写入模板。如果 `--output` 接收到
@@ -98,26 +103,26 @@ section schema(配置段结构定义)。该命令也会把 root(根配置) 和
 section schema(配置段结构定义) 写入指定的 schema path(结构定义路径)。
 
 ```bash
-demo config-template --output app_config.example.toml --schema schemas/myapp.schema.json
+demo generate-template --output app_config.example.toml --schema schemas/myapp.schema.json
 ```
 
 下面的命令会生成 root(根配置) 和 section(配置段) 的 JSON Schema(JSON 结构定义)：
 
 ```bash
-demo config-schema
+demo generate-schema
 ```
 
-未提供 `--output` 时，`config-schema` 会把 root schema(根结构定义) 写入
+未提供 `--output` 时，`generate-schema` 会把 root schema(根结构定义) 写入
 `config/<root_config_name>/<root_config_name>.schema.json`。
 
 下面的命令会校验完整的 runtime config tree(运行时配置树)：
 
 ```bash
-demo config-validate
+demo validate-config
 ```
 
 生成的 editor schema(编辑器结构定义) 会刻意避免在拆分文件里触发必填字段诊断。
-`config-validate` 会加载 includes(包含文件)、应用默认值，并执行最终
+`validate-config` 会加载 includes(包含文件)、应用默认值，并执行最终
 `confique` 校验，
 包括通过 `#[config(validate = Self::validate)]` 声明的校验。生成的
 `*.schema.json` 仍然只用于 IDE(集成开发环境) 补全和基础编辑期检查，不负责字段值合法性判断。

@@ -38,7 +38,7 @@ IDE schema は補完と基本的な editor check のためのものです。type
 unknown property check など、生成 schema が表せる範囲だけを扱います。
 具体的な field value が application として合法かどうかは判断しません。
 field value validation は code 側で `#[config(validate = Self::validate)]` として
-実装し、`load_config` または `config-validate` で実行します。required field と
+実装し、`load_config` または `validate-config` で実行します。required field と
 final merged config validation もこの runtime path で扱います。
 
 ## TOML

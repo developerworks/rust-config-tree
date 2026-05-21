@@ -1,4 +1,4 @@
-//! High-level `confique` integration and config-template rendering.
+//! High-level `confique` integration and generate-template rendering.
 //!
 //! This module loads `.env` values, builds a Figment runtime source graph,
 //! extracts it into a `confique` schema for defaults and validation, renders
@@ -15,9 +15,7 @@ pub use crate::config_format::ConfigFormat;
 pub use crate::config_load::{
     build_config_figment, load_config, load_config_from_figment, load_config_with_figment,
 };
-pub(crate) use crate::config_output::{
-    default_config_schema_output,
-};
+pub(crate) use crate::config_output::default_config_schema_output;
 pub use crate::config_schema::{
     ConfigSchemaTarget, config_schema_targets_for_path, write_config_schema, write_config_schemas,
 };

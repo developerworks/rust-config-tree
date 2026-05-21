@@ -10,9 +10,9 @@ Fuehre sie aus dem Repository-Root aus:
 ```bash
 cargo run --example basic_loading
 cargo run --example cli_overrides -- --server-port 9000
-cargo run --example config_commands -- config-template
-cargo run --example config_commands -- config-schema
-cargo run --example config_commands -- config-validate
+cargo run --example config_commands -- generate-template
+cargo run --example config_commands -- generate-schema
+cargo run --example config_commands -- validate-config
 cargo run --example generate_templates
 cargo run --example tree_api
 ```

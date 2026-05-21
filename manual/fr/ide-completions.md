@@ -42,7 +42,7 @@ comme les types, les enums et les controles de proprietes inconnues pris en
 charge par le schema genere. Ils ne decident pas si une valeur de champ concrete
 est valide pour l'application. La validation de valeur doit etre implementee
 dans le code avec `#[config(validate = Self::validate)]`, puis executee par
-`load_config` ou `config-validate`. Les champs obligatoires et la validation
+`load_config` ou `validate-config`. Les champs obligatoires et la validation
 finale de la configuration fusionnee utilisent aussi ces chemins d'execution.
 
 ## TOML

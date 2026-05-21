@@ -41,7 +41,7 @@ IDE-scheman ar for komplettering och grundlaggande editor-kontroller, som typ,
 enum och okanda properties som stods av det genererade schemat. De avgor inte om
 ett konkret faltvarde ar giltigt for programmet. Faltvardevalidering ska
 implementeras i kod med `#[config(validate = Self::validate)]` och koras via
-`load_config` eller `config-validate`. Obligatoriska falt och slutlig
+`load_config` eller `validate-config`. Obligatoriska falt och slutlig
 sammanslagen konfigurationsvalidering anvander ocksa dessa runtime-vagar.
 
 ## TOML

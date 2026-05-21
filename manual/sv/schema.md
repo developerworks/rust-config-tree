@@ -99,7 +99,7 @@ giltigt for programmet.
 Faltvardevalidering ska implementeras i kod med
 `#[config(validate = Self::validate)]`. Validatorn kors nar den slutliga
 konfigurationen laddas med `load_config` eller kontrolleras med
-`config-validate`.
+`validate-config`.
 
 ## Overstyrning av mallsektioner
 

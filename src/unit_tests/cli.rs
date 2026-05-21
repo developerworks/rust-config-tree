@@ -137,7 +137,7 @@ fn config_command_can_be_flattened_into_a_consumer_cli() {
     let cli = DemoCli::parse_from(["demo", "generate-template", "--output", "config.yaml"]);
 
     match cli.command {
-        DemoCommand::Config(ConfigCommand::GenerateTemplate { output, schema, .. }) => {
+        DemoCommand::Config(ConfigCommand::GenerateTemplate { output, schema }) => {
             assert_eq!(output, Some(PathBuf::from("config.yaml")));
             assert_eq!(schema, None);
         }
@@ -165,7 +165,7 @@ fn config_template_defaults_use_root_config_snake_case_name() {
     let cli = DemoCli::parse_from(["demo", "generate-template"]);
 
     match cli.command {
-        DemoCommand::Config(ConfigCommand::GenerateTemplate { output, schema, .. }) => {
+        DemoCommand::Config(ConfigCommand::GenerateTemplate { output, schema }) => {
             assert_eq!(output, None);
             assert_eq!(schema, None);
         }
@@ -243,7 +243,7 @@ fn config_template_command_accepts_schema_path() {
     ]);
 
     match cli.command {
-        DemoCommand::Config(ConfigCommand::GenerateTemplate { output, schema, .. }) => {
+        DemoCommand::Config(ConfigCommand::GenerateTemplate { output, schema }) => {
             assert_eq!(output, Some(PathBuf::from("config.example.toml")));
             assert_eq!(schema, Some(PathBuf::from("schemas/myapp.schema.json")));
         }
@@ -381,7 +381,7 @@ fn uninstall_completions_command_is_flattened_into_consumer_cli() {
 fn handle_config_command_writes_templates_for_consumer_schema() {
     let _guard = CURRENT_DIR_LOCK.lock().unwrap();
     let current_dir = std::env::current_dir().unwrap();
-    let root = temp_dir_path("handle-config-template");
+    let root = temp_dir_path("handle-generate-template");
     fs::create_dir_all(root.join("config")).unwrap();
     let config_path = root.join("config.yaml");
     let output_path = root.join("examples").join("config.example.yaml");
@@ -397,7 +397,6 @@ fn handle_config_command_writes_templates_for_consumer_schema() {
         ConfigCommand::GenerateTemplate {
             output: Some(output_path.clone()),
             schema: Some(PathBuf::from("schemas/config.schema.json")),
-            r#type: "test::Config".to_owned(),
         },
         &config_path,
     );
@@ -428,7 +427,7 @@ fn handle_config_command_writes_templates_for_consumer_schema() {
     let _ = fs::remove_dir_all(root);
 }
 
-/// Verifies omitted config-template paths use the root ConfigSchema type name.
+/// Verifies omitted generate-template paths use the root ConfigSchema type name.
 ///
 /// # Arguments
 ///
@@ -447,7 +446,7 @@ fn handle_config_command_writes_templates_for_consumer_schema() {
 fn handle_config_template_defaults_to_root_config_named_targets() {
     let _guard = CURRENT_DIR_LOCK.lock().unwrap();
     let current_dir = std::env::current_dir().unwrap();
-    let root = temp_dir_path("handle-config-template-defaults");
+    let root = temp_dir_path("handle-generate-template-defaults");
     fs::create_dir_all(&root).unwrap();
     std::env::set_current_dir(&root).unwrap();
 
@@ -455,7 +454,6 @@ fn handle_config_template_defaults_to_root_config_named_targets() {
         ConfigCommand::GenerateTemplate {
             output: None,
             schema: None,
-            r#type: "test::Config".to_owned(),
         },
         Path::new("recorder.yaml"),
     );
@@ -506,7 +504,7 @@ fn handle_config_template_defaults_to_root_config_named_targets() {
 /// ```
 #[test]
 fn handle_config_command_writes_json_schema_for_consumer_schema() {
-    let root = temp_dir_path("handle-config-schema");
+    let root = temp_dir_path("handle-generate-schema");
     fs::create_dir_all(root.join("schemas")).unwrap();
     let schema_path = root.join("schemas").join("myapp.schema.json");
 
@@ -524,7 +522,7 @@ fn handle_config_command_writes_json_schema_for_consumer_schema() {
     let _ = fs::remove_dir_all(root);
 }
 
-/// Verifies omitted config-schema output uses the root ConfigSchema type name.
+/// Verifies omitted generate-schema output uses the root ConfigSchema type name.
 ///
 /// # Arguments
 ///
@@ -543,7 +541,7 @@ fn handle_config_command_writes_json_schema_for_consumer_schema() {
 fn handle_config_schema_defaults_to_root_config_named_subdirectory() {
     let _guard = CURRENT_DIR_LOCK.lock().unwrap();
     let current_dir = std::env::current_dir().unwrap();
-    let root = temp_dir_path("handle-config-schema-defaults");
+    let root = temp_dir_path("handle-generate-schema-defaults");
     fs::create_dir_all(&root).unwrap();
     std::env::set_current_dir(&root).unwrap();
 
@@ -582,7 +580,7 @@ fn handle_config_schema_defaults_to_root_config_named_subdirectory() {
 /// ```
 #[test]
 fn handle_config_command_validates_full_runtime_config() {
-    let root = temp_dir_path("handle-config-validate");
+    let root = temp_dir_path("handle-validate-config");
     fs::create_dir_all(&root).unwrap();
     let config_path = root.join("config.yaml");
     fs::write(&config_path, "required_value: present\n").unwrap();
@@ -613,7 +611,7 @@ fn handle_config_command_validates_full_runtime_config() {
 /// ```
 #[test]
 fn handle_config_command_rejects_invalid_runtime_config() {
-    let root = temp_dir_path("handle-config-validate-invalid");
+    let root = temp_dir_path("handle-validate-config-invalid");
     fs::create_dir_all(&root).unwrap();
     let config_path = root.join("config.yaml");
     fs::write(&config_path, "").unwrap();

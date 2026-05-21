@@ -41,7 +41,7 @@ uiteindelijke configuratie is nog steeds een normale `confique`-schemawaarde.
 - Draft 7 JSON Schema-generatie voor editorcompletion en basale schemacontroles.
 - Veldwaardevalidatie in toepassingscode met
   `#[config(validate = Self::validate)]`, uitgevoerd door `load_config` of
-  `config-validate`.
+  `validate-config`.
 - YAML-, TOML-, JSON- en JSON5-sjabloongeneratie.
 - TOML `#:schema`, YAML Language Server-schemamodelines en JSON/JSON5
   `$schema`-velden voor gegenereerde sjablonen.

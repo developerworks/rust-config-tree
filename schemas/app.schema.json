@@ -1,0 +1,35 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "ServerConfig": {
+      "properties": {
+        "bind": {
+          "type": "string"
+        },
+        "port": {
+          "format": "uint16",
+          "maximum": 65535,
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "properties": {
+    "include": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "mode": {
+      "type": "string"
+    },
+    "server": {
+      "$ref": "#/definitions/ServerConfig"
+    }
+  },
+  "title": "AppConfig",
+  "type": "object"
+}

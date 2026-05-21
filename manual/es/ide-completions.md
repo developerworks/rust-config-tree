@@ -41,7 +41,7 @@ editor, como tipo, enum y propiedades desconocidas admitidas por el esquema
 generado. No deciden si un valor concreto de campo es válido para la aplicación.
 La validación de valores debe implementarse en código con
 `#[config(validate = Self::validate)]` y ejecutarse mediante `load_config` o
-`config-validate`. Los campos obligatorios y la validación final de la
+`validate-config`. Los campos obligatorios y la validación final de la
 configuración fusionada también usan esas rutas de ejecución.
 
 ## TOML

@@ -31,24 +31,24 @@ enum Command {
 }
 
 #[derive(Debug, Config, JsonSchema)]
-struct AppConfig {
+pub struct AppConfig {
     #[config(default = [])]
-    include: Vec<PathBuf>,
+    pub include: Vec<PathBuf>,
 
     #[config(default = "demo")]
-    mode: String,
+    pub mode: String,
 
     #[config(nested)]
-    server: ServerConfig,
+    pub server: ServerConfig,
 }
 
 #[derive(Debug, Config, JsonSchema)]
-struct ServerConfig {
+pub struct ServerConfig {
     #[config(default = "127.0.0.1")]
-    bind: String,
+    pub bind: String,
 
     #[config(default = 8080)]
-    port: u16,
+    pub port: u16,
 }
 
 /// Exposes the example's include list to the config command handlers.

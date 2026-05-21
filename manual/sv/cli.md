@@ -4,9 +4,9 @@
 
 `ConfigCommand` tillhandahaller ateranvandbara clap-underkommandon:
 
-- `config-template`
-- `config-schema`
-- `config-validate`
+- `generate-template`
+- `generate-schema`
+- `validate-config`
 - `completions`
 - `install-completions`
 - `uninstall-completions`
@@ -87,7 +87,7 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 ## Konfigurationsmallar
 
 ```bash
-demo config-template
+demo generate-template
 ```
 
 Kommandot skriver mallar under `config/<root_config_name>/`. Om `--output` far
@@ -100,26 +100,26 @@ VS Code kanner igen. Kommandot skriver ocksa rot- och sektionsscheman till den
 valda schemasokvagen.
 
 ```bash
-demo config-template --output app_config.example.toml --schema schemas/myapp.schema.json
+demo generate-template --output app_config.example.toml --schema schemas/myapp.schema.json
 ```
 
 Generera rot- och sektions-JSON Schemas:
 
 ```bash
-demo config-schema
+demo generate-schema
 ```
 
-Utan `--output` skriver `config-schema` rotschemat till
+Utan `--output` skriver `generate-schema` rotschemat till
 `config/<root_config_name>/<root_config_name>.schema.json`.
 
 Validera hela runtime-konfigurationstradet:
 
 ```bash
-demo config-validate
+demo validate-config
 ```
 
 Genererade editorscheman undviker avsiktligt required-field-diagnostik for
-delade filer. `config-validate` laddar includes, tillampar standardvarden och
+delade filer. `validate-config` laddar includes, tillampar standardvarden och
 kor slutlig `confique`-validering, inklusive validatorer deklarerade med
 `#[config(validate = Self::validate)]`. Genererade `*.schema.json`-filer ar for
 IDE-komplettering och grundlaggande editor-kontroller, inte for

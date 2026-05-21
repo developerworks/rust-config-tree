@@ -13,8 +13,8 @@ Het ondersteunt:
 
 - het laden van een `confique`-schema naar een direct bruikbaar configuratieobject
   via Figment-runtimeproviders
-- opdrachtverwerkers voor `config-template`, `config-schema`,
-  `config-validate`, `completions`, `install-completions` en
+- opdrachtverwerkers voor `generate-template`, `generate-schema`,
+  `validate-config`, `completions`, `install-completions` en
   `uninstall-completions`
 - Draft 7 JSON Schema-generatie voor root- en sectieschema's voor editorcompletion en basale schemacontroles
 - configuratiesjabloongeneratie voor YAML, TOML, JSON en JSON5
@@ -220,7 +220,7 @@ zonder ontbrekende velden te rapporteren. Gegenereerde `*.schema.json`-bestanden
 zijn alleen voor IDE-completion en basale editorcontroles; ze bepalen niet of
 een concrete veldwaarde geldig is voor de toepassing. Veldwaardevalidatie moet
 in code worden geimplementeerd met `#[config(validate = Self::validate)]` en
-wordt uitgevoerd via `load_config` of `config-validate`:
+wordt uitgevoerd via `load_config` of `validate-config`:
 
 ```rust
 use rust_config_tree::write_config_schemas;
@@ -335,9 +335,9 @@ geplaatst, bijvoorbeeld `trading/risk.yaml`.
 
 Flatten `ConfigCommand` in de bestaande clap-opdrachtenenum om toe te voegen:
 
-- `config-template`
-- `config-schema`
-- `config-validate`
+- `generate-template`
+- `generate-schema`
+- `validate-config`
 - `completions`
 - `install-completions`
 - `uninstall-completions`
@@ -413,7 +413,7 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 }
 ```
 
-`config-template --output <file-name>` schrijft sjablonen onder
+`generate-template --output <file-name>` schrijft sjablonen onder
 `config/<root_config_name>/` met de gekozen bestandsnaam. Als een pad is
 opgegeven, wordt alleen de bestandsnaam gebruikt. Als geen uitvoerbestandsnaam
 is opgegeven, schrijft het
@@ -423,11 +423,11 @@ een gegenereerde JSON Schema-set. JSON- en JSON5-sjablonen krijgen een
 `$schema`-veld dat VS Code herkent. Dit schrijft ook het rootschema en de
 sectieschema's naar het gekozen schemapad.
 
-`config-schema --output <path>` schrijft het root-Draft 7 JSON Schema en de
+`generate-schema --output <path>` schrijft het root-Draft 7 JSON Schema en de
 sectieschema's. Als geen uitvoerpad is opgegeven, wordt het rootschema naar
 `config/<root_config_name>/<root_config_name>.schema.json` geschreven.
 
-`config-validate` laadt de volledige runtimeconfiguratieboom en voert
+`validate-config` laadt de volledige runtimeconfiguratieboom en voert
 `confique`-standaardwaarden en validatie uit, inclusief validators die met
 `#[config(validate = Self::validate)]` zijn gedeclareerd. Gebruik editorschema's
 voor rustige completion tijdens het bewerken van gesplitste bestanden; gebruik

@@ -40,7 +40,7 @@ resolved from the file that declared them. The final config is still a normal
 - Draft 7 JSON Schema generation for editor completion and basic schema checks.
 - Field value validation in application code through
   `#[config(validate = Self::validate)]`, executed by `load_config` or
-  `config-validate`.
+  `validate-config`.
 - YAML, TOML, JSON, and JSON5 template generation.
 - TOML `#:schema`, YAML Language Server schema modelines, and JSON/JSON5
   `$schema` fields for generated templates.

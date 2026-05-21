@@ -99,7 +99,7 @@ Feldwert fuer die Anwendung gueltig ist.
 
 Feldwertvalidierung muss im Code mit `#[config(validate = Self::validate)]`
 implementiert werden. Der Validator laeuft, wenn die finale Konfiguration ueber
-`load_config` geladen oder ueber `config-validate` geprueft wird.
+`load_config` geladen oder ueber `validate-config` geprueft wird.
 
 ## Abschnittspfade fuer Vorlagen ueberschreiben
 

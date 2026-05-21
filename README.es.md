@@ -13,8 +13,8 @@ Gestiona:
 
 - cargar un esquema `confique` en un objeto de configuración directamente
   utilizable mediante proveedores de Figment en tiempo de ejecución
-- manejadores de comandos `config-template`, `config-schema`,
-  `config-validate`, `completions`, `install-completions` y
+- manejadores de comandos `generate-template`, `generate-schema`,
+  `validate-config`, `completions`, `install-completions` y
   `uninstall-completions`
 - generación de JSON Schema Draft 7 para la raíz y las secciones, útil para
   completado y comprobaciones básicas de esquema en editores
@@ -223,7 +223,7 @@ de configuración parciales sin informar campos faltantes. Los archivos
 básicas del editor; no deciden si un valor concreto de campo es válido para la
 aplicación. La validación de valores debe implementarse en código con
 `#[config(validate = Self::validate)]` y ejecutarse mediante `load_config` o
-`config-validate`:
+`validate-config`:
 
 ```rust
 use rust_config_tree::write_config_schemas;
@@ -338,9 +338,9 @@ padre; por ejemplo, `trading/risk.yaml`.
 
 Aplana `ConfigCommand` dentro de tu enum de comandos clap existente para añadir:
 
-- `config-template`
-- `config-schema`
-- `config-validate`
+- `generate-template`
+- `generate-schema`
+- `validate-config`
 - `completions`
 - `install-completions`
 - `uninstall-completions`
@@ -418,7 +418,7 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 }
 ```
 
-`config-template --output <file-name>` escribe plantillas bajo
+`generate-template --output <file-name>` escribe plantillas bajo
 `config/<root_config_name>/` usando el nombre de archivo seleccionado. Si se
 proporciona una ruta, solo se usa su nombre de archivo. Si no se proporciona un
 nombre de archivo de salida, escribe
@@ -428,11 +428,11 @@ conjunto de JSON Schema generado. Las plantillas JSON y JSON5 reciben un campo
 `$schema` que VS Code reconoce. Esto también escribe el esquema raíz y los
 esquemas de sección en la ruta de esquema seleccionada.
 
-`config-schema --output <path>` escribe el JSON Schema Draft 7 raíz y los
+`generate-schema --output <path>` escribe el JSON Schema Draft 7 raíz y los
 esquemas de sección. Si no se proporciona ruta de salida, el esquema raíz se
 escribe en `config/<root_config_name>/<root_config_name>.schema.json`.
 
-`config-validate` carga el árbol completo de configuración en tiempo de
+`validate-config` carga el árbol completo de configuración en tiempo de
 ejecución y ejecuta los valores por defecto y la validación de `confique`,
 incluidos los validadores declarados con `#[config(validate = Self::validate)]`.
 Usa los esquemas del editor para completado sin ruido mientras editas archivos

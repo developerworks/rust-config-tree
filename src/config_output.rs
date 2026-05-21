@@ -74,7 +74,7 @@ pub(crate) fn resolve_config_template_output<S>(output: Option<PathBuf>) -> Conf
     Ok(normalize_lexical(output))
 }
 
-/// Returns the default config-template output path for a root config type.
+/// Returns the default generate-template output path for a root config type.
 ///
 /// The file stem is the root config structure name converted to snake_case.
 ///

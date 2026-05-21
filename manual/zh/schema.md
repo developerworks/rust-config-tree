@@ -98,7 +98,7 @@ secret: String,
 不负责判断具体字段值对应用是否合法。
 
 字段值合法性应在代码中通过 `#[config(validate = Self::validate)]` 实现。
-当 `load_config` 加载最终配置，或者 `config-validate` 检查最终配置时，
+当 `load_config` 加载最终配置，或者 `validate-config` 检查最终配置时，
 运行时会执行这个校验。
 
 ## 模板 Section(配置段) 路径覆盖

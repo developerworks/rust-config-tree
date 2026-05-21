@@ -96,7 +96,7 @@ secret: String,
 
 field value validation は code 側で `#[config(validate = Self::validate)]` として
 実装します。final config を `load_config` で読み込むとき、または
-`config-validate` で確認するときに、この runtime validation が実行されます。
+`validate-config` で確認するときに、この runtime validation が実行されます。
 
 ## Template Section Overrides
 

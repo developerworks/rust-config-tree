@@ -39,7 +39,7 @@ konfigurationen ar fortfarande ett normalt `confique`-schemavarde.
 - Draft 7 JSON Schema-generering for editor-komplettering och grundlaggande schemakontroller.
 - Faltvardevalidering i programkod med
   `#[config(validate = Self::validate)]`, kord via `load_config` eller
-  `config-validate`.
+  `validate-config`.
 - Generering av YAML-, TOML-, JSON- och JSON5-mallar.
 - TOML `#:schema`, YAML Language Server-modelines och JSON/JSON5-`$schema`-falt
   for genererade mallar.

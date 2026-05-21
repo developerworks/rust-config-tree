@@ -43,7 +43,7 @@ base, comme les types, les enums et les proprietes inconnues pris en charge par
 le schema genere. Les `*.schema.json` generes ne decident pas si une valeur de
 champ concrete est valide pour l'application. La validation de valeur doit etre
 implementee dans le code avec `#[config(validate = Self::validate)]` ; `load_config`
-et `config-validate` executent cette validation d'execution.
+et `validate-config` executent cette validation d'execution.
 
 Liez ces schemas depuis les modeles TOML, YAML, JSON et JSON5 generes :
 

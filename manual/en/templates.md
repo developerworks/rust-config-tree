@@ -39,7 +39,7 @@ Present fields can still receive basic editor checks, such as type, enum, and
 unknown property checks supported by the generated schema. Generated
 `*.schema.json` files do not decide whether a concrete field value is legal for
 the application. Implement field value validation in code with
-`#[config(validate = Self::validate)]`; `load_config` and `config-validate`
+`#[config(validate = Self::validate)]`; `load_config` and `validate-config`
 execute that runtime validation.
 
 Bind those schemas from generated TOML, YAML, JSON, and JSON5 templates:
@@ -68,7 +68,7 @@ The output format is inferred from the output path:
 - unknown or missing extensions generate YAML.
 
 The template APIs write exactly under the `output_path` you pass. The built-in
-`config-template` CLI command normalizes generated templates under
+`generate-template` CLI command normalizes generated templates under
 `config/<root_config_name>/`; without `--output`, `AppConfig` writes
 `config/app_config/app_config.example.yaml` and the matching default schema
 `config/app_config/app_config.schema.json`.

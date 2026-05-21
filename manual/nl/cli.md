@@ -4,9 +4,9 @@
 
 `ConfigCommand` biedt herbruikbare clap-subcommands:
 
-- `config-template`
-- `config-schema`
-- `config-validate`
+- `generate-template`
+- `generate-schema`
+- `validate-config`
 - `completions`
 - `install-completions`
 - `uninstall-completions`
@@ -88,7 +88,7 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 ## Configuratiesjablonen
 
 ```bash
-demo config-template
+demo generate-template
 ```
 
 De opdracht schrijft sjablonen onder `config/<root_config_name>/`. Als
@@ -102,26 +102,26 @@ krijgen een `$schema`-veld dat VS Code herkent. De opdracht schrijft ook het
 root- en de sectieschema's naar het gekozen schemapad.
 
 ```bash
-demo config-template --output app_config.example.toml --schema schemas/myapp.schema.json
+demo generate-template --output app_config.example.toml --schema schemas/myapp.schema.json
 ```
 
 Genereer root- en sectie-JSON Schemas:
 
 ```bash
-demo config-schema
+demo generate-schema
 ```
 
-Zonder `--output` schrijft `config-schema` het rootschema naar
+Zonder `--output` schrijft `generate-schema` het rootschema naar
 `config/<root_config_name>/<root_config_name>.schema.json`.
 
 Valideer de volledige runtimeconfiguratieboom:
 
 ```bash
-demo config-validate
+demo validate-config
 ```
 
 Gegenereerde editorschema's vermijden bewust diagnostics voor verplichte velden
-in gesplitste bestanden. `config-validate` laadt includes, past defaults toe en
+in gesplitste bestanden. `validate-config` laadt includes, past defaults toe en
 voert uiteindelijke `confique`-validatie uit, inclusief validators die met
 `#[config(validate = Self::validate)]` zijn gedeclareerd. Gegenereerde
 `*.schema.json`-bestanden blijven voor IDE-completion en basale editorcontroles,

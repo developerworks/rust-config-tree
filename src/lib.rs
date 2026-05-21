@@ -32,8 +32,8 @@ mod template_tree;
 mod tree;
 
 pub use cli::{
-    ConfigCommand, handle_config_command, handle_generate_template, install_shell_completion,
-    print_shell_completion, uninstall_shell_completion, upsert_managed_block,
+    ConfigCommand, handle_config_command, install_shell_completion, print_shell_completion,
+    uninstall_shell_completion, upsert_managed_block,
 };
 pub use config::{
     ConfigFormat, ConfigResult, ConfigSchema, ConfigSchemaTarget, ConfigTemplateTarget,

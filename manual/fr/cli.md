@@ -4,9 +4,9 @@
 
 `ConfigCommand` fournit des sous-commandes clap reutilisables :
 
-- `config-template`
-- `config-schema`
-- `config-validate`
+- `generate-template`
+- `generate-schema`
+- `validate-config`
 - `completions`
 - `install-completions`
 - `uninstall-completions`
@@ -90,7 +90,7 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 ## Modeles de configuration
 
 ```bash
-demo config-template
+demo generate-template
 ```
 
 La commande ecrit les modeles sous `config/<root_config_name>/`. Si `--output`
@@ -104,26 +104,26 @@ schema de section correspondant. Les modeles JSON et JSON5 recoivent un champ
 section au chemin de schema choisi.
 
 ```bash
-demo config-template --output app_config.example.toml --schema schemas/myapp.schema.json
+demo generate-template --output app_config.example.toml --schema schemas/myapp.schema.json
 ```
 
 Generer les schemas JSON racine et de section :
 
 ```bash
-demo config-schema
+demo generate-schema
 ```
 
-Sans `--output`, `config-schema` ecrit le schema racine dans
+Sans `--output`, `generate-schema` ecrit le schema racine dans
 `config/<root_config_name>/<root_config_name>.schema.json`.
 
 Valider l'arbre complet de configuration d'execution :
 
 ```bash
-demo config-validate
+demo validate-config
 ```
 
 Les schemas d'editeur generes evitent intentionnellement les diagnostics de
-champs obligatoires pour les fichiers separes. `config-validate` charge les
+champs obligatoires pour les fichiers separes. `validate-config` charge les
 inclusions, applique les valeurs par defaut et lance la validation finale
 `confique`, y compris les validateurs declares avec
 `#[config(validate = Self::validate)]`. Les `*.schema.json` generes restent

@@ -37,7 +37,7 @@ log:
 - `tracing`을 통한 TRACE 레벨 소스 추적 이벤트.
 - 에디터 완성과 기본 schema 검사를 위한 Draft 7 JSON Schema 생성.
 - 애플리케이션 코드에서 `#[config(validate = Self::validate)]`로 구현하고
-  `load_config` 또는 `config-validate`로 실행하는 필드 값 유효성 검사.
+  `load_config` 또는 `validate-config`로 실행하는 필드 값 유효성 검사.
 - YAML, TOML, JSON, JSON5 템플릿 생성.
 - 생성된 템플릿을 위한 TOML `#:schema`, YAML Language Server 스키마 modeline,
   JSON/JSON5 `$schema` 필드.

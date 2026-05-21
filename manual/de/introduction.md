@@ -43,7 +43,7 @@ finale Konfiguration bleibt ein normales `confique`-Schema.
   grundlegende Schema-Pruefungen.
 - Feldwertvalidierung im Anwendungscode mit
   `#[config(validate = Self::validate)]`, ausgefuehrt durch `load_config` oder
-  `config-validate`.
+  `validate-config`.
 - Vorlagenerzeugung fuer YAML, TOML, JSON und JSON5.
 - TOML-`#:schema`, YAML-Language-Server-Modelines und JSON/JSON5-`$schema`-
   Felder fuer erzeugte Vorlagen.

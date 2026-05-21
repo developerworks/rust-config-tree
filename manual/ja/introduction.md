@@ -38,7 +38,7 @@ schema value です。
 - `tracing` による TRACE-level source tracking event。
 - editor completion と基本的な schema check 向け Draft 7 JSON Schema generation。
 - application code で `#[config(validate = Self::validate)]` として実装し、
-  `load_config` または `config-validate` で実行する field value validation。
+  `load_config` または `validate-config` で実行する field value validation。
 - YAML、TOML、JSON、JSON5 template generation。
 - generated TOML template の `#:schema`、YAML Language Server modeline、
   JSON / JSON5 template の `$schema` field。

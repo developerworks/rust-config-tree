@@ -41,7 +41,7 @@ en onbekende-eigenschapcontroles die door het gegenereerde schema worden
 ondersteund. Ze bepalen niet of een concrete veldwaarde geldig is voor de
 toepassing. Veldwaardevalidatie moet in code worden geimplementeerd met
 `#[config(validate = Self::validate)]` en wordt uitgevoerd via `load_config` of
-`config-validate`. Verplichte velden en uiteindelijke samengevoegde
+`validate-config`. Verplichte velden en uiteindelijke samengevoegde
 configuratievalidatie gebruiken ook die runtimepaden.
 
 ## TOML

@@ -29,7 +29,7 @@ Tama kirjoittaa juuriskeeman ja osioskeemat, kuten `schemas/server.schema.json`.
 
 `x-env-only`-merkityt kentat jatetaan pois luoduista skeemoista, joten IDEt eivat ehdota salaisuuksia tai muita arvoja, joiden tulee tulla vain ymparistomuuttujista.
 
-IDE-skeemat ovat taydennysta ja editorin perustarkistuksia varten, kuten luodun skeeman tukemat tyyppi-, enum- ja tuntemattomien ominaisuuksien tarkistukset. Ne eivat paata, onko konkreettinen kentan arvo sovellukselle kelvollinen. Kentta-arvojen validointi toteutetaan koodissa `#[config(validate = Self::validate)]`-attribuutilla ja suoritetaan `load_config`- tai `config-validate`-polussa. Pakolliset kentat ja lopullisen yhdistetyn konfiguraation validointi kayttavat myos naita runtime-polkuja.
+IDE-skeemat ovat taydennysta ja editorin perustarkistuksia varten, kuten luodun skeeman tukemat tyyppi-, enum- ja tuntemattomien ominaisuuksien tarkistukset. Ne eivat paata, onko konkreettinen kentan arvo sovellukselle kelvollinen. Kentta-arvojen validointi toteutetaan koodissa `#[config(validate = Self::validate)]`-attribuutilla ja suoritetaan `load_config`- tai `validate-config`-polussa. Pakolliset kentat ja lopullisen yhdistetyn konfiguraation validointi kayttavat myos naita runtime-polkuja.
 
 ## TOML
 

@@ -14,8 +14,8 @@ Il gere :
 
 - le chargement d'un schema `confique` dans un objet de configuration
   directement utilisable via des fournisseurs Figment d'execution ;
-- les gestionnaires de commandes `config-template`, `config-schema`,
-  `config-validate`, `completions`, `install-completions` et
+- les gestionnaires de commandes `generate-template`, `generate-schema`,
+  `validate-config`, `completions`, `install-completions` et
   `uninstall-completions` ;
 - la generation de schemas JSON Draft 7 pour la racine et les sections, pour la
   completion et les controles de schema de base dans l'editeur ;
@@ -226,7 +226,7 @@ fichiers `*.schema.json` generes servent uniquement a la completion IDE et aux
 controles d'editeur de base ; ils ne decident pas si une valeur de champ concrete
 est valide pour l'application. La validation de valeur doit etre implementee dans
 le code avec `#[config(validate = Self::validate)]`, puis executee par
-`load_config` ou `config-validate` :
+`load_config` ou `validate-config` :
 
 ```rust
 use rust_config_tree::write_config_schemas;
@@ -343,9 +343,9 @@ fichier parent, par exemple `trading/risk.yaml`.
 Aplatissez `ConfigCommand` dans votre enum de commandes clap existante pour
 ajouter :
 
-- `config-template`
-- `config-schema`
-- `config-validate`
+- `generate-template`
+- `generate-schema`
+- `validate-config`
 - `completions`
 - `install-completions`
 - `uninstall-completions`
@@ -423,7 +423,7 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 }
 ```
 
-`config-template --output <file-name>` ecrit les modeles sous
+`generate-template --output <file-name>` ecrit les modeles sous
 `config/<root_config_name>/` avec le nom de fichier choisi. Si un chemin est
 fourni, seul son nom de fichier est utilise. Si aucun nom de fichier de sortie
 n'est fourni, il ecrit
@@ -433,11 +433,11 @@ de schemas JSON generes. Les modeles JSON et JSON5 recoivent un champ `$schema`
 reconnu par VS Code. Cela ecrit aussi le schema racine et les schemas de
 section au chemin de schema choisi.
 
-`config-schema --output <path>` ecrit le schema JSON Draft 7 racine et les
+`generate-schema --output <path>` ecrit le schema JSON Draft 7 racine et les
 schemas de section. Les sections imbriquees non marquees restent dans le schema racine. Si aucun chemin de sortie n'est fourni, le schema racine est
 ecrit dans `config/<root_config_name>/<root_config_name>.schema.json`.
 
-`config-validate` charge l'arbre complet de configuration d'execution et lance
+`validate-config` charge l'arbre complet de configuration d'execution et lance
 les valeurs par defaut et la validation `confique`, y compris les validateurs
 declares avec `#[config(validate = Self::validate)]`. Utilisez les schemas
 d'editeur pour une completion non bruyante pendant l'edition de fichiers

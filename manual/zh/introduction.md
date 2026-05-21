@@ -39,7 +39,7 @@ log:
 - 它会生成 Draft 7 JSON Schema(JSON 结构定义)，供编辑器补全和基础
   schema(结构定义) 检查使用。
 - 应用代码通过 `#[config(validate = Self::validate)]` 实现字段值合法性校验，
-  `load_config` 或 `config-validate` 会执行这个校验。
+  `load_config` 或 `validate-config` 会执行这个校验。
 - 它会生成 YAML、TOML、JSON 和 JSON5 配置模板。
 - 它会为生成的 TOML 模板写入 `#:schema`，为 YAML 模板写入
   YAML Language Server(YAML 语言服务器) modeline(模式声明行)，并为

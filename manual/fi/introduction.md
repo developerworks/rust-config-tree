@@ -34,7 +34,7 @@ Jokainen sisallytetty tiedosto voi kayttaa samaa skeemamuotoa, ja suhteelliset i
 - Draft 7 JSON Schema -luonti editorien taydennysta ja skeeman perustarkistuksia varten.
 - Kentta-arvojen validointi sovelluskoodissa
   `#[config(validate = Self::validate)]`-attribuutilla, suoritettuna
-  `load_config`- tai `config-validate`-polussa.
+  `load_config`- tai `validate-config`-polussa.
 - YAML-, TOML-, JSON- ja JSON5-mallien luonti.
 - TOML `#:schema` -direktiivit, YAML Language Server -skeemamallirivit ja
   JSON/JSON5 `$schema` -kentat luoduille malleille.

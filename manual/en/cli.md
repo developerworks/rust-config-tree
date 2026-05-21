@@ -4,9 +4,9 @@
 
 `ConfigCommand` provides reusable clap subcommands:
 
-- `config-template`
-- `config-schema`
-- `config-validate`
+- `generate-template`
+- `generate-schema`
+- `validate-config`
 - `completions`
 - `install-completions`
 - `uninstall-completions`
@@ -28,6 +28,12 @@ Flatten it into an application command enum:
 4. Clap expands the flattened `ConfigCommand` variants into the same command
    level as the application's own variants.
 5. Match the `Config(command)` variant and pass it to `handle_config_command`.
+
+The `AppConfig` type argument in `handle_config_command::<Cli, AppConfig>`
+is the schema that supplies fields, defaults, validation, and template output.
+`generate-template` does not discover arbitrary Rust structs at runtime. If an
+application exposes multiple config schemas, add an application level selector
+and dispatch to different `handle_config_command::<Cli, S>` calls.
 
 ```rust
 use std::path::PathBuf;
@@ -87,7 +93,7 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 ## Config Templates
 
 ```bash
-demo config-template
+demo generate-template
 ```
 
 The command writes templates under `config/<root_config_name>/`. If `--output`
@@ -100,26 +106,26 @@ schema. The command also writes the root and section schemas to the selected
 schema path.
 
 ```bash
-demo config-template --output app_config.example.toml --schema schemas/myapp.schema.json
+demo generate-template --output app_config.example.toml --schema schemas/myapp.schema.json
 ```
 
 Generate root and section JSON Schemas:
 
 ```bash
-demo config-schema
+demo generate-schema
 ```
 
-Without `--output`, `config-schema` writes the root schema to
+Without `--output`, `generate-schema` writes the root schema to
 `config/<root_config_name>/<root_config_name>.schema.json`.
 
 Validate the complete runtime config tree:
 
 ```bash
-demo config-validate
+demo validate-config
 ```
 
 Generated editor schemas intentionally avoid required-field diagnostics for
-split files. `config-validate` loads includes, applies defaults, and runs final
+split files. `validate-config` loads includes, applies defaults, and runs final
 `confique` validation, including validators declared with
 `#[config(validate = Self::validate)]`. Generated `*.schema.json` files remain
 for IDE completion and basic editor checks, not field value legality. It prints

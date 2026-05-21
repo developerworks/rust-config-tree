@@ -97,7 +97,7 @@ application.
 
 Implement field value validation in code with
 `#[config(validate = Self::validate)]`. The validator runs when the final config
-is loaded through `load_config` or checked through `config-validate`.
+is loaded through `load_config` or checked through `validate-config`.
 
 ## Template Section Overrides
 

@@ -41,7 +41,7 @@ como tipo, enum e propriedades desconhecidas suportadas pelo esquema gerado.
 Eles nao decidem se um valor concreto de campo e valido para a aplicacao. A
 validacao de valores deve ser implementada no codigo com
 `#[config(validate = Self::validate)]` e executada por `load_config` ou
-`config-validate`. Campos obrigatorios e a validacao final da configuracao
+`validate-config`. Campos obrigatorios e a validacao final da configuracao
 mesclada tambem usam esses caminhos de execucao.
 
 ## TOML

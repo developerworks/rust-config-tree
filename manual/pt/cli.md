@@ -4,9 +4,9 @@
 
 `ConfigCommand` fornece subcomandos clap reutilizaveis:
 
-- `config-template`
-- `config-schema`
-- `config-validate`
+- `generate-template`
+- `generate-schema`
+- `validate-config`
 - `completions`
 - `install-completions`
 - `uninstall-completions`
@@ -90,7 +90,7 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 ## Modelos de configuracao
 
 ```bash
-demo config-template
+demo generate-template
 ```
 
 O comando grava modelos em `config/<root_config_name>/`. Se `--output` receber
@@ -104,26 +104,26 @@ reconhecido pelo VS Code. O comando tambem grava o esquema raiz e esquemas de
 secao no caminho de esquema selecionado.
 
 ```bash
-demo config-template --output app_config.example.toml --schema schemas/myapp.schema.json
+demo generate-template --output app_config.example.toml --schema schemas/myapp.schema.json
 ```
 
 Gere JSON Schemas raiz e de secao:
 
 ```bash
-demo config-schema
+demo generate-schema
 ```
 
-Sem `--output`, `config-schema` grava o esquema raiz em
+Sem `--output`, `generate-schema` grava o esquema raiz em
 `config/<root_config_name>/<root_config_name>.schema.json`.
 
 Valide a arvore completa de configuracao em tempo de execucao:
 
 ```bash
-demo config-validate
+demo validate-config
 ```
 
 Esquemas de editor gerados evitam intencionalmente diagnosticos de campos
-obrigatorios para arquivos divididos. `config-validate` carrega includes, aplica
+obrigatorios para arquivos divididos. `validate-config` carrega includes, aplica
 padroes e executa a validacao final do `confique`, incluindo validadores
 declarados com `#[config(validate = Self::validate)]`. Os `*.schema.json`
 gerados continuam sendo para completamento de IDE e verificacoes basicas do

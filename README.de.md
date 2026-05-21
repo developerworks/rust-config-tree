@@ -13,8 +13,8 @@ Es unterstuetzt:
 
 - Laden eines `confique`-Schemas ueber Figment-Laufzeitprovider in ein direkt
   nutzbares Konfigurationsobjekt
-- Handler fuer die Befehle `config-template`, `config-schema`,
-  `config-validate`, `completions`, `install-completions` und
+- Handler fuer die Befehle `generate-template`, `generate-schema`,
+  `validate-config`, `completions`, `install-completions` und
   `uninstall-completions`
 - Erzeugung von Draft-7-JSON-Schemas fuer Root- und Abschnittsschemas zur
   Editor-Vervollstaendigung und grundlegenden Schema-Pruefung
@@ -221,7 +221,7 @@ ohne fehlende Felder zu melden. Die erzeugten `*.schema.json`-Dateien sind nur
 fuer IDE-Vervollstaendigung und grundlegende Editor-Pruefungen gedacht; sie
 entscheiden nicht, ob ein konkreter Feldwert fuer die Anwendung gueltig ist.
 Feldwertvalidierung muss im Code mit `#[config(validate = Self::validate)]`
-implementiert und dann ueber `load_config` oder `config-validate` ausgefuehrt
+implementiert und dann ueber `load_config` oder `validate-config` ausgefuehrt
 werden:
 
 ```rust
@@ -345,9 +345,9 @@ Dateistamm ihres Elternteils abgelegt, zum Beispiel `trading/risk.yaml`.
 Fuege `ConfigCommand` flach in das vorhandene clap-Befehls-Enum ein, um diese
 Befehle hinzuzufuegen:
 
-- `config-template`
-- `config-schema`
-- `config-validate`
+- `generate-template`
+- `generate-schema`
+- `validate-config`
 - `completions`
 - `install-completions`
 - `uninstall-completions`
@@ -427,7 +427,7 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 }
 ```
 
-`config-template --output <file-name>` schreibt Vorlagen unter
+`generate-template --output <file-name>` schreibt Vorlagen unter
 `config/<root_config_name>/` mit dem gewaehlten Dateinamen. Wenn ein Pfad
 angegeben wird, wird nur dessen Dateiname verwendet. Wird kein Ausgabe-Dateiname
 angegeben, schreibt der Befehl
@@ -437,11 +437,11 @@ erzeugtes JSON-Schema-Set zu binden. JSON- und JSON5-Vorlagen erhalten ein von
 VS Code erkennbares `$schema`-Feld. Dabei werden auch das Root-Schema und
 Abschnittsschemas an den gewaehlten Schemapfad geschrieben.
 
-`config-schema --output <path>` schreibt das Root-Draft-7-JSON-Schema und
+`generate-schema --output <path>` schreibt das Root-Draft-7-JSON-Schema und
 Abschnittsschemas. Wird kein Ausgabepfad angegeben, wird das Root-Schema nach
 `config/<root_config_name>/<root_config_name>.schema.json` geschrieben.
 
-`config-validate` laedt den vollstaendigen Laufzeit-Konfigurationsbaum und
+`validate-config` laedt den vollstaendigen Laufzeit-Konfigurationsbaum und
 fuehrt `confique`-Defaults und Validierung aus, einschliesslich Validatoren aus
 `#[config(validate = Self::validate)]`. Verwende Editor-Schemas fuer rauscharme
 Vervollstaendigung beim Bearbeiten aufgeteilter Dateien; verwende diesen Befehl

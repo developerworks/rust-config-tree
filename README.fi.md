@@ -10,7 +10,7 @@ Kielikohtaiset oppaat julkaistaan itsenaisina mdBook-sivustoina, joissa on kiele
 Se kasittelee:
 
 - `confique`-skeeman lataamisen suoraan kaytettavaksi konfiguraatio-olioksi Figmentin runtime provider -lahteiden kautta
-- `config-template`-, `config-schema`-, `config-validate`-, `completions`-,
+- `generate-template`-, `generate-schema`-, `validate-config`-, `completions`-,
   `install-completions`- ja `uninstall-completions`-komentojen kasittelijat
 - Draft 7 -juuri- ja osio-JSON Schema -skeemojen luonnin editorien taydennysta ja skeeman perustarkistuksia varten
 - konfiguraatiomallien luonnin YAML-, TOML-, JSON- ja JSON5-muodoissa
@@ -179,7 +179,7 @@ Mallit renderoidaan samalla skeemalla ja include-lapikaynnin saannoilla. Tuloste
 - `.json` ja `.json5` tuottavat JSON5-yhteensopivia malleja
 - tuntematon tai puuttuva paate tuottaa YAMLia
 
-Kayta `write_config_schemas`-funktiota Draft 7 JSON Schema -skeemojen luontiin juurikonfiguraatiolle ja jaetuille sisakkaisille osioille. Luodut skeemat jattavat `required`-rajoitteet pois, jotta IDEt voivat tarjota taydennysta osittaisille konfiguraatiotiedostoille ilman puuttuvien kenttien virheilmoituksia. Luodut `*.schema.json`-tiedostot ovat vain IDE-taydennysta ja editorin perustarkistuksia varten; ne eivat paata, onko konkreettinen kentan arvo sovellukselle kelvollinen. Kentta-arvojen validointi toteutetaan koodissa `#[config(validate = Self::validate)]`-attribuutilla ja suoritetaan `load_config`- tai `config-validate`-polussa:
+Kayta `write_config_schemas`-funktiota Draft 7 JSON Schema -skeemojen luontiin juurikonfiguraatiolle ja jaetuille sisakkaisille osioille. Luodut skeemat jattavat `required`-rajoitteet pois, jotta IDEt voivat tarjota taydennysta osittaisille konfiguraatiotiedostoille ilman puuttuvien kenttien virheilmoituksia. Luodut `*.schema.json`-tiedostot ovat vain IDE-taydennysta ja editorin perustarkistuksia varten; ne eivat paata, onko konkreettinen kentan arvo sovellukselle kelvollinen. Kentta-arvojen validointi toteutetaan koodissa `#[config(validate = Self::validate)]`-attribuutilla ja suoritetaan `load_config`- tai `validate-config`-polussa:
 
 ```rust
 use rust_config_tree::write_config_schemas;
@@ -280,9 +280,9 @@ Oletusosiopolku on `<section>.yaml` ylatasojen sisakkaisille osioille. Sisakkais
 
 Litista `ConfigCommand` olemassa olevaan clap-komentoenumiin, jolloin saat:
 
-- `config-template`
-- `config-schema`
-- `config-validate`
+- `generate-template`
+- `generate-schema`
+- `validate-config`
 - `completions`
 - `install-completions`
 - `uninstall-completions`
@@ -352,11 +352,11 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 }
 ```
 
-`config-template --output <file-name>` kirjoittaa mallit hakemistoon `config/<root_config_name>/` valitulla tiedostonimella. Jos polku annetaan, vain sen tiedostonimi kaytetaan. Jos tulostetiedoston nimea ei anneta, komento kirjoittaa `config/<root_config_name>/<root_config_name>.example.yaml`. Lisaa `--schema <path>`, jotta TOML-, YAML-, JSON- ja JSON5-mallit sidotaan luotuun JSON Schema -joukkoon. JSON- ja JSON5-mallit saavat `$schema`-kentan, jonka VS Code tunnistaa. Tama kirjoittaa myos juuriskeeman ja osioskeemat valittuun skeemapolkuun.
+`generate-template --output <file-name>` kirjoittaa mallit hakemistoon `config/<root_config_name>/` valitulla tiedostonimella. Jos polku annetaan, vain sen tiedostonimi kaytetaan. Jos tulostetiedoston nimea ei anneta, komento kirjoittaa `config/<root_config_name>/<root_config_name>.example.yaml`. Lisaa `--schema <path>`, jotta TOML-, YAML-, JSON- ja JSON5-mallit sidotaan luotuun JSON Schema -joukkoon. JSON- ja JSON5-mallit saavat `$schema`-kentan, jonka VS Code tunnistaa. Tama kirjoittaa myos juuriskeeman ja osioskeemat valittuun skeemapolkuun.
 
-`config-schema --output <path>` kirjoittaa Draft 7 -juuri-JSON Schema -skeeman ja osioskeemat. Jos tulostepolkua ei anneta, juuriskeema kirjoitetaan tiedostoon `config/<root_config_name>/<root_config_name>.schema.json`.
+`generate-schema --output <path>` kirjoittaa Draft 7 -juuri-JSON Schema -skeeman ja osioskeemat. Jos tulostepolkua ei anneta, juuriskeema kirjoitetaan tiedostoon `config/<root_config_name>/<root_config_name>.schema.json`.
 
-`config-validate` lataa koko runtime-konfiguraatiopuun ja ajaa `confique`-oletukset seka validoinnin, mukaan lukien `#[config(validate = Self::validate)]`-attribuutilla maaritellyt validaattorit. Kayta editoriskeemoja hiljaiseen taydennykseen jaettujen tiedostojen muokkauksessa; kayta tata komentoa pakollisille kentille ja lopulliselle konfiguraation validoinnille. Onnistuessaan se tulostaa `Configuration is ok`.
+`validate-config` lataa koko runtime-konfiguraatiopuun ja ajaa `confique`-oletukset seka validoinnin, mukaan lukien `#[config(validate = Self::validate)]`-attribuutilla maaritellyt validaattorit. Kayta editoriskeemoja hiljaiseen taydennykseen jaettujen tiedostojen muokkauksessa; kayta tata komentoa pakollisille kentille ja lopulliselle konfiguraation validoinnille. Onnistuessaan se tulostaa `Configuration is ok`.
 
 `completions <shell>` tulostaa taydennykset stdoutiin.
 

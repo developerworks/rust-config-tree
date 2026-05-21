@@ -100,7 +100,7 @@ toepassing.
 Veldwaardevalidatie moet in code worden geimplementeerd met
 `#[config(validate = Self::validate)]`. De validator draait wanneer de
 uiteindelijke configuratie wordt geladen met `load_config` of gecontroleerd met
-`config-validate`.
+`validate-config`.
 
 ## Overrides voor sjabloonsecties
 

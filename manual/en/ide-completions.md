@@ -39,7 +39,7 @@ IDE schemas are for completion and basic editor checks, such as type, enum, and
 unknown property checks supported by the generated schema. They do not decide
 whether a concrete field value is legal for the application. Implement field
 value validation in code with `#[config(validate = Self::validate)]`, then run
-it through `load_config` or `config-validate`. Required fields and final merged
+it through `load_config` or `validate-config`. Required fields and final merged
 config validation also use those runtime paths.
 
 ## TOML

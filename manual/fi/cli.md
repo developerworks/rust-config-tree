@@ -4,9 +4,9 @@
 
 `ConfigCommand` tarjoaa uudelleenkaytettavat clap-alikomennot:
 
-- `config-template`
-- `config-schema`
-- `config-validate`
+- `generate-template`
+- `generate-schema`
+- `validate-config`
 - `completions`
 - `install-completions`
 - `uninstall-completions`
@@ -81,30 +81,30 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 ## Konfiguraatiomallit
 
 ```bash
-demo config-template
+demo generate-template
 ```
 
 Komento kirjoittaa mallit hakemistoon `config/<root_config_name>/`. Jos `--output` saa polun, vain tiedostonimi kaytetaan. Jos tulostetiedoston nimea ei anneta, komento kirjoittaa `config/<root_config_name>/<root_config_name>.example.yaml`. Lisaa `--schema schemas/myapp.schema.json`, jotta luodut TOML-, YAML-, JSON- ja JSON5-mallit sidotaan luotuihin JSON Schema -skeemoihin. Jaetut YAML-mallit sitovat vastaavan osioskeeman. JSON- ja JSON5-mallit saavat `$schema`-kentan, jonka VS Code tunnistaa. Komento kirjoittaa myos juuri- ja osioskeemat valittuun skeemapolkuun.
 
 ```bash
-demo config-template --output app_config.example.toml --schema schemas/myapp.schema.json
+demo generate-template --output app_config.example.toml --schema schemas/myapp.schema.json
 ```
 
 Luo juuri- ja osio-JSON Schema -skeemat:
 
 ```bash
-demo config-schema
+demo generate-schema
 ```
 
-Ilman `--output`-arvoa `config-schema` kirjoittaa juuriskeeman tiedostoon `config/<root_config_name>/<root_config_name>.schema.json`.
+Ilman `--output`-arvoa `generate-schema` kirjoittaa juuriskeeman tiedostoon `config/<root_config_name>/<root_config_name>.schema.json`.
 
 Validoi koko runtime-konfiguraatiopuu:
 
 ```bash
-demo config-validate
+demo validate-config
 ```
 
-Luodut editoriskeemat valttavat tarkoituksella required-kenttien diagnostiikkaa jaetuille tiedostoille. `config-validate` lataa includet, kayttaa oletusarvot ja ajaa lopullisen `confique`-validoinnin, mukaan lukien `#[config(validate = Self::validate)]`-attribuutilla maaritellyt validaattorit. Luodut `*.schema.json`-tiedostot ovat IDE-taydennysta ja editorin perustarkistuksia varten, eivat kentta-arvon kelvollisuuden arviointiin. Se tulostaa `Configuration is ok`, kun validointi onnistuu.
+Luodut editoriskeemat valttavat tarkoituksella required-kenttien diagnostiikkaa jaetuille tiedostoille. `validate-config` lataa includet, kayttaa oletusarvot ja ajaa lopullisen `confique`-validoinnin, mukaan lukien `#[config(validate = Self::validate)]`-attribuutilla maaritellyt validaattorit. Luodut `*.schema.json`-tiedostot ovat IDE-taydennysta ja editorin perustarkistuksia varten, eivat kentta-arvon kelvollisuuden arviointiin. Se tulostaa `Configuration is ok`, kun validointi onnistuu.
 
 ## Shell-taydennykset
 
