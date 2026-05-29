@@ -179,6 +179,8 @@ Mallit renderoidaan samalla skeemalla ja include-lapikaynnin saannoilla. Tuloste
 - `.json` ja `.json5` tuottavat JSON5-yhteensopivia malleja
 - tuntematon tai puuttuva paate tuottaa YAMLia
 
+YAML-, TOML- ja JSON5-mallit kirjoittavat oletusarvot kommentoimattomina suoraan ladattavaksi; pakolliset kentat ilman oletusarvoa sailyttavat selitekommentit ja tyhjat paikat. Kaikki kolme muotoa tukevat ylatason `include`-kenttaa, esimerkiksi TOML `include = ["server.toml"]` tai JSON5 `include: ["server.json"]`.
+
 Kayta `write_config_schemas`-funktiota Draft 7 JSON Schema -skeemojen luontiin juurikonfiguraatiolle ja jaetuille sisakkaisille osioille. Luodut skeemat jattavat `required`-rajoitteet pois, jotta IDEt voivat tarjota taydennysta osittaisille konfiguraatiotiedostoille ilman puuttuvien kenttien virheilmoituksia. Luodut `*.schema.json`-tiedostot ovat vain IDE-taydennysta ja editorin perustarkistuksia varten; ne eivat paata, onko konkreettinen kentan arvo sovellukselle kelvollinen. Kentta-arvojen validointi toteutetaan koodissa `#[config(validate = Self::validate)]`-attribuutilla ja suoritetaan `load_config`- tai `validate-config`-polussa:
 
 ```rust

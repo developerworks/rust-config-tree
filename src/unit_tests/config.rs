@@ -678,6 +678,9 @@ fn template_targets_with_schema_add_toml_and_yaml_directives() {
             .content
             .starts_with("#:schema ./schemas/myapp.schema.json\n\n")
     );
+    assert!(targets[0].content.contains("include = [\"server.yaml\"]"));
+    assert!(targets[0].content.contains("mode = \"paper\""));
+    assert!(!targets[0].content.contains("#mode ="));
     assert!(!targets[0].content.contains("$schema"));
 
     assert_eq!(targets[1].path, root.join("server.yaml"));
@@ -924,6 +927,32 @@ fn unmarked_nested_sections_stay_in_root_template_and_schema() {
     assert!(!schema_targets[0].content.contains("x-tree-split"));
 
     let _ = fs::remove_dir_all(root);
+}
+
+/// Verifies TOML and JSON templates emit uncommented default values.
+#[test]
+fn inline_template_renders_uncommented_defaults_in_toml_and_json() {
+    let toml = template_for_path::<InlineTemplateConfig>("config.example.toml").unwrap();
+    assert!(toml.contains("value = \"inline\""));
+    assert!(!toml.contains("#value = \"inline\""));
+
+    let json = template_for_path::<InlineTemplateConfig>("config.example.json").unwrap();
+    assert!(json.contains("value: \"inline\","));
+    assert!(!json.contains("//value: \"inline\""));
+}
+
+/// Verifies env-only fields are omitted from generated TOML and JSON templates.
+#[test]
+fn env_only_fields_are_omitted_from_toml_and_json_templates() {
+    let toml = template_for_path::<EnvOnlyTemplateConfig>("config.example.toml").unwrap();
+    assert!(toml.contains("mode = \"visible\""));
+    assert!(!toml.contains("secret ="));
+    assert!(!toml.contains("[wallet]"));
+
+    let json = template_for_path::<EnvOnlyTemplateConfig>("config.example.json").unwrap();
+    assert!(json.contains("mode: \"visible\","));
+    assert!(!json.contains("secret:"));
+    assert!(!json.contains("wallet:"));
 }
 
 /// Verifies env-only fields are omitted from generated YAML templates and schemas.

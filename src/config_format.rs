@@ -1,9 +1,4 @@
-//! Format inference and renderer option presets.
-//!
-//! Runtime loading and template rendering both use [`ConfigFormat`] so unknown
-//! or extensionless files consistently fall back to YAML. The private option
-//! helpers keep generated templates comment-rich and visually aligned across
-//! YAML, TOML, and JSON5.
+//! Format inference for config files and generated templates.
 
 use std::{ffi::OsStr, path::Path};
 
@@ -49,75 +44,4 @@ impl ConfigFormat {
             Some("yaml" | "yml") | Some(_) | None => Self::Yaml,
         }
     }
-}
-
-/// Builds the YAML renderer options used by default templates.
-///
-/// # Arguments
-///
-/// This function has no arguments.
-///
-/// # Returns
-///
-/// Returns YAML format options shared by generated templates.
-///
-/// # Examples
-///
-/// ```no_run
-/// let _ = ();
-/// ```
-pub(crate) fn yaml_options() -> confique::yaml::FormatOptions {
-    let mut options = confique::yaml::FormatOptions::default();
-    options.indent = 2;
-    options.general.comments = true;
-    options.general.env_keys = true;
-    options.general.nested_field_gap = 1;
-    options
-}
-
-/// Builds the TOML renderer options used by default templates.
-///
-/// # Arguments
-///
-/// This function has no arguments.
-///
-/// # Returns
-///
-/// Returns TOML format options shared by generated templates.
-///
-/// # Examples
-///
-/// ```no_run
-/// let _ = ();
-/// ```
-pub(crate) fn toml_options() -> confique::toml::FormatOptions {
-    let mut options = confique::toml::FormatOptions::default();
-    options.general.comments = true;
-    options.general.env_keys = true;
-    options.general.nested_field_gap = 1;
-    options
-}
-
-/// Builds the JSON5 renderer options used by default templates.
-///
-/// # Arguments
-///
-/// This function has no arguments.
-///
-/// # Returns
-///
-/// Returns JSON5 format options shared by generated templates.
-///
-/// # Examples
-///
-/// ```no_run
-/// let _ = ();
-/// ```
-pub(crate) fn json5_options() -> confique::json5::FormatOptions {
-    let mut options = confique::json5::FormatOptions::default();
-    options.indent = 2;
-    options.general.comments = true;
-    options.general.env_keys = true;
-    options.general.nested_field_gap = 1;
-    options
 }

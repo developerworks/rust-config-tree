@@ -204,6 +204,11 @@ output format is inferred from the output path:
 - `.json` and `.json5` generate JSON5-compatible templates
 - unknown or missing extensions generate YAML
 
+YAML, TOML, and JSON5 templates write uncommented default values for direct
+loading; required fields without defaults keep explanatory comments and empty
+placeholders. All three formats support a top-level `include` field, for example
+TOML `include = ["server.toml"]` or JSON5 `include: ["server.json"]`.
+
 Use `write_config_schemas` to create Draft 7 JSON Schemas for the root config
 and split nested sections. Mark a nested field with
 `#[schemars(extend("x-tree-split" = true))]` when it should be generated as its

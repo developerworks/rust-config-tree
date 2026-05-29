@@ -213,6 +213,8 @@ uitvoerformaat wordt afgeleid uit het uitvoerpad:
 - `.json` en `.json5` genereren JSON5-compatibele sjablonen
 - onbekende of ontbrekende extensies genereren YAML
 
+YAML-, TOML- en JSON5-sjablonen schrijven standaardwaarden zonder commentaar voor direct laden; verplichte velden zonder standaardwaarde behouden toelichtende commentaren en lege placeholders. Alle drie de formaten ondersteunen een top-level `include`-veld, bijvoorbeeld TOML `include = ["server.toml"]` of JSON5 `include: ["server.json"]`.
+
 Gebruik `write_config_schemas` om Draft 7 JSON Schemas voor de rootconfiguratie
 en gesplitste geneste secties te maken. De gegenereerde schema's laten `required`-regels
 weg, zodat IDE's completion kunnen bieden voor gedeeltelijke configuratiebestanden

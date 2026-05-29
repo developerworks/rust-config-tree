@@ -5,6 +5,7 @@ use std::path::{Path, PathBuf};
 use confique::meta::{Expr, FieldKind, LeafKind, MapKey, Meta};
 
 use super::{
+    fields::{has_renderable_fields, is_env_only_field},
     render::{quote_path, render_yaml_include},
     section::meta_at_path,
 };
@@ -37,12 +38,12 @@ pub(super) fn render_yaml_template(
     env_only_paths: &[Vec<&'static str>],
 ) -> String {
     let mut output = String::new();
-    if !include_paths.is_empty() {
-        output.push_str(&render_yaml_include(include_paths));
-        output.push('\n');
-    }
 
     if section_path.is_empty() {
+        if !include_paths.is_empty() {
+            output.push_str(&render_yaml_include(include_paths));
+            output.push('\n');
+        }
         render_yaml_fields(
             meta,
             &mut Vec::new(),
@@ -53,7 +54,14 @@ pub(super) fn render_yaml_template(
             &mut output,
         );
     } else {
-        render_yaml_section(meta, section_path, split_paths, env_only_paths, &mut output);
+        render_yaml_section(
+            meta,
+            section_path,
+            include_paths,
+            split_paths,
+            env_only_paths,
+            &mut output,
+        );
     }
 
     ensure_single_trailing_newline(&mut output);
@@ -82,6 +90,7 @@ pub(super) fn render_yaml_template(
 fn render_yaml_section(
     meta: &'static Meta,
     section_path: &[&'static str],
+    include_paths: &[PathBuf],
     split_paths: &[Vec<&'static str>],
     env_only_paths: &[Vec<&'static str>],
     output: &mut String,
@@ -90,11 +99,17 @@ fn render_yaml_section(
     let mut current_path = Vec::new();
 
     for (depth, section) in section_path.iter().enumerate() {
-        // Section templates remain valid partial YAML. Ancestor section keys are
-        // emitted so editors show context.
-        write_yaml_indent(output, depth);
-        output.push_str(section);
-        output.push_str(":\n");
+        let is_target_section = depth + 1 == section_path.len();
+        if is_target_section {
+            output.push_str(section);
+            output.push_str(":\n");
+        } else {
+            // Ancestor sections stay commented so the file opens on the target section.
+            write_yaml_indent(output, depth);
+            output.push('#');
+            output.push_str(section);
+            output.push_str(":\n");
+        }
         current_path.push(*section);
 
         let Some(next_meta) = meta_at_path(current_meta, &[*section]) else {
@@ -103,12 +118,17 @@ fn render_yaml_section(
         current_meta = next_meta;
     }
 
+    if !include_paths.is_empty() {
+        append_yaml_include(output, include_paths, 1);
+        output.push('\n');
+    }
+
     render_yaml_fields(
         current_meta,
         &mut current_path,
         split_paths,
         env_only_paths,
-        section_path.len(),
+        1,
         false,
         output,
     );
@@ -183,7 +203,7 @@ fn render_yaml_fields(
         }
 
         let child_split_paths = if split_descendant { split_paths } else { &[] };
-        if !has_renderable_yaml_fields(meta, current_path, child_split_paths, env_only_paths, false)
+        if !has_renderable_fields(meta, current_path, child_split_paths, env_only_paths, false)
         {
             current_path.pop();
             continue;
@@ -215,101 +235,6 @@ fn render_yaml_fields(
         );
         current_path.pop();
     }
-}
-
-/// Returns whether `meta` has any fields that should be rendered.
-///
-/// # Arguments
-///
-/// - `meta`: Metadata node to inspect.
-/// - `current_path`: Section path for `meta`.
-/// - `split_paths`: Section paths split into separate templates.
-/// - `env_only_paths`: Leaf field paths omitted from generated config files.
-/// - `skip_include_field`: Whether to omit the root include field.
-///
-/// # Returns
-///
-/// Returns `true` when at least one leaf or nested section is renderable.
-///
-/// # Examples
-///
-/// ```no_run
-/// let _ = ();
-/// ```
-fn has_renderable_yaml_fields(
-    meta: &'static Meta,
-    current_path: &[&'static str],
-    split_paths: &[Vec<&'static str>],
-    env_only_paths: &[Vec<&'static str>],
-    skip_include_field: bool,
-) -> bool {
-    for field in meta.fields {
-        let FieldKind::Leaf { .. } = field.kind else {
-            continue;
-        };
-
-        if skip_include_field && current_path.is_empty() && field.name == "include" {
-            continue;
-        }
-
-        if !is_env_only_field(current_path, field.name, env_only_paths) {
-            return true;
-        }
-    }
-
-    for field in meta.fields {
-        let FieldKind::Nested { meta } = field.kind else {
-            continue;
-        };
-
-        let mut child_path = current_path.to_vec();
-        child_path.push(field.name);
-
-        let split_exact = split_paths.iter().any(|path| path == &child_path);
-        if split_exact {
-            continue;
-        }
-
-        let split_descendant = split_paths
-            .iter()
-            .any(|path| path.starts_with(&child_path) && path.len() > child_path.len());
-        let child_split_paths = if split_descendant { split_paths } else { &[] };
-
-        if has_renderable_yaml_fields(meta, &child_path, child_split_paths, env_only_paths, false) {
-            return true;
-        }
-    }
-
-    false
-}
-
-/// Returns whether a leaf field path is marked env-only.
-///
-/// # Arguments
-///
-/// - `current_path`: Section path for the field.
-/// - `field_name`: Leaf field name.
-/// - `env_only_paths`: Leaf field paths omitted from generated config files.
-///
-/// # Returns
-///
-/// Returns `true` when the full field path is in `env_only_paths`.
-///
-/// # Examples
-///
-/// ```no_run
-/// let _ = ();
-/// ```
-fn is_env_only_field(
-    current_path: &[&'static str],
-    field_name: &'static str,
-    env_only_paths: &[Vec<&'static str>],
-) -> bool {
-    env_only_paths.iter().any(|path| {
-        path.len() == current_path.len() + 1
-            && path.starts_with(current_path)
-            && path.last() == Some(&field_name)
-    })
 }
 
 /// Renders one leaf field with docs, environment hint, and default value.
@@ -510,5 +435,17 @@ fn render_plain_or_quoted_string(value: &str) -> String {
 fn write_yaml_indent(output: &mut String, depth: usize) {
     for _ in 0..depth {
         output.push_str("  ");
+    }
+}
+
+/// Appends an `include` list indented for a nested section template.
+fn append_yaml_include(output: &mut String, paths: &[PathBuf], depth: usize) {
+    write_yaml_indent(output, depth);
+    output.push_str("include:\n");
+    for path in paths {
+        write_yaml_indent(output, depth + 1);
+        output.push_str("- ");
+        output.push_str(&quote_path(path));
+        output.push('\n');
     }
 }

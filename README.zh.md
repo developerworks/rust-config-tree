@@ -180,6 +180,8 @@ fn load_with_cli_overrides(cli_mode: Option<String>) -> Result<AppConfig, Box<dy
 - `.json` 和 `.json5` 会生成 JSON5-compatible(JSON5 兼容) 模板。
 - 未知或缺失扩展名会生成 YAML。
 
+YAML、TOML 和 JSON5 模板会写出带默认值的未注释配置项，便于直接加载；无默认值的必填字段仍保留说明注释和空占位。三种格式均支持顶层 `include` 字段，例如 TOML 的 `include = ["server.toml"]` 或 JSON5 的 `"include": ["server.json"]`。
+
 使用 `write_config_schemas` 可以为 root config(根配置) 和显式拆分的嵌套
 section(配置段) 生成 Draft 7 JSON Schema(JSON 结构定义)。如果 nested(嵌套)
 字段需要独立生成 `*.yaml` 和 `<section>.schema.json`，就使用

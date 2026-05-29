@@ -213,6 +213,8 @@ gerendert. Das Ausgabeformat wird aus dem Ausgabepfad abgeleitet:
 - `.json` und `.json5` erzeugen JSON5-kompatible Vorlagen
 - unbekannte oder fehlende Erweiterungen erzeugen YAML
 
+YAML-, TOML- und JSON5-Vorlagen schreiben Standardwerte als unkommentierte Eintraege fuer direktes Laden; Pflichtfelder ohne Standardwert behalten Erklaerungskommentare und leere Platzhalter. Alle drei Formate unterstuetzen ein top-level `include`-Feld, zum Beispiel TOML `include = ["server.toml"]` oder JSON5 `include: ["server.json"]`.
+
 Verwende `write_config_schemas`, um Draft-7-JSON-Schemas fuer die
 Root-Konfiguration und explizit aufgeteilte verschachtelte Abschnitte zu
 erzeugen. Die erzeugten Schemas lassen `required`-Einschraenkungen weg, damit

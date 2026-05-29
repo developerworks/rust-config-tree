@@ -198,6 +198,8 @@ output path から推定されます。
 - `.json` と `.json5` は JSON5-compatible template
 - unknown extension または extension なしは YAML
 
+YAML、TOML、JSON5 template は default 付き field をコメントなしで書き出し、そのまま load できます。default のない必須 field は説明 comment と空 placeholder を残します。3 形式とも top-level `include` をサポートし、例: TOML `include = ["server.toml"]`、JSON5 `include: ["server.json"]`.
+
 `write_config_schemas` は root config と split nested section の Draft 7 JSON Schema
 を生成します。生成 schema は `required` constraint を省略するため、IDE は
 partial config file に補完を出しながら missing field diagnostic を出しません。

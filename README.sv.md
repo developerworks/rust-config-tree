@@ -205,6 +205,8 @@ harleds fran utdatasokvagen:
 - `.json` och `.json5` genererar JSON5-kompatibla mallar
 - okanda eller saknade filandelse genererar YAML
 
+YAML-, TOML- och JSON5-mallar skriver standardvarden utan kommentar for direkt laddning; obligatoriska falt utan standardvarde behaller forklarande kommentarer och tomma platshallare. Alla tre format stodjer ett top-level `include`-falt, till exempel TOML `include = ["server.toml"]` eller JSON5 `include: ["server.json"]`.
+
 Anvand `write_config_schemas` for att skapa Draft 7 JSON Schemas for
 rotkonfigurationen och `x-tree-split`-markerade nastlade sektioner. De genererade schemana utelamnar
 `required`-begransningar sa IDE:er kan erbjuda komplettering for partiella

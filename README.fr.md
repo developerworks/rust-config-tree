@@ -218,6 +218,8 @@ d'inclusions. Le format de sortie est deduit du chemin de sortie :
 - `.json` et `.json5` generent des modeles compatibles JSON5 ;
 - les extensions inconnues ou absentes generent du YAML.
 
+Les modeles YAML, TOML et JSON5 ecrivent les valeurs par defaut sans commentaire pour un chargement direct ; les champs obligatoires sans valeur par defaut conservent des commentaires explicatifs et des marqueurs vides. Les trois formats prennent en charge un champ `include` de niveau superieur, par exemple TOML `include = ["server.toml"]` ou JSON5 `include: ["server.json"]`.
+
 Utilisez `write_config_schemas` pour creer des schemas JSON Draft 7 pour la
 configuration racine et les sections imbriquees decoupees. Les schemas generes omettent
 les contraintes `required` afin que les IDE puissent proposer la completion pour

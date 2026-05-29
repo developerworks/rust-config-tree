@@ -212,6 +212,8 @@ includes. O formato de saida e inferido pelo caminho de saida:
 - `.json` e `.json5` geram modelos compativeis com JSON5
 - extensoes desconhecidas ou ausentes geram YAML
 
+Modelos YAML, TOML e JSON5 escrevem valores padrao sem comentario para carregamento direto; campos obrigatorios sem valor padrao mantem comentarios explicativos e marcadores vazios. Os tres formatos suportam um campo `include` de nivel superior, por exemplo TOML `include = ["server.toml"]` ou JSON5 `include: ["server.json"]`.
+
 Use `write_config_schemas` para criar JSON Schemas Draft 7 para a configuracao
 raiz e secoes aninhadas marcadas para divisao. Os esquemas gerados omitem restricoes `required` para
 que IDEs possam oferecer completamento em arquivos de configuracao parciais sem

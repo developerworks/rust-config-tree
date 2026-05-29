@@ -215,6 +215,8 @@ recorrido de includes. El formato de salida se infiere de la ruta de salida:
 - `.json` y `.json5` generan plantillas compatibles con JSON5
 - extensiones desconocidas o ausentes generan YAML
 
+Las plantillas YAML, TOML y JSON5 escriben valores por defecto sin comentar para una carga directa; los campos obligatorios sin valor por defecto conservan comentarios explicativos y marcadores vacios. Los tres formatos admiten un campo `include` de nivel superior, por ejemplo TOML `include = ["server.toml"]` o JSON5 `include: ["server.json"]`.
+
 Usa `write_config_schemas` para crear JSON Schemas Draft 7 para la
 configuración raíz y las secciones marcadas con `x-tree-split`. Los esquemas generados omiten
 restricciones `required` para que los IDE puedan ofrecer completado en archivos

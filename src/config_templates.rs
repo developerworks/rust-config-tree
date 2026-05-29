@@ -20,10 +20,13 @@ use crate::{
 };
 
 mod binding;
+mod fields;
 mod includes;
+mod json5;
 mod render;
 mod section;
 mod target;
+mod toml;
 mod yaml;
 
 use binding::{schema_path_for_template_target, template_with_schema_directive};

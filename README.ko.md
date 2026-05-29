@@ -200,6 +200,8 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 - `.json` 및 `.json5`는 JSON5 호환 템플릿 생성
 - 알 수 없거나 없는 확장자는 YAML 생성
 
+YAML, TOML, JSON5 template은 default가 있는 필드를 주석 없이 써서 바로 load할 수 있습니다. default가 없는 필수 필드는 설명 주석과 빈 placeholder를 유지합니다. 세 형식 모두 top-level `include`를 지원하며, 예: TOML `include = ["server.toml"]`, JSON5 `include: ["server.json"]`.
+
 `write_config_schemas`를 사용해 루트 설정과 분할된 중첩 섹션의 Draft 7 JSON Schema를
 생성합니다. 생성된 스키마는 `required` 제약을 생략하므로, IDE가 부분 설정 파일에
 대해 누락 필드 오류를 보고하지 않고 완성을 제공할 수 있습니다.
