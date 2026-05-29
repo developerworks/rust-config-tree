@@ -94,9 +94,8 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 demo generate-template
 ```
 
-El comando escribe plantillas bajo `config/<root_config_name>/`. Si `--output`
-recibe una ruta, solo se usa el nombre de archivo. Si no se proporciona un
-nombre de archivo de salida, el comando escribe
+El comando escribe plantillas en la ruta de salida indicada por `--output`. Si
+no se proporciona `--output`, el comando escribe
 `config/<root_config_name>/<root_config_name>.example.yaml`. Añade
 `--schema schemas/myapp.schema.json` para enlazar plantillas TOML, YAML, JSON y
 JSON5 generadas a JSON Schemas generados. Las plantillas YAML divididas enlazan

@@ -90,9 +90,8 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 demo generate-template
 ```
 
-Kommandot skriver mallar under `config/<root_config_name>/`. Om `--output` far
-en sokvag anvands bara filnamnet. Om inget utdatafilnamn anges skriver
-kommandot `config/<root_config_name>/<root_config_name>.example.yaml`. Lagg till
+Kommandot skriver mallar till utdatasokvagen som anges av `--output`. Om inget
+`--output` anges skriver kommandot `config/<root_config_name>/<root_config_name>.example.yaml`. Lagg till
 `--schema schemas/myapp.schema.json` for att binda genererade TOML-, YAML-,
 JSON- och JSON5-mallar till genererade JSON Schemas. Delade YAML-mallar binder
 matchande sektionsschema. JSON- och JSON5-mallar far ett `$schema`-falt som

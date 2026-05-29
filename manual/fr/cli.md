@@ -93,9 +93,8 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 demo generate-template
 ```
 
-La commande ecrit les modeles sous `config/<root_config_name>/`. Si `--output`
-recoit un chemin, seul le nom de fichier est utilise. Si aucun nom de fichier de
-sortie n'est fourni, la commande ecrit
+La commande ecrit les modeles dans le chemin de sortie indique par `--output`.
+Si aucun `--output` n'est fourni, la commande ecrit
 `config/<root_config_name>/<root_config_name>.example.yaml`. Ajoutez
 `--schema schemas/myapp.schema.json` pour lier les modeles TOML, YAML, JSON et
 JSON5 generes aux schemas JSON generes. Les modeles YAML separes lient le

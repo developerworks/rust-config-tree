@@ -48,8 +48,7 @@ pub(crate) fn write_template(path: &Path, content: &str) -> ConfigResult<()> {
 /// - `output`: Optional user-provided output path. When omitted, the root
 ///   config type name is converted to
 ///   `config/<root_config_name>/<root_config_name>.example.yaml`.
-///   When provided, only the file name is used and it is written under the same
-///   root config directory.
+///   When provided, the full output path is used.
 ///
 /// # Returns
 ///
@@ -63,12 +62,7 @@ pub(crate) fn write_template(path: &Path, content: &str) -> ConfigResult<()> {
 #[allow(dead_code)]
 pub(crate) fn resolve_config_template_output<S>(output: Option<PathBuf>) -> ConfigResult<PathBuf> {
     let current_dir = std::env::current_dir()?;
-    let output = output
-        .as_deref()
-        .and_then(Path::file_name)
-        .map(PathBuf::from)
-        .map(|file_name| default_config_output_dir::<S>().join(file_name))
-        .unwrap_or_else(default_config_template_output::<S>);
+    let output = output.unwrap_or_else(default_config_template_output::<S>);
     let output = current_dir.join(output);
 
     Ok(normalize_lexical(output))

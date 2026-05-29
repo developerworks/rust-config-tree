@@ -181,6 +181,28 @@ fn config_template_defaults_use_root_config_snake_case_name() {
     );
 }
 
+#[test]
+fn config_template_output_uses_provided_path() {
+    let _guard = CURRENT_DIR_LOCK.lock().unwrap();
+    let current_dir = std::env::current_dir().unwrap();
+    let root = temp_dir_path("resolve-generate-template-output");
+    fs::create_dir_all(&root).unwrap();
+
+    std::env::set_current_dir(&root).unwrap();
+    let resolved_root = std::env::current_dir().unwrap();
+    let output = resolve_config_template_output::<TestConfig>(Some(PathBuf::from(
+        "examples/config.example.toml",
+    )));
+    std::env::set_current_dir(current_dir).unwrap();
+
+    assert_eq!(
+        output.unwrap(),
+        resolved_root.join("examples/config.example.toml")
+    );
+
+    let _ = fs::remove_dir_all(root);
+}
+
 /// Verifies default target names follow any root ConfigSchema structure name.
 ///
 /// # Arguments
@@ -384,7 +406,8 @@ fn handle_config_command_writes_templates_for_consumer_schema() {
     let root = temp_dir_path("handle-generate-template");
     fs::create_dir_all(root.join("config")).unwrap();
     let config_path = root.join("config.yaml");
-    let output_path = root.join("examples").join("config.example.yaml");
+    let output_arg = PathBuf::from("examples/config.example.yaml");
+    let output_path = root.join(&output_arg);
     fs::write(
         &config_path,
         concat!("include:\n", "  - config/server.yaml\n",),
@@ -395,7 +418,7 @@ fn handle_config_command_writes_templates_for_consumer_schema() {
     std::env::set_current_dir(&root).unwrap();
     let result = handle_config_command::<DemoCli, TestConfig>(
         ConfigCommand::GenerateTemplate {
-            output: Some(output_path.clone()),
+            output: Some(output_arg),
             schema: Some(PathBuf::from("schemas/config.schema.json")),
         },
         &config_path,
@@ -403,22 +426,21 @@ fn handle_config_command_writes_templates_for_consumer_schema() {
     std::env::set_current_dir(current_dir).unwrap();
     result.unwrap();
 
-    let expected_output = root
+    let default_output_path = root
         .join("config")
         .join("test_config")
         .join("config.example.yaml");
 
     assert!(root.join("schemas").join("config.schema.json").exists());
-    assert!(!output_path.exists());
-    assert!(expected_output.exists());
+    assert!(output_path.exists());
+    assert!(!default_output_path.exists());
     assert!(
-        fs::read_to_string(&expected_output)
+        fs::read_to_string(&output_path)
             .unwrap()
-            .starts_with("# yaml-language-server: $schema=../../schemas/config.schema.json\n\n")
+            .starts_with("# yaml-language-server: $schema=../schemas/config.schema.json\n\n")
     );
     assert!(
-        root.join("config")
-            .join("test_config")
+        root.join("examples")
             .join("config")
             .join("server.yaml")
             .exists()

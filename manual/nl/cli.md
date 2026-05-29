@@ -91,9 +91,8 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 demo generate-template
 ```
 
-De opdracht schrijft sjablonen onder `config/<root_config_name>/`. Als
-`--output` een pad ontvangt, wordt alleen de bestandsnaam gebruikt. Als geen
-uitvoerbestandsnaam is opgegeven, schrijft de opdracht
+De opdracht schrijft sjablonen naar het uitvoerpad dat door `--output` is
+opgegeven. Als geen `--output` is opgegeven, schrijft de opdracht
 `config/<root_config_name>/<root_config_name>.example.yaml`. Voeg
 `--schema schemas/myapp.schema.json` toe om gegenereerde TOML-, YAML-, JSON- en
 JSON5-sjablonen te koppelen aan gegenereerde JSON Schemas. Gesplitste

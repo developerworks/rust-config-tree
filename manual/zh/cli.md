@@ -94,13 +94,13 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 demo generate-template
 ```
 
-命令会在 `config/<root_config_name>/` 下写入模板。如果 `--output` 接收到
-路径，命令只使用其中的文件名。未提供 output file name(输出文件名) 时，命令写入
-`config/<root_config_name>/<root_config_name>.example.yaml`。添加
-`--schema schemas/myapp.schema.json` 后，生成的 TOML、YAML、JSON 和 JSON5 模板会绑定生成的
-JSON Schema(JSON 结构定义)。拆分出的 YAML 模板会绑定对应的
-section schema(配置段结构定义)。该命令也会把 root(根配置) 和
-section schema(配置段结构定义) 写入指定的 schema path(结构定义路径)。
+命令会把模板写入 `--output` 指定的 output path(输出路径). 未提供
+`--output` 时, 命令写入
+`config/<root_config_name>/<root_config_name>.example.yaml`. 添加
+`--schema schemas/myapp.schema.json` 后, 生成的 TOML, YAML, JSON 和 JSON5 模板会绑定生成的
+JSON Schema(JSON 结构定义). 拆分出的 YAML 模板会绑定对应的
+section schema(配置段结构定义). 该命令也会把 root(根配置) 和
+section schema(配置段结构定义) 写入指定的 schema path(结构定义路径).
 
 ```bash
 demo generate-template --output app_config.example.toml --schema schemas/myapp.schema.json

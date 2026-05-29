@@ -96,9 +96,8 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 demo generate-template
 ```
 
-The command writes templates under `config/<root_config_name>/`. If `--output`
-receives a path, only the file name is used. If no output file name is provided,
-the command writes
+The command writes templates to the output path specified by `--output`. If no
+`--output` is provided, the command writes
 `config/<root_config_name>/<root_config_name>.example.yaml`. Add
 `--schema schemas/myapp.schema.json` to bind generated TOML, YAML, JSON, and JSON5 templates
 to generated JSON Schemas. Split YAML templates bind the matching section

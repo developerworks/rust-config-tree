@@ -348,13 +348,13 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 }
 ```
 
-`generate-template --output <file-name>`
-会在 `config/<root_config_name>/` 下写入模板，并使用指定的文件名。如果传入的是路径，只取它的文件名。未提供
-output file name(输出文件名) 时，写入
-`config/<root_config_name>/<root_config_name>.example.yaml`。添加
-`--schema <path>` 后，TOML、YAML、JSON 和 JSON5 模板会绑定生成的
-JSON Schema 集合。这也会把 root schema(根结构定义) 和
-section schema(配置段结构定义) 写入指定的 schema path(结构定义路径)。
+`generate-template --output <path>`
+会把模板写入指定的 output path(输出路径). 未提供
+`--output` 时, 写入
+`config/<root_config_name>/<root_config_name>.example.yaml`. 添加
+`--schema <path>` 后, TOML, YAML, JSON 和 JSON5 模板会绑定生成的
+JSON Schema(JSON 结构定义) 集合. 这也会把 root schema(根结构定义) 和
+section schema(配置段结构定义) 写入指定的 schema path(结构定义路径).
 
 `generate-schema --output <path>` 会写入 root(根配置) 的 Draft 7
 JSON Schema(JSON 结构定义) 和 section schema(配置段结构定义)。未提供

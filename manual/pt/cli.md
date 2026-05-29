@@ -93,9 +93,8 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 demo generate-template
 ```
 
-O comando grava modelos em `config/<root_config_name>/`. Se `--output` receber
-um caminho, somente o nome do arquivo e usado. Se nenhum nome de arquivo de
-saida for fornecido, o comando grava
+O comando grava modelos no caminho de saida indicado por `--output`. Se nenhum
+`--output` for fornecido, o comando grava
 `config/<root_config_name>/<root_config_name>.example.yaml`. Adicione
 `--schema schemas/myapp.schema.json` para vincular modelos TOML, YAML, JSON e
 JSON5 gerados a JSON Schemas gerados. Modelos YAML divididos vinculam o esquema

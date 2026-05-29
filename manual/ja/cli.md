@@ -90,9 +90,8 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 demo generate-template
 ```
 
-この command は `config/<root_config_name>/` の下に template を書きます。
-`--output` に path を渡した場合は file name だけを使います。output file name
-がない場合は
+この command は `--output` が指定した output path に template を書きます。
+`--output` がない場合は
 `config/<root_config_name>/<root_config_name>.example.yaml` を書きます。
 `--schema schemas/myapp.schema.json` を追加すると、generated TOML / YAML /
 JSON / JSON5 template を generated JSON Schema に bind します。split YAML

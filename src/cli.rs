@@ -31,9 +31,9 @@ use crate::{
 pub enum ConfigCommand {
     /// Generate an example config template.
     ///
-    /// The output format is inferred from the extension; unknown or missing extensions use YAML.
+    /// The output format is inferred from the output path extension; unknown or missing extensions use YAML.
     GenerateTemplate {
-        /// Template file name. Defaults to `config/<root-config-name>/<root-config-name>.example.yaml`.
+        /// Template output path. Defaults to `config/<root-config-name>/<root-config-name>.example.yaml`.
         #[arg(long)]
         output: Option<PathBuf>,
 

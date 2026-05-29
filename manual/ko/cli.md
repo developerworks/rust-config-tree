@@ -88,8 +88,7 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 demo generate-template
 ```
 
-명령은 `config/<root_config_name>/` 아래에 템플릿을 씁니다. `--output`이 경로를
-받으면 파일 이름만 사용합니다. 출력 파일 이름을 제공하지 않으면
+명령은 `--output`이 지정한 출력 경로에 템플릿을 씁니다. `--output`을 제공하지 않으면
 `config/<root_config_name>/<root_config_name>.example.yaml`을 씁니다. 생성된
 TOML, YAML, JSON 및 JSON5 템플릿을 생성된 JSON Schema에 바인딩하려면
 `--schema schemas/myapp.schema.json`를 추가하세요. 분할 YAML 템플릿은 대응하는

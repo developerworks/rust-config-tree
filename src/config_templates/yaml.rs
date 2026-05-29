@@ -91,9 +91,8 @@ fn render_yaml_section(
 
     for (depth, section) in section_path.iter().enumerate() {
         // Section templates remain valid partial YAML. Ancestor section keys are
-        // emitted as comments so editors show context without duplicating data.
+        // emitted so editors show context.
         write_yaml_indent(output, depth);
-        output.push('#');
         output.push_str(section);
         output.push_str(":\n");
         current_path.push(*section);
@@ -202,7 +201,6 @@ fn render_yaml_fields(
             output.push('\n');
         }
         write_yaml_indent(output, depth);
-        output.push('#');
         output.push_str(field.name);
         output.push_str(":\n");
 
@@ -365,7 +363,6 @@ fn render_yaml_leaf(
     match kind {
         LeafKind::Optional => {
             write_yaml_indent(output, depth);
-            output.push('#');
             output.push_str(name);
             output.push_str(":\n");
         }
@@ -377,7 +374,6 @@ fn render_yaml_leaf(
                     output.push_str(&render_yaml_expr(&default));
                     output.push('\n');
                     write_yaml_indent(output, depth);
-                    output.push('#');
                     output.push_str(name);
                     output.push_str(": ");
                     output.push_str(&render_yaml_expr(&default));
@@ -386,7 +382,6 @@ fn render_yaml_leaf(
                 None => {
                     output.push_str("# Required! This value must be specified.\n");
                     write_yaml_indent(output, depth);
-                    output.push('#');
                     output.push_str(name);
                     output.push_str(":\n");
                 }

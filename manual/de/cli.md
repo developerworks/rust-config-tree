@@ -92,9 +92,8 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 demo generate-template
 ```
 
-Der Befehl schreibt Vorlagen unter `config/<root_config_name>/`. Wenn `--output`
-einen Pfad erhaelt, wird nur der Dateiname verwendet. Wenn kein
-Ausgabe-Dateiname angegeben wird, schreibt der Befehl
+Der Befehl schreibt Vorlagen in den von `--output` angegebenen Ausgabepfad.
+Wenn kein `--output` angegeben wird, schreibt der Befehl
 `config/<root_config_name>/<root_config_name>.example.yaml`. Fuege
 `--schema schemas/myapp.schema.json` hinzu, um erzeugte TOML-, YAML-, JSON- und
 JSON5-Vorlagen an erzeugte JSON-Schemas zu binden. Aufgeteilte YAML-Vorlagen

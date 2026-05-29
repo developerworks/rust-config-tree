@@ -84,7 +84,7 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 demo generate-template
 ```
 
-Komento kirjoittaa mallit hakemistoon `config/<root_config_name>/`. Jos `--output` saa polun, vain tiedostonimi kaytetaan. Jos tulostetiedoston nimea ei anneta, komento kirjoittaa `config/<root_config_name>/<root_config_name>.example.yaml`. Lisaa `--schema schemas/myapp.schema.json`, jotta luodut TOML-, YAML-, JSON- ja JSON5-mallit sidotaan luotuihin JSON Schema -skeemoihin. Jaetut YAML-mallit sitovat vastaavan osioskeeman. JSON- ja JSON5-mallit saavat `$schema`-kentan, jonka VS Code tunnistaa. Komento kirjoittaa myos juuri- ja osioskeemat valittuun skeemapolkuun.
+Komento kirjoittaa mallit `--output`-arvon osoittamaan tulostepolkuun. Jos `--output`-arvoa ei anneta, komento kirjoittaa `config/<root_config_name>/<root_config_name>.example.yaml`. Lisaa `--schema schemas/myapp.schema.json`, jotta luodut TOML-, YAML-, JSON- ja JSON5-mallit sidotaan luotuihin JSON Schema -skeemoihin. Jaetut YAML-mallit sitovat vastaavan osioskeeman. JSON- ja JSON5-mallit saavat `$schema`-kentan, jonka VS Code tunnistaa. Komento kirjoittaa myos juuri- ja osioskeemat valittuun skeemapolkuun.
 
 ```bash
 demo generate-template --output app_config.example.toml --schema schemas/myapp.schema.json
