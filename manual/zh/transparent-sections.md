@@ -36,10 +36,10 @@ struct AppConfig {
 }
 ```
 
-| 扩展 | 作用 |
-| ---- | ---- |
-| `x-tree-split` | 生成独立 `children.yaml` 模板和 `children.schema.json` |
-| `x-tree-transparent-array` | 运行时与模板层把该段当作 YAML 数组, 而不是嵌套对象 |
+| 扩展                       | 作用                                                     |
+| -------------------------- | -------------------------------------------------------- |
+| `x-tree-split`             | 生成独立 `children.yaml` 模板和 `children.schema.json`   |
+| `x-tree-transparent-array` | 运行时与模板层把该段当作 YAML 数组, 而不是嵌套对象       |
 | `x-tree-inner-field`(可选) | 覆盖 confique(配置结构定义库) 内部字段名, 默认 `"items"` |
 
 ## Rust 类型选择

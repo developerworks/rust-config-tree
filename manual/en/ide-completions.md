@@ -135,11 +135,7 @@ binding:
 {
   "json.schemas": [
     {
-      "fileMatch": [
-        "/config.json",
-        "/config.*.json",
-        "/deploy/*.json"
-      ],
+      "fileMatch": ["/config.json", "/config.*.json", "/deploy/*.json"],
       "url": "./schemas/myapp.schema.json"
     }
   ]

@@ -43,11 +43,11 @@ struct AppConfig {
 }
 ```
 
-| Extension | Purpose |
-| --------- | ------- |
-| `x-tree-split` | Emit a separate `children.yaml` template and `children.schema.json` |
-| `x-tree-transparent-array` | Treat the section as a YAML array at runtime and in templates |
-| `x-tree-inner-field` (optional) | Override the inner `confique` field name; default is `"items"` |
+| Extension                       | Purpose                                                             |
+| ------------------------------- | ------------------------------------------------------------------- |
+| `x-tree-split`                  | Emit a separate `children.yaml` template and `children.schema.json` |
+| `x-tree-transparent-array`      | Treat the section as a YAML array at runtime and in templates       |
+| `x-tree-inner-field` (optional) | Override the inner `confique` field name; default is `"items"`      |
 
 ## Rust Type Options
 
