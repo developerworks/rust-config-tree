@@ -121,7 +121,11 @@ Validate the complete runtime config tree:
 
 ```bash
 demo validate-config
+demo validate-config --config config.yaml
 ```
+
+When `--config` is omitted, `validate-config` uses the consumer default path
+passed to `handle_config_command`.
 
 Generated editor schemas intentionally avoid required-field diagnostics for
 split files. `validate-config` loads includes, applies defaults, and runs final

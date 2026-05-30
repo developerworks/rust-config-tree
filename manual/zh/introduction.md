@@ -44,8 +44,9 @@ log:
 - 它会为生成的 TOML 模板写入 `#:schema`，为 YAML 模板写入
   YAML Language Server(YAML 语言服务器) modeline(模式声明行)，并为
   JSON 和 JSON5 模板写入 `$schema` 字段。
-- 它会按 `x-tree-split` 标记拆分嵌套 section(配置段) 的 YAML 模板。
-- 它内置了用于 config template(配置模板)、JSON Schema(JSON 结构定义) 和
+- 它会按 `x-tree-split` 标记拆分嵌套 section(配置段) 的 YAML 模板.
+- 它会为 `x-tree-transparent-array` 标记的 split section(拆分配置段) 生成 body-only 数组模板, 并在运行时适配透明数组 YAML 形状. 详见 [透明数组 Section(配置段)](transparent-sections.md).
+- 它内置了用于 config template(配置模板), JSON Schema(JSON 结构定义) 和
   shell completion(命令补全) 的 clap(命令行解析库) 子命令。
 - 它为不使用 `confique` 的调用方提供低层 tree API(树形接口)。
 

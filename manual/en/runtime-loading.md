@@ -55,6 +55,21 @@ The high-level loader performs these steps:
 Step 6 is application-specific because this crate cannot infer how a CLI flag
 maps to a schema field.
 
+## Transparent Array Section Adaptation
+
+When the schema marks a section with `x-tree-transparent-array`, the loader
+adapts YAML shapes after the Figment merge and before `confique`
+deserialization:
+
+1. Body-only split files (for example `children.yaml` containing `[...]`) merge
+   into `children: { items: [...] }`.
+2. Single-file `children: [...]` normalizes to the same inner shape.
+3. When the section is omitted entirely at runtime, the library injects
+   `{ items: [] }` so template defaults do not leak in as phantom entries.
+
+Applications call `load_config` directly and do not need post-normalize
+logic. See [Transparent Array Sections](transparent-sections.md) for details.
+
 ## File Formats
 
 The runtime file provider is selected from the config path extension:

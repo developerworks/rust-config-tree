@@ -8,15 +8,16 @@
 use std::path::Path;
 
 use confique::{Config, Layer};
-use figment::{
-    Figment,
-    providers::{Format, Json, Toml, Yaml},
-};
+use figment::Figment;
+use schemars::JsonSchema;
 
 use crate::{
     config::{ConfigResult, ConfigSchema},
     config_env::ConfiqueEnvProvider,
-    config_format::ConfigFormat,
+    config_load_adapt::{
+        TransparentSectionContext, TransparentSectionTracker, is_split_section_file,
+        merge_adapted_file, merge_missing_transparent_sections,
+    },
     config_trace::trace_config_sources,
     path::absolutize_lexical,
     tree::{ConfigSource, ConfigTree, ConfigTreeOptions, IncludeOrder},
@@ -52,8 +53,9 @@ use crate::{
 /// use std::fs;
 /// use confique::Config;
 /// use rust_config_tree::config::{ConfigSchema, load_config};
+/// use schemars::JsonSchema;
 ///
-/// #[derive(Debug, Config)]
+/// #[derive(Debug, Config, JsonSchema)]
 /// struct AppConfig {
 ///     #[config(default = [])]
 ///     include: Vec<std::path::PathBuf>,
@@ -81,7 +83,7 @@ use crate::{
 /// ```
 pub fn load_config<S>(path: impl AsRef<Path>) -> ConfigResult<S>
 where
-    S: ConfigSchema,
+    S: ConfigSchema + JsonSchema,
 {
     let (config, _) = load_config_with_figment::<S>(path)?;
     Ok(config)
@@ -111,8 +113,9 @@ where
 /// use std::fs;
 /// use confique::Config;
 /// use rust_config_tree::config::{ConfigSchema, load_config_with_figment};
+/// use schemars::JsonSchema;
 ///
-/// #[derive(Debug, Config)]
+/// #[derive(Debug, Config, JsonSchema)]
 /// struct AppConfig {
 ///     #[config(default = [])]
 ///     include: Vec<std::path::PathBuf>,
@@ -141,7 +144,7 @@ where
 /// ```
 pub fn load_config_with_figment<S>(path: impl AsRef<Path>) -> ConfigResult<(S, Figment)>
 where
-    S: ConfigSchema,
+    S: ConfigSchema + JsonSchema,
 {
     let figment = build_config_figment::<S>(path)?;
     let config = load_config_from_figment::<S>(&figment)?;
@@ -172,8 +175,9 @@ where
 /// use std::fs;
 /// use confique::Config;
 /// use rust_config_tree::config::{ConfigSchema, build_config_figment};
+/// use schemars::JsonSchema;
 ///
-/// #[derive(Debug, Config)]
+/// #[derive(Debug, Config, JsonSchema)]
 /// struct AppConfig {
 ///     #[config(default = [])]
 ///     include: Vec<std::path::PathBuf>,
@@ -200,17 +204,21 @@ where
 /// ```
 pub fn build_config_figment<S>(path: impl AsRef<Path>) -> ConfigResult<Figment>
 where
-    S: ConfigSchema,
+    S: ConfigSchema + JsonSchema,
 {
     let path = path.as_ref();
     load_dotenv_for_path(path)?;
 
-    let tree = load_layer_tree::<S>(path)?;
+    let context = TransparentSectionContext::for_schema::<S>(path)?;
+    let tree = load_layer_tree::<S>(path, &context)?;
     let mut figment = Figment::new();
+    let mut tracker = TransparentSectionTracker::default();
 
     for node in tree.nodes().iter().rev() {
-        figment = merge_file_provider(figment, node.path());
+        figment = merge_adapted_file::<S>(figment, node.path(), &context, &mut tracker)?;
     }
+
+    figment = merge_missing_transparent_sections(figment, &context, &tracker);
 
     Ok(figment.merge(ConfiqueEnvProvider::new::<S>()))
 }
@@ -238,8 +246,9 @@ where
 /// use std::fs;
 /// use confique::Config;
 /// use rust_config_tree::config::{ConfigSchema, build_config_figment, load_config_from_figment};
+/// use schemars::JsonSchema;
 ///
-/// #[derive(Debug, Config)]
+/// #[derive(Debug, Config, JsonSchema)]
 /// struct AppConfig {
 ///     #[config(default = [])]
 ///     include: Vec<std::path::PathBuf>,
@@ -268,7 +277,7 @@ where
 /// ```
 pub fn load_config_from_figment<S>(figment: &Figment) -> ConfigResult<S>
 where
-    S: ConfigSchema,
+    S: ConfigSchema + JsonSchema,
 {
     let runtime_layer: <S as Config>::Layer = figment.extract()?;
     let config = S::from_layer(runtime_layer.with_fallback(S::Layer::default_values()))?;
@@ -305,37 +314,36 @@ where
     Ok(figment_for_file(path).extract()?)
 }
 
-/// Loads every config layer reachable from the root include tree.
-///
-/// # Type Parameters
-///
-/// - `S`: Config schema type whose layer type is loaded for each file.
-///
-/// # Arguments
-///
-/// - `path`: Root config path used to start include traversal.
-///
-/// # Returns
-///
-/// Returns the loaded config tree containing one `confique` layer per source.
-///
-/// # Examples
-///
-/// ```no_run
-/// let _ = ();
-/// ```
-fn load_layer_tree<S>(path: &Path) -> ConfigResult<ConfigTree<<S as Config>::Layer>>
+fn load_layer_adapted<S>(
+    path: &Path,
+    context: &TransparentSectionContext,
+) -> ConfigResult<<S as Config>::Layer>
 where
-    S: ConfigSchema,
+    S: ConfigSchema + JsonSchema,
 {
-    // Reverse traversal lets later declared includes override earlier files
-    // after the collected nodes are merged from leaves back toward the root.
+    Ok(merge_adapted_file::<S>(Figment::new(), path, context, &mut TransparentSectionTracker::default())?
+        .extract()?)
+}
+
+/// Loads every config layer reachable from the root include tree.
+fn load_layer_tree<S>(
+    path: &Path,
+    context: &TransparentSectionContext,
+) -> ConfigResult<ConfigTree<<S as Config>::Layer>>
+where
+    S: ConfigSchema + JsonSchema,
+{
     Ok(ConfigTreeOptions::default()
         .include_order(IncludeOrder::Reverse)
         .load(
             path,
             |path| -> ConfigResult<ConfigSource<<S as Config>::Layer>> {
-                let layer = load_layer::<S>(path)?;
+                if is_split_section_file::<S>(context, path) {
+                    let layer: <S as Config>::Layer = Figment::new().extract()?;
+                    return Ok(ConfigSource::new(layer, Vec::new()));
+                }
+
+                let layer = load_layer_adapted::<S>(path, context)?;
                 let include_paths = S::include_paths(&layer);
                 Ok(ConfigSource::new(layer, include_paths))
             },
@@ -343,22 +351,11 @@ where
 }
 
 /// Merges one file provider selected from the path extension.
-///
-/// # Arguments
-///
-/// - `figment`: Existing Figment graph to extend.
-/// - `path`: Config file path whose extension selects the provider format.
-///
-/// # Returns
-///
-/// Returns `figment` with the selected file provider merged in.
-///
-/// # Examples
-///
-/// ```no_run
-/// let _ = ();
-/// ```
 fn merge_file_provider(figment: Figment, path: &Path) -> Figment {
+    use figment::providers::{Format, Json, Toml, Yaml};
+
+    use crate::config_format::ConfigFormat;
+
     match ConfigFormat::from_path(path) {
         ConfigFormat::Yaml => figment.merge(Yaml::file_exact(path)),
         ConfigFormat::Toml => figment.merge(Toml::file_exact(path)),

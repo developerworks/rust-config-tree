@@ -14,20 +14,22 @@ cargo run --example config_commands -- generate-schema
 cargo run --example config_commands -- validate-config
 cargo run --example generate_templates
 cargo run --example tree_api
+cargo run --example transparent_array_section
 ```
 
-`config_commands` 的 template(模板) 和 schema(结构定义) 命令使用 CLI 默认路径，
-因此 `AppConfig` 会把生成文件写到 `config/app_config/` 下。
+`config_commands` 的 template(模板) 和 schema(结构定义) 命令使用 CLI 默认路径,
+因此 `AppConfig` 会把生成文件写到 `config/app_config/` 下.
 
-这些示例覆盖以下内容：
+这些示例覆盖以下内容:
 
 - `basic_loading.rs` 会从递归 config tree(配置树) 加载 `confique`
-  schema(结构定义)。
+  schema(结构定义).
 - `cli_overrides.rs` 会将应用 CLI(命令行接口) 参数作为最高优先级
-  Figment(配置合并库) provider(值提供器) 合并。
+  Figment(配置合并库) provider(值提供器) 合并.
 - `config_commands.rs` 会把 `ConfigCommand` flatten(展开) 到应用的
-  clap(命令行解析库) CLI(命令行接口) 中。
+  clap(命令行解析库) CLI(命令行接口) 中.
 - `generate_templates.rs` 会从 schema(结构定义) 写入 root(根配置) 和
-  section(配置段) 的 JSON Schema(JSON 结构定义)，也会写入绑定
-  schema(结构定义) 的 TOML、YAML、JSON 和 JSON5 模板。
-- `tree_api.rs` 会使用低层、格式无关的 include tree API(包含树接口)。
+  section(配置段) 的 JSON Schema(JSON 结构定义), 也会写入绑定
+  schema(结构定义) 的 TOML, YAML, JSON 和 JSON5 模板.
+- `transparent_array_section.rs` 会声明透明 split `children.yaml`, 生成 section schema(配置段结构定义), 并调用 `load_config` 验证加载. 详见 [manual/zh/transparent-sections.md](../manual/zh/transparent-sections.md).
+- `tree_api.rs` 会使用低层, 格式无关的 include tree API(包含树接口).

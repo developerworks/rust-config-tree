@@ -26,6 +26,8 @@ pub use crate::config_templates::{
     write_config_templates_with_schema,
 };
 pub use crate::config_trace::trace_config_sources;
+pub use crate::config_load_adapt::TransparentSectionContext;
+pub use crate::transparent_section::ArraySection;
 
 /// Result type used by the high-level configuration API.
 ///

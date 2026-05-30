@@ -20,7 +20,11 @@ cargo run --example config_commands -- generate-schema
 cargo run --example config_commands -- validate-config
 cargo run --example generate_templates
 cargo run --example tree_api
+cargo run --example transparent_array_section
 ```
 
 The `config_commands` template and schema commands use the CLI defaults, so
 `AppConfig` writes generated files under `config/app_config/`.
+
+See [transparent-sections.md](transparent-sections.md) for transparent array
+section documentation.

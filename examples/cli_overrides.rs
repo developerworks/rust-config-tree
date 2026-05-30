@@ -11,6 +11,7 @@ use clap::Parser;
 use confique::Config;
 use figment::providers::Serialized;
 use rust_config_tree::config::{ConfigSchema, build_config_figment, load_config_from_figment};
+use schemars::JsonSchema;
 use serde::Serialize;
 
 #[derive(Debug, Parser)]
@@ -26,7 +27,7 @@ struct Cli {
     log_level: Option<String>,
 }
 
-#[derive(Debug, Config)]
+#[derive(Debug, Config, JsonSchema)]
 struct AppConfig {
     #[config(default = [])]
     include: Vec<PathBuf>,
@@ -38,7 +39,7 @@ struct AppConfig {
     log: LogConfig,
 }
 
-#[derive(Debug, Config)]
+#[derive(Debug, Config, JsonSchema)]
 struct ServerConfig {
     #[config(default = "127.0.0.1")]
     bind: String,
@@ -47,7 +48,7 @@ struct ServerConfig {
     port: u16,
 }
 
-#[derive(Debug, Config)]
+#[derive(Debug, Config, JsonSchema)]
 struct LogConfig {
     #[config(default = "info")]
     level: String,

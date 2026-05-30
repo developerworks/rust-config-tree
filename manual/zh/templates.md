@@ -168,3 +168,11 @@ server.yaml
 root template(根模板) 会得到 include block(包含块)，`server.yaml`
 只包含 `server` section(配置段)。没有标记的 nested section(嵌套配置段) 会内联
 保留在父模板中；更深层 section(配置段) 只有同样带 `x-tree-split` 时才会继续拆分。
+
+## 透明数组 Section(配置段) 模板
+
+当 nested section(嵌套配置段) 同时标记 `x-tree-transparent-array` 时, section 模板只输出 block YAML(块状 YAML) 数组体. 它不会写入 section 根键(例如 `children:`) 或 `items:` 包裹, 也不会使用 flow 风格 `[{ ... }]`.
+
+对应的 section schema(配置段结构定义) 顶层类型为 `array`, 而不是 `{ items: [...] }` 对象. IDE(集成开发环境) 在编辑 `children.yaml` 这类 split 文件时直接补全数组项.
+
+完整说明见 [透明数组 Section(配置段)](transparent-sections.md).

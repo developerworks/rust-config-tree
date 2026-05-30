@@ -50,9 +50,19 @@ let (config, figment) = load_config_with_figment::<AppConfig>("config.yaml")?;
 8. 应用 `confique` 代码默认值。
 9. 加载器会校验并构造最终 schema(结构定义)。
 
-`load_config` 和 `load_config_with_figment` 执行第 1-5 步和第 7-9 步。
-第 6 步属于应用语义，因为这个 crate(软件包) 无法推断某个
-CLI flag(命令行参数) 应该映射到哪个 schema(结构定义) 字段。
+`load_config` 和 `load_config_with_figment` 执行第 1-5 步和第 7-9 步.
+第 6 步属于应用语义, 因为这个 crate(软件包) 无法推断某个
+CLI flag(命令行参数) 应该映射到哪个 schema(结构定义) 字段.
+
+## 透明数组 Section(配置段) 适配
+
+当 schema(结构定义) 标记了 `x-tree-transparent-array` 时, 加载器会在 Figment(配置合并库) merge(合并) 之后, confique(配置结构定义库) 反序列化之前, 适配 YAML(数据序列化格式) 形状:
+
+1. body-only split 文件(例如 `children.yaml` 内容为 `[...]`) 会 merge 成 `children: { items: [...] }`.
+2. 单文件里的 `children: [...]` 会 normalize(规范化) 为同样的 inner shape(内部形状).
+3. 若运行时配置完全省略该 section, 库会注入 `{ items: [] }`, 避免模板 default(默认值) 在运行时 phantom(幽灵) 注入.
+
+因此应用只需调用 `load_config`, 不需要在加载后再做 post-normalize(后处理规范化). 完整说明见 [透明数组 Section(配置段)](transparent-sections.md).
 
 ## 文件格式
 

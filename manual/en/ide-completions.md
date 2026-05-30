@@ -42,6 +42,48 @@ value validation in code with `#[config(validate = Self::validate)]`, then run
 it through `load_config` or `validate-config`. Required fields and final merged
 config validation also use those runtime paths.
 
+## Transparent Array Sections
+
+Use `x-tree-transparent-array` when a split section should serialize as a bare
+YAML array in both the root config and the split file body. Pair it with
+`transparent_array_section!` or `ArraySection<T>`. See
+[Transparent Array Sections](transparent-sections.md) for the full workflow.
+
+```rust
+use rust_config_tree::transparent_array_section;
+
+transparent_array_section! {
+    pub struct ChildrenSection {
+        #[config(default = [{ "name": "worker" }])]
+        pub items: Vec<ChildDeclaration>,
+    }
+}
+
+#[derive(Debug, Config, JsonSchema)]
+struct AppConfig {
+    #[config(nested)]
+    #[schemars(extend(
+        "x-tree-split" = true,
+        "x-tree-transparent-array" = true
+    ))]
+    children: ChildrenSection,
+}
+```
+
+Behavior:
+
+- `load_config` accepts `children: [...]`, `children:\n  items: [...]`, and
+  body-only `children.yaml`.
+- Generated `children.schema.json` is a top-level `array`, not an
+  `{ items: [...] }` object.
+- Template generation emits block YAML array bodies without `children:` or
+  flow-style `[{ ... }]`.
+
+Optional extension `x-tree-inner-field = "items"` overrides the confique inner
+field name. The default is `"items"`.
+
+Run `cargo run --example transparent_array_section` for a complete demo.
+
 ## TOML
 
 TOML files should bind the schema with a top-of-file `#:schema` directive:

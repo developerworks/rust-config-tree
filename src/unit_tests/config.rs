@@ -53,7 +53,7 @@ impl ConfigSchema for TestConfig {
     }
 }
 
-#[derive(Debug, Config)]
+#[derive(Debug, Config, JsonSchema)]
 #[allow(dead_code)]
 struct DotenvConfig {
     #[config(default = [])]
@@ -84,7 +84,7 @@ impl ConfigSchema for DotenvConfig {
     }
 }
 
-#[derive(Debug, Config)]
+#[derive(Debug, Config, JsonSchema)]
 #[allow(dead_code)]
 struct EnvMappedConfig {
     #[config(default = [])]
@@ -93,7 +93,7 @@ struct EnvMappedConfig {
     database: EnvMappedDatabaseConfig,
 }
 
-#[derive(Debug, Config)]
+#[derive(Debug, Config, JsonSchema)]
 #[allow(dead_code)]
 struct EnvMappedDatabaseConfig {
     #[config(env = "APP_DATABASE_POOL_SIZE", default = 16)]

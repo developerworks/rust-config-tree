@@ -19,7 +19,10 @@ cargo run --example config_commands -- generate-schema
 cargo run --example config_commands -- validate-config
 cargo run --example generate_templates
 cargo run --example tree_api
+cargo run --example transparent_array_section
 ```
 
-`config_commands` 的 template(模板) 和 schema(结构定义) 命令使用 CLI 默认路径，
-因此 `AppConfig` 会把生成文件写到 `config/app_config/` 下。
+`config_commands` 的 template(模板) 和 schema(结构定义) 命令使用 CLI 默认路径,
+因此 `AppConfig` 会把生成文件写到 `config/app_config/` 下.
+
+透明数组 Section(配置段) 的完整说明见 [transparent-sections.md](transparent-sections.md).

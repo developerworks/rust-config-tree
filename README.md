@@ -246,6 +246,34 @@ when editing their own section YAML files. Nested sections without
 `x-tree-split` remain in the root schema because they do not have independent
 template or schema files.
 
+Mark a split nested section with
+`#[schemars(extend("x-tree-transparent-array" = true))]` when the section
+should serialize as a bare YAML array in both the root config and the split
+file body. Pair it with `transparent_array_section!` or `ArraySection<T>` so
+`confique` still stores the data in an inner `items` field while templates,
+schemas, and loaders expose array-shaped YAML:
+
+```rust
+use rust_config_tree::transparent_array_section;
+
+transparent_array_section! {
+    pub struct ChildrenSection {
+        #[config(default = [{ "name": "worker" }])]
+        pub items: Vec<ChildDeclaration>,
+    }
+}
+
+#[derive(Debug, Config, JsonSchema)]
+struct AppConfig {
+    #[config(nested)]
+    #[schemars(extend(
+        "x-tree-split" = true,
+        "x-tree-transparent-array" = true
+    ))]
+    children: ChildrenSection,
+}
+```
+
 Use `write_config_templates` to create a root template and every template file
 reachable from its include tree:
 

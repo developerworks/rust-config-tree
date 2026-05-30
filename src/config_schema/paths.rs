@@ -8,7 +8,10 @@ use serde_json::Value;
 use crate::config::ConfigSchema;
 
 use super::{
-    marker::{ENV_ONLY_SCHEMA_EXTENSION, TREE_SPLIT_SCHEMA_EXTENSION},
+    marker::{
+        DEFAULT_TREE_INNER_FIELD, ENV_ONLY_SCHEMA_EXTENSION, TREE_INNER_FIELD_EXTENSION,
+        TREE_SPLIT_SCHEMA_EXTENSION, TREE_TRANSPARENT_ARRAY_EXTENSION,
+    },
     reference::resolve_schema_reference,
 };
 
@@ -93,6 +96,64 @@ where
         .into_iter()
         .filter(|section_path| section_has_tree_split_marker(full_schema, section_path))
         .collect()
+}
+
+/// Finds nested sections whose field schema opts into transparent array serialization.
+///
+/// # Type Parameters
+///
+/// - `S`: Config schema type whose metadata supplies nested section paths.
+///
+/// # Arguments
+///
+/// - `full_schema`: Full root schema containing `x-tree-transparent-array` markers.
+///
+/// # Returns
+///
+/// Returns nested section paths that serialize as transparent arrays.
+pub fn transparent_array_section_paths<S>(full_schema: &Value) -> Vec<Vec<&'static str>>
+where
+    S: ConfigSchema,
+{
+    nested_section_paths(&S::META)
+        .into_iter()
+        .filter(|section_path| section_has_transparent_array_marker(full_schema, section_path))
+        .collect()
+}
+
+/// Returns the confique inner field name for one transparent array section.
+///
+/// # Arguments
+///
+/// - `full_schema`: Full root schema containing section markers.
+/// - `section_path`: Nested section field path to inspect.
+///
+/// # Returns
+///
+/// Returns the configured inner field name, or `"items"` when unset.
+pub fn inner_field_for_section(full_schema: &Value, section_path: &[&str]) -> String {
+    property_schema_for_path(full_schema, section_path)
+        .and_then(|schema| schema.get(TREE_INNER_FIELD_EXTENSION))
+        .and_then(Value::as_str)
+        .map(str::to_owned)
+        .unwrap_or_else(|| DEFAULT_TREE_INNER_FIELD.to_string())
+}
+
+/// Returns whether one section path uses transparent array serialization.
+///
+/// # Arguments
+///
+/// - `full_schema`: Full root schema to inspect.
+/// - `section_path`: Nested section field path to check.
+///
+/// # Returns
+///
+/// Returns `true` when the section schema carries `x-tree-transparent-array = true`.
+pub fn section_has_transparent_array_marker(root_schema: &Value, section_path: &[&str]) -> bool {
+    property_schema_for_path(root_schema, section_path)
+        .and_then(|schema| schema.get(TREE_TRANSPARENT_ARRAY_EXTENSION))
+        .and_then(Value::as_bool)
+        .unwrap_or(false)
 }
 
 /// Finds leaf fields whose schema opts out of template and schema output.

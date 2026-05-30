@@ -32,7 +32,7 @@ use crate::config::ConfigSchema;
 /// ```no_run
 /// let _ = ();
 /// ```
-pub(super) fn section_path_for_target<S>(
+pub(crate) fn section_path_for_target<S>(
     root_base_dir: &Path,
     target_path: &Path,
     split_paths: &[Vec<&'static str>],
@@ -104,7 +104,7 @@ where
 /// ```no_run
 /// let _ = ();
 /// ```
-pub(super) fn template_path_for_section<S>(section_path: &[&str]) -> PathBuf
+pub(crate) fn template_path_for_section<S>(section_path: &[&str]) -> PathBuf
 where
     S: ConfigSchema,
 {
@@ -165,7 +165,7 @@ pub(super) fn path_relative_to(path: &Path, base: &Path) -> PathBuf {
 /// ```no_run
 /// let _ = ();
 /// ```
-fn infer_section_path_from_path(
+pub(crate) fn infer_section_path_from_path(
     path: &Path,
     candidates: &[Vec<&'static str>],
 ) -> Option<Vec<&'static str>> {

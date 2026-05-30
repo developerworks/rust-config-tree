@@ -115,11 +115,14 @@ demo generate-schema
 未提供 `--output` 时，`generate-schema` 会把 root schema(根结构定义) 写入
 `config/<root_config_name>/<root_config_name>.schema.json`。
 
-下面的命令会校验完整的 runtime config tree(运行时配置树)：
+下面的命令会校验完整的 runtime config tree(运行时配置树):
 
 ```bash
 demo validate-config
+demo validate-config --config config.yaml
 ```
+
+省略 `--config` 时, `validate-config` 使用传给 `handle_config_command` 的消费者默认路径.
 
 生成的 editor schema(编辑器结构定义) 会刻意避免在拆分文件里触发必填字段诊断。
 `validate-config` 会加载 includes(包含文件)、应用默认值，并执行最终

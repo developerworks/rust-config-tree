@@ -51,7 +51,11 @@ pub enum ConfigCommand {
 
     /// Validate the full runtime config tree.
     #[command(name = "validate-config")]
-    ValidateConfig,
+    ValidateConfig {
+        /// Root config file to validate. Falls back to the default when omitted.
+        #[arg(long)]
+        config: Option<PathBuf>,
+    },
 
     /// Generate shell completions.
     Completions {
@@ -130,7 +134,7 @@ pub enum ConfigCommand {
 /// }
 ///
 /// handle_config_command::<Cli, AppConfig>(
-///     ConfigCommand::ValidateConfig,
+///     ConfigCommand::ValidateConfig { config: None },
 ///     std::path::Path::new("config.yaml"),
 /// )?;
 /// # Ok::<(), rust_config_tree::error::ConfigError>(())
@@ -150,8 +154,9 @@ where
         ConfigCommand::GenerateSchema { output } => {
             write_config_schemas::<S>(output.unwrap_or_else(default_config_schema_output::<S>))
         }
-        ConfigCommand::ValidateConfig => {
-            load_config::<S>(config_path)?;
+        ConfigCommand::ValidateConfig { config } => {
+            let path = config.as_deref().unwrap_or(config_path);
+            load_config::<S>(path)?;
             println!("Configuration is ok");
             Ok(())
         }

@@ -4,5 +4,6 @@
 
 This is the English manual for `rust-config-tree`.
 
-Start with [Introduction](introduction.md), [Quick Start](quick-start.md), or
-the runnable [Examples](examples.md).
+Start with [Introduction](introduction.md), [Quick Start](quick-start.md),
+[Transparent Array Sections](transparent-sections.md), or the runnable
+[Examples](examples.md).

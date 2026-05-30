@@ -165,3 +165,15 @@ The root template receives an include block, and `server.yaml` contains
 only the `server` section. Unmarked nested sections stay inline in their parent
 template. Nested sections are split recursively only when those fields also
 carry `x-tree-split`.
+
+## Transparent Array Section Templates
+
+When a nested section also carries `x-tree-transparent-array`, the section
+template emits only a block YAML array body. It does not write a section root
+key (such as `children:`), an `items:` wrapper, or flow-style `[{ ... }]`.
+
+The matching section schema uses a top-level `array` type rather than an
+`{ items: [...] }` object, so IDEs complete array items directly while editing
+split files such as `children.yaml`.
+
+See [Transparent Array Sections](transparent-sections.md) for the full workflow.

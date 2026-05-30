@@ -7,8 +7,11 @@ use serde_json::Value;
 use crate::config::ConfigResult;
 
 use super::{
-    marker::{ENV_ONLY_SCHEMA_EXTENSION, TREE_SPLIT_SCHEMA_EXTENSION},
-    paths::direct_child_split_section_paths,
+    marker::{
+        ENV_ONLY_SCHEMA_EXTENSION, TREE_INNER_FIELD_EXTENSION, TREE_SPLIT_SCHEMA_EXTENSION,
+        TREE_TRANSPARENT_ARRAY_EXTENSION,
+    },
+    paths::{direct_child_split_section_paths, inner_field_for_section},
     reference::{
         collect_schema_refs, collect_transitive_schema_refs, resolve_schema_reference,
         retain_schema_map,
@@ -32,14 +35,61 @@ use super::{
 /// let _ = ();
 /// ```
 fn section_schema_for_path(root_schema: &Value, section_path: &[&str]) -> Option<Value> {
-    let mut current = root_schema;
+    let property = property_schema_for_path(root_schema, section_path)?;
+    let resolved = resolve_schema_reference(root_schema, property).unwrap_or(property);
 
-    for section in section_path {
-        current = current.get("properties")?.get(*section)?;
-        current = resolve_schema_reference(root_schema, current).unwrap_or(current);
+    if section_has_transparent_array_marker(root_schema, section_path) {
+        return transparent_array_section_schema(root_schema, section_path, resolved);
     }
 
-    Some(standalone_section_schema(root_schema, current))
+    Some(standalone_section_schema(root_schema, resolved))
+}
+
+/// Returns the property schema for one nested section path.
+fn property_schema_for_path<'a>(root_schema: &'a Value, path: &[&str]) -> Option<&'a Value> {
+    let mut current = root_schema;
+
+    for (index, section) in path.iter().enumerate() {
+        let property = current.get("properties")?.get(*section)?;
+        if index + 1 == path.len() {
+            return Some(property);
+        }
+
+        current = resolve_schema_reference(root_schema, property).unwrap_or(property);
+    }
+
+    None
+}
+
+/// Returns whether one section path uses transparent array serialization.
+fn section_has_transparent_array_marker(root_schema: &Value, section_path: &[&str]) -> bool {
+    property_schema_for_path(root_schema, section_path)
+        .and_then(|schema| schema.get(TREE_TRANSPARENT_ARRAY_EXTENSION))
+        .and_then(Value::as_bool)
+        .unwrap_or(false)
+}
+
+/// Builds a standalone array schema for one transparent array section.
+fn transparent_array_section_schema(
+    root_schema: &Value,
+    section_path: &[&str],
+    section_schema: &Value,
+) -> Option<Value> {
+    let inner_field = inner_field_for_section(root_schema, section_path);
+    let resolved = resolve_schema_reference(root_schema, section_schema).unwrap_or(section_schema);
+    let inner_schema = resolved
+        .get("properties")
+        .and_then(|properties| properties.get(inner_field))
+        .or_else(|| resolved.get("items"))?;
+    let inner_schema = resolve_schema_reference(root_schema, inner_schema).unwrap_or(inner_schema);
+
+    Some(standalone_section_schema(
+        root_schema,
+        &serde_json::json!({
+            "type": "array",
+            "items": inner_schema.clone(),
+        }),
+    ))
 }
 /// Copies root-level schema metadata needed by an extracted section schema.
 ///
@@ -369,6 +419,8 @@ pub fn remove_schema_extensions(value: &mut Value) {
     match value {
         Value::Object(object) => {
             object.remove(TREE_SPLIT_SCHEMA_EXTENSION);
+            object.remove(TREE_TRANSPARENT_ARRAY_EXTENSION);
+            object.remove(TREE_INNER_FIELD_EXTENSION);
             object.remove(ENV_ONLY_SCHEMA_EXTENSION);
 
             for child in object.values_mut() {

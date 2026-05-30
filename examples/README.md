@@ -14,6 +14,7 @@ cargo run --example config_commands -- generate-template
 cargo run --example config_commands -- generate-schema
 cargo run --example config_commands -- validate-config
 cargo run --example generate_templates
+cargo run --example transparent_array_section
 cargo run --example tree_api
 ```
 
@@ -28,4 +29,7 @@ The examples cover:
 - `config_commands.rs`: flatten `ConfigCommand` into an application clap CLI.
 - `generate_templates.rs`: write root and section JSON Schemas plus
   schema-bound TOML/YAML templates from a schema.
+- `transparent_array_section.rs`: declare transparent split `children.yaml`,
+  generate templates/schemas, and load a body-only split file. See
+  [manual/en/transparent-sections.md](../manual/en/transparent-sections.md).
 - `tree_api.rs`: use the lower-level, format-agnostic include tree API.

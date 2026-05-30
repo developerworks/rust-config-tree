@@ -26,8 +26,9 @@
 - 它会执行词法路径归一化。
 - 它会检测 include(包含) 循环。
 - 它会使用确定性的遍历顺序。
-- 它会收集镜像模板目标。
-- 它会按显式标记的嵌套 schema section(结构定义配置段) 拆分 YAML 模板。
+- 它会收集镜像模板目标.
+- 它会按显式标记的嵌套 schema section(结构定义配置段) 拆分 YAML 模板.
+- 它会为 `x-tree-transparent-array` 标记的 split section(拆分配置段) 生成 body-only 数组模板, 并在运行时适配透明数组 YAML 形状. 详见 [透明数组 Section(配置段)](transparent-sections.md).
 
 应用通过派生 `confique::Config` 并实现 `ConfigSchema` 来提供自己的
 schema(结构定义)。`ConfigSchema` 用于暴露 schema(结构定义) 中的
@@ -37,7 +38,7 @@ include(包含) 字段。
 
 ```toml
 [dependencies]
-rust-config-tree = "0.1"
+rust-config-tree = "0.3"
 confique = { version = "0.4", features = ["yaml", "toml", "json5"] }
 figment = { version = "0.10", features = ["yaml", "toml", "json", "env"] }
 schemars = { version = "1", features = ["derive"] }
@@ -218,7 +219,30 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 被拆分的嵌套 section(配置段) 属性，所以 `server` 和 `log` 只会在编辑各自的
 section(配置段) YAML 文件时补全。没有 `x-tree-split` 的 nested section(嵌套配置段)
 会保留在 root schema(根结构定义) 中，因为它们没有独立的模板文件和
-schema(结构定义) 文件。
+schema(结构定义) 文件.
+
+当 split section(拆分配置段) 在单文件里应写成 `section: [...]`, 而 split 文件里只有 body-only 数组 `[...]` 时, 给字段同时加上 `x-tree-split` 和 `x-tree-transparent-array`, 并配合 `transparent_array_section!` 宏或 `ArraySection<T>`. 完整说明见手册 [透明数组 Section(配置段)](manual/zh/transparent-sections.md).
+
+```rust
+use rust_config_tree::transparent_array_section;
+
+transparent_array_section! {
+    pub struct ChildrenSection {
+        #[config(default = [{ "name": "worker" }])]
+        pub items: Vec<ChildDeclaration>,
+    }
+}
+
+#[derive(Debug, Config, JsonSchema)]
+struct AppConfig {
+    #[config(nested)]
+    #[schemars(extend(
+        "x-tree-split" = true,
+        "x-tree-transparent-array" = true
+    ))]
+    children: ChildrenSection,
+}
+```
 
 使用 `write_config_templates` 可以创建 root(根配置) 模板和 include tree(包含树)
 中的子模板：

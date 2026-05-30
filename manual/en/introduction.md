@@ -45,6 +45,9 @@ resolved from the file that declared them. The final config is still a normal
 - TOML `#:schema`, YAML Language Server schema modelines, and JSON/JSON5
   `$schema` fields for generated templates.
 - Opt-in YAML template splitting for nested sections marked with `x-tree-split`.
+- Transparent array sections marked with `x-tree-transparent-array` for
+  body-only split YAML arrays, runtime shape adaptation, and array-typed section
+  schemas. See [Transparent Array Sections](transparent-sections.md).
 - Built-in clap subcommands for config templates, JSON Schema, and shell completions.
 - A lower-level tree API for callers that do not use `confique`.
 

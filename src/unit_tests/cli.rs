@@ -352,7 +352,22 @@ fn config_validate_command_is_flattened_into_consumer_cli() {
     let cli = DemoCli::parse_from(["demo", "validate-config"]);
 
     match cli.command {
-        DemoCommand::Config(ConfigCommand::ValidateConfig) => {}
+        DemoCommand::Config(ConfigCommand::ValidateConfig { config }) => {
+            assert!(config.is_none());
+        }
+        command => panic!("unexpected command: {command:?}"),
+    }
+}
+
+/// Verifies validate-config accepts an explicit config path.
+#[test]
+fn validate_config_command_accepts_config_flag() {
+    let cli = DemoCli::parse_from(["demo", "validate-config", "--config", "custom.yaml"]);
+
+    match cli.command {
+        DemoCommand::Config(ConfigCommand::ValidateConfig { config }) => {
+            assert_eq!(config.as_deref(), Some(std::path::Path::new("custom.yaml")));
+        }
         command => panic!("unexpected command: {command:?}"),
     }
 }
@@ -608,7 +623,7 @@ fn handle_config_command_validates_full_runtime_config() {
     fs::write(&config_path, "required_value: present\n").unwrap();
 
     handle_config_command::<DemoCli, RequiredConfig>(
-        ConfigCommand::ValidateConfig,
+        ConfigCommand::ValidateConfig { config: None },
         config_path.as_path(),
     )
     .unwrap();
@@ -639,7 +654,7 @@ fn handle_config_command_rejects_invalid_runtime_config() {
     fs::write(&config_path, "").unwrap();
 
     let result = handle_config_command::<DemoCli, RequiredConfig>(
-        ConfigCommand::ValidateConfig,
+        ConfigCommand::ValidateConfig { config: None },
         config_path.as_path(),
     );
 

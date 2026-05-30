@@ -79,6 +79,36 @@ server:
   port: 8080
 ```
 
+## Transparent Array Sections
+
+When a split section should appear as `section: [...]` in a single file and as
+a body-only `[...]` array in its split file, mark the field with both
+`x-tree-split` and `x-tree-transparent-array`, and pair it with
+`transparent_array_section!` or `ArraySection<T>`:
+
+```rust
+use rust_config_tree::transparent_array_section;
+
+transparent_array_section! {
+    pub struct ChildrenSection {
+        #[config(default = [{ "name": "worker" }])]
+        pub items: Vec<ChildDeclaration>,
+    }
+}
+
+#[derive(Debug, Config, JsonSchema)]
+struct AppConfig {
+    #[config(nested)]
+    #[schemars(extend(
+        "x-tree-split" = true,
+        "x-tree-transparent-array" = true
+    ))]
+    children: ChildrenSection,
+}
+```
+
+See [Transparent Array Sections](transparent-sections.md) for the full workflow.
+
 ## Environment-Only Fields
 
 Mark a leaf field with `#[schemars(extend("x-env-only" = true))]` when the value must be supplied only by an environment variable and should not appear in generated config files. Generated YAML templates and JSON Schemas omit env-only fields, and empty parent objects left behind by those omissions are pruned.

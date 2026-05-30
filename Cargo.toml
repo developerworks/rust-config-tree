@@ -1,6 +1,6 @@
 [package]
 name = "rust-config-tree"
-version = "0.2.2"
+version = "0.2.3"
 edition = "2024"
 rust-version = "1.85"
 description = "Recursive include tree utilities for layered configuration files."
@@ -23,5 +23,6 @@ serde_json = "1.0.149"
 serde_yaml = "0.9.34"
 tracing = "0.1.44"
 
-[dev-dependencies]
 serde = { version = "1", features = ["derive"] }
+
+[dev-dependencies]

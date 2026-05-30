@@ -22,12 +22,18 @@ pub mod config_schema;
 pub mod error;
 pub mod path;
 pub mod template_tree;
+pub mod transparent_section;
 pub mod tree;
 
 mod config_env;
 mod config_format;
 mod config_load;
+mod config_load_adapt;
 mod config_output;
 mod config_templates;
 mod config_trace;
 mod config_util;
+
+#[cfg(test)]
+#[path = "unit_tests/transparent_section.rs"]
+mod transparent_section_tests;

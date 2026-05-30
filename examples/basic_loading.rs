@@ -9,8 +9,9 @@ use std::{
 
 use confique::Config;
 use rust_config_tree::config::{ConfigSchema, load_config};
+use schemars::JsonSchema;
 
-#[derive(Debug, Config)]
+#[derive(Debug, Config, JsonSchema)]
 struct AppConfig {
     #[config(default = [])]
     include: Vec<PathBuf>,
@@ -22,7 +23,7 @@ struct AppConfig {
     server: ServerConfig,
 }
 
-#[derive(Debug, Config)]
+#[derive(Debug, Config, JsonSchema)]
 struct ServerConfig {
     #[config(default = "127.0.0.1")]
     #[config(env = "APP_SERVER_BIND")]

@@ -79,6 +79,33 @@ server:
   port: 8080
 ```
 
+## 透明数组 Section(配置段)
+
+当 split section(拆分配置段) 在单文件里应写成 `section: [...]`, 而 split 文件里只有 body-only 数组 `[...]` 时, 给字段同时加上 `x-tree-split` 和 `x-tree-transparent-array`, 并配合 `transparent_array_section!` 宏或 `ArraySection<T>`:
+
+```rust
+use rust_config_tree::transparent_array_section;
+
+transparent_array_section! {
+    pub struct ChildrenSection {
+        #[config(default = [{ "name": "worker" }])]
+        pub items: Vec<ChildDeclaration>,
+    }
+}
+
+#[derive(Debug, Config, JsonSchema)]
+struct AppConfig {
+    #[config(nested)]
+    #[schemars(extend(
+        "x-tree-split" = true,
+        "x-tree-transparent-array" = true
+    ))]
+    children: ChildrenSection,
+}
+```
+
+完整说明见 [透明数组 Section(配置段)](transparent-sections.md).
+
 ## 环境变量专用字段
 
 当 leaf(叶子) 字段只能由环境变量提供，并且不应该出现在生成的配置文件中时，

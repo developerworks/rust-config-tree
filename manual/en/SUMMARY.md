@@ -4,6 +4,7 @@
 - [Introduction](introduction.md)
 - [Quick Start](quick-start.md)
 - [Configuration Schema](schema.md)
+- [Transparent Array Sections](transparent-sections.md)
 - [Runtime Loading](runtime-loading.md)
 - [Environment Variables](environment.md)
 - [Source Tracking](source-tracking.md)

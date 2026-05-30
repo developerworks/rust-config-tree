@@ -90,8 +90,42 @@ include: Vec<PathBuf>,
 文件的补全不受这两个注解影响。它们主要服务于 **root config(根配置) 文件**（例如
 `config.yaml`、`config.toml`、`config.json`）。
 
-若 `include` 使用了非空默认值（不常见），`#[serde(default)]` 仍应与其 serde 默认值保持一致；
-`#[config(default = ...)]` 则与 `confique` 运行时默认值保持一致。
+若 `include` 使用了非空默认值(不常见), `#[serde(default)]` 仍应与其 serde 默认值保持一致;
+`#[config(default = ...)]` 则与 `confique` 运行时默认值保持一致.
+
+## 透明数组 Section(配置段)
+
+当 split section(拆分配置段) 在单文件里应写成 `section: [...]`, 而 split 文件里只有 body-only 数组 `[...]` 时, 使用 `x-tree-transparent-array` 扩展与 `transparent_array_section!` 宏. **完整说明见 [透明数组 Section(配置段)](transparent-sections.md).**
+
+```rust
+use rust_config_tree::transparent_array_section;
+
+transparent_array_section! {
+    /// Child declarations stored as a transparent array section.
+    pub struct ChildrenSection {
+        #[config(default = [{ "name": "worker" }])]
+        pub items: Vec<ChildDeclaration>,
+    }
+}
+
+#[derive(Debug, Config, JsonSchema)]
+struct AppConfig {
+    #[config(nested)]
+    #[schemars(extend(
+        "x-tree-split" = true,
+        "x-tree-transparent-array" = true
+    ))]
+    children: ChildrenSection,
+}
+```
+
+行为说明:
+
+- 运行时 `load_config` 接受 `children: [...]`, `children:\n  items: [...]`, 以及 body-only `children.yaml` 三种形状.
+- 生成的 `children.schema.json` 顶层类型为 `array`, 而不是 `{ items: [...] }` 对象.
+- 模板生成只输出 block YAML(块状 YAML) 数组体, 不再写入 `children:` 或 flow 风格 `[{ ... }]`.
+
+可选扩展 `x-tree-inner-field = "items"` 可覆盖 confique 内部字段名, 默认值为 `"items"`.
 
 ## TOML
 

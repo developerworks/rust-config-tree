@@ -11,10 +11,11 @@ use schemars::JsonSchema;
 
 use crate::{
     config::{ConfigResult, ConfigSchema},
+    config_format::ConfigFormat,
     config_output::write_template,
     config_schema::{
         generate::root_config_schema,
-        paths::{env_only_field_paths, nested_section_paths, split_section_paths},
+        paths::{env_only_field_paths, nested_section_paths, split_section_paths, transparent_array_section_paths},
     },
     path::absolutize_lexical,
     template_tree::{collect_template_targets, select_template_source},
@@ -25,9 +26,10 @@ mod fields;
 mod includes;
 mod json5;
 mod render;
-mod section;
+pub(crate) mod section;
 mod target;
 mod toml;
+mod transparent_yaml;
 mod yaml;
 
 use binding::{schema_path_for_template_target, template_with_schema_directive};
@@ -37,6 +39,7 @@ use includes::{
 };
 use render::template_for_target;
 use section::section_path_for_target;
+use transparent_yaml::{is_transparent_split_section, normalize_transparent_split_template};
 
 pub use render::template_for_path;
 pub use target::ConfigTemplateTarget;
@@ -105,6 +108,7 @@ where
     let full_schema = root_config_schema::<S>()?;
     let all_section_paths = nested_section_paths(&S::META);
     let split_paths = split_section_paths::<S>(&full_schema);
+    let transparent_paths = transparent_array_section_paths::<S>(&full_schema);
     let env_only_paths = env_only_field_paths::<S>(&full_schema);
 
     // First collect from the source tree. Existing include entries are kept
@@ -149,14 +153,27 @@ where
             let section_path =
                 section_path_for_target::<S>(output_base_dir, &target_path, &split_paths)
                     .unwrap_or_default();
-            Ok(ConfigTemplateTarget {
-                content: template_for_target::<S>(
+            let mut content = template_for_target::<S>(
                     &target_path,
                     &include_paths,
                     &section_path,
                     &split_paths,
                     &env_only_paths,
-                )?,
+                )?;
+
+            if ConfigFormat::from_path(&target_path) == ConfigFormat::Yaml
+                && is_transparent_split_section(&section_path, &transparent_paths)
+            {
+                let section_name = section_path.last().copied().unwrap_or("");
+                let inner_field = crate::config_schema::paths::inner_field_for_section(
+                    &full_schema,
+                    &section_path,
+                );
+                content = normalize_transparent_split_template(&content, section_name, &inner_field);
+            }
+
+            Ok(ConfigTemplateTarget {
+                content,
                 path: target_path,
             })
         })
