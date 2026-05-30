@@ -9,11 +9,12 @@ use std::{
 
 use confique::Config;
 use rust_config_tree::config::{
-    ConfigSchema, write_config_schemas, write_config_templates_with_schema,
+    write_config_schemas, write_config_templates_with_schema,
 };
+use rust_config_tree::ConfigSchema;
 use schemars::JsonSchema;
 
-#[derive(Debug, Config, JsonSchema)]
+#[derive(Debug, Config, JsonSchema, ConfigSchema)]
 #[allow(dead_code)]
 struct AppConfig {
     #[config(default = [])]
@@ -63,13 +64,6 @@ struct LogConfig {
     #[config(default = "info")]
     #[config(env = "APP_LOG_LEVEL")]
     level: String,
-}
-
-/// Exposes the example's include list to template generation.
-impl ConfigSchema for AppConfig {
-    fn include_paths(layer: &<Self as Config>::Layer) -> Vec<PathBuf> {
-        layer.include.clone().unwrap_or_default()
-    }
 }
 
 /// Generates schemas and templates, then prints every generated path.

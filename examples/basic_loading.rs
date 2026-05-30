@@ -8,10 +8,11 @@ use std::{
 };
 
 use confique::Config;
-use rust_config_tree::config::{ConfigSchema, load_config};
+use rust_config_tree::config::load_config;
+use rust_config_tree::ConfigSchema;
 use schemars::JsonSchema;
 
-#[derive(Debug, Config, JsonSchema)]
+#[derive(Debug, Config, JsonSchema, ConfigSchema)]
 struct AppConfig {
     #[config(default = [])]
     include: Vec<PathBuf>,
@@ -32,13 +33,6 @@ struct ServerConfig {
     #[config(default = 8080)]
     #[config(env = "APP_SERVER_PORT")]
     port: u16,
-}
-
-/// Exposes the example's top-level include list to the tree loader.
-impl ConfigSchema for AppConfig {
-    fn include_paths(layer: &<Self as Config>::Layer) -> Vec<PathBuf> {
-        layer.include.clone().unwrap_or_default()
-    }
 }
 
 /// Writes demo files, loads them, and prints the merged config.

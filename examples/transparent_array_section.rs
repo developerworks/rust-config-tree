@@ -18,8 +18,9 @@ use std::{
 
 use confique::Config;
 use rust_config_tree::{
-    config::{load_config, write_config_schemas, ConfigSchema},
+    config::{load_config, write_config_schemas},
     transparent_array_section,
+    ConfigSchema,
 };
 use schemars::JsonSchema;
 
@@ -39,7 +40,7 @@ pub struct ChildDeclaration {
 }
 
 /// Root config schema used by the transparent array section example.
-#[derive(Debug, Clone, PartialEq, Config, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Config, JsonSchema, ConfigSchema)]
 pub struct AppConfig {
     /// Included child configuration files.
     #[config(default = [])]
@@ -56,12 +57,6 @@ pub struct AppConfig {
         "x-tree-transparent-array" = true
     ))]
     pub children: ChildrenSection,
-}
-
-impl ConfigSchema for AppConfig {
-    fn include_paths(layer: &<Self as Config>::Layer) -> Vec<PathBuf> {
-        layer.include.clone().unwrap_or_default()
-    }
 }
 
 /// Writes demo files, generates schemas/templates, loads split config, and prints results.

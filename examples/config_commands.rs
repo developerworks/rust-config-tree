@@ -10,7 +10,8 @@ use clap::{Parser, Subcommand};
 use confique::Config;
 use rust_config_tree::{
     cli::{ConfigCommand, handle_config_command},
-    config::{ConfigSchema, load_config},
+    config::load_config,
+    ConfigSchema,
 };
 use schemars::JsonSchema;
 
@@ -33,7 +34,7 @@ enum Command {
     Config(ConfigCommand),
 }
 
-#[derive(Debug, Config, JsonSchema)]
+#[derive(Debug, Config, JsonSchema, ConfigSchema)]
 pub struct AppConfig {
     #[config(default = [])]
     pub include: Vec<PathBuf>,
@@ -52,13 +53,6 @@ pub struct ServerConfig {
 
     #[config(default = 8080)]
     pub port: u16,
-}
-
-/// Exposes the example's include list to the config command handlers.
-impl ConfigSchema for AppConfig {
-    fn include_paths(layer: &<Self as Config>::Layer) -> Vec<PathBuf> {
-        layer.include.clone().unwrap_or_default()
-    }
 }
 
 /// Parses the example CLI and dispatches either app run or config commands.

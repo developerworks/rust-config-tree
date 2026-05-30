@@ -52,21 +52,15 @@ use crate::{
 /// ```
 /// use std::fs;
 /// use confique::Config;
-/// use rust_config_tree::config::{ConfigSchema, load_config};
+/// use rust_config_tree::config::load_config;
 /// use schemars::JsonSchema;
 ///
-/// #[derive(Debug, Config, JsonSchema)]
+/// #[derive(Debug, Config, JsonSchema, rust_config_tree::ConfigSchema)]
 /// struct AppConfig {
 ///     #[config(default = [])]
 ///     include: Vec<std::path::PathBuf>,
 ///     #[config(default = "demo")]
 ///     mode: String,
-/// }
-///
-/// impl ConfigSchema for AppConfig {
-///     fn include_paths(layer: &<Self as Config>::Layer) -> Vec<std::path::PathBuf> {
-///         layer.include.clone().unwrap_or_default()
-///     }
 /// }
 ///
 /// # fn run() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
@@ -112,21 +106,15 @@ where
 /// ```
 /// use std::fs;
 /// use confique::Config;
-/// use rust_config_tree::config::{ConfigSchema, load_config_with_figment};
+/// use rust_config_tree::config::load_config_with_figment;
 /// use schemars::JsonSchema;
 ///
-/// #[derive(Debug, Config, JsonSchema)]
+/// #[derive(Debug, Config, JsonSchema, rust_config_tree::ConfigSchema)]
 /// struct AppConfig {
 ///     #[config(default = [])]
 ///     include: Vec<std::path::PathBuf>,
 ///     #[config(default = "demo")]
 ///     mode: String,
-/// }
-///
-/// impl ConfigSchema for AppConfig {
-///     fn include_paths(layer: &<Self as Config>::Layer) -> Vec<std::path::PathBuf> {
-///         layer.include.clone().unwrap_or_default()
-///     }
 /// }
 ///
 /// # fn run() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
@@ -174,21 +162,15 @@ where
 /// ```
 /// use std::fs;
 /// use confique::Config;
-/// use rust_config_tree::config::{ConfigSchema, build_config_figment};
+/// use rust_config_tree::config::build_config_figment;
 /// use schemars::JsonSchema;
 ///
-/// #[derive(Debug, Config, JsonSchema)]
+/// #[derive(Debug, Config, JsonSchema, rust_config_tree::ConfigSchema)]
 /// struct AppConfig {
 ///     #[config(default = [])]
 ///     include: Vec<std::path::PathBuf>,
 ///     #[config(default = "demo")]
 ///     mode: String,
-/// }
-///
-/// impl ConfigSchema for AppConfig {
-///     fn include_paths(layer: &<Self as Config>::Layer) -> Vec<std::path::PathBuf> {
-///         layer.include.clone().unwrap_or_default()
-///     }
 /// }
 ///
 /// # fn run() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
@@ -245,21 +227,15 @@ where
 /// ```
 /// use std::fs;
 /// use confique::Config;
-/// use rust_config_tree::config::{ConfigSchema, build_config_figment, load_config_from_figment};
+/// use rust_config_tree::config::{build_config_figment, load_config_from_figment};
 /// use schemars::JsonSchema;
 ///
-/// #[derive(Debug, Config, JsonSchema)]
+/// #[derive(Debug, Config, JsonSchema, rust_config_tree::ConfigSchema)]
 /// struct AppConfig {
 ///     #[config(default = [])]
 ///     include: Vec<std::path::PathBuf>,
 ///     #[config(default = "demo")]
 ///     mode: String,
-/// }
-///
-/// impl ConfigSchema for AppConfig {
-///     fn include_paths(layer: &<Self as Config>::Layer) -> Vec<std::path::PathBuf> {
-///         layer.include.clone().unwrap_or_default()
-///     }
 /// }
 ///
 /// # fn run() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {

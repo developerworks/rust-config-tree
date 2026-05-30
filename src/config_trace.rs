@@ -33,20 +33,14 @@ use crate::config::ConfigSchema;
 /// ```
 /// use confique::Config;
 /// use figment::Figment;
-/// use rust_config_tree::config::{ConfigSchema, trace_config_sources};
+/// use rust_config_tree::config::trace_config_sources;
 ///
-/// #[derive(Config)]
+/// #[derive(Config, rust_config_tree::ConfigSchema)]
 /// struct AppConfig {
 ///     #[config(default = [])]
 ///     include: Vec<std::path::PathBuf>,
 ///     #[config(default = "demo")]
 ///     mode: String,
-/// }
-///
-/// impl ConfigSchema for AppConfig {
-///     fn include_paths(layer: &<Self as Config>::Layer) -> Vec<std::path::PathBuf> {
-///         layer.include.clone().unwrap_or_default()
-///     }
 /// }
 ///
 /// trace_config_sources::<AppConfig>(&Figment::new());

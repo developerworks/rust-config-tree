@@ -1,0 +1,17 @@
+[package]
+name = "rust-config-tree-macros"
+version = "0.2.3"
+edition = "2024"
+rust-version = "1.85"
+description = "Procedural macros for rust-config-tree."
+documentation = "https://docs.rs/rust-config-tree"
+repository = "https://github.com/developerworks/rust-config-tree"
+license = "MIT OR Apache-2.0"
+
+[lib]
+proc-macro = true
+
+[dependencies]
+proc-macro2 = "1"
+quote = "1"
+syn = { version = "2", features = ["full"] }

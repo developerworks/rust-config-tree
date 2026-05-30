@@ -25,6 +25,9 @@ use crate::{
     config_output,
 };
 
+pub use crate::cli_overrides::{ConfigOverrideProvider, ConfigOverrides};
+pub use rust_config_tree_macros::ConfigOverrides;
+
 /// Built-in clap subcommands for config templates and shell completions.
 #[derive(Debug, Subcommand)]
 pub enum ConfigCommand {
@@ -106,7 +109,6 @@ pub enum ConfigCommand {
 /// use clap::{Parser, Subcommand};
 /// use confique::Config;
 /// use rust_config_tree::cli::{ConfigCommand, handle_config_command};
-/// use rust_config_tree::config::ConfigSchema;
 /// use schemars::JsonSchema;
 ///
 /// #[derive(Parser)]
@@ -121,16 +123,10 @@ pub enum ConfigCommand {
 ///     Config(ConfigCommand),
 /// }
 ///
-/// #[derive(Config, JsonSchema)]
+/// #[derive(Config, JsonSchema, rust_config_tree::ConfigSchema)]
 /// struct AppConfig {
 ///     #[config(default = [])]
 ///     include: Vec<std::path::PathBuf>,
-/// }
-///
-/// impl ConfigSchema for AppConfig {
-///     fn include_paths(layer: &<Self as Config>::Layer) -> Vec<std::path::PathBuf> {
-///         layer.include.clone().unwrap_or_default()
-///     }
 /// }
 ///
 /// handle_config_command::<Cli, AppConfig>(

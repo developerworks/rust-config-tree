@@ -11,10 +11,8 @@ use confique::Config;
 use schemars::JsonSchema;
 
 use super::*;
-use crate::{
-    config::ConfigSchema,
-    config_output::{default_config_template_output, resolve_config_template_output},
-};
+use crate::config_output::{default_config_template_output, resolve_config_template_output};
+use crate::ConfigSchema;
 
 static CURRENT_DIR_LOCK: Mutex<()> = Mutex::new(());
 
@@ -32,89 +30,33 @@ enum DemoCommand {
     Config(ConfigCommand),
 }
 
-#[derive(Debug, Config, JsonSchema)]
+#[derive(Debug, Config, JsonSchema, ConfigSchema)]
 #[allow(dead_code)]
 struct TestConfig {
     #[config(default = [])]
     include: Vec<PathBuf>,
 }
 
-/// Exposes the fixture include list to template command tests.
-impl ConfigSchema for TestConfig {
-    /// Returns include paths declared by the fixture layer.
-    ///
-    /// # Arguments
-    ///
-    /// - `layer`: Partially loaded fixture layer.
-    ///
-    /// # Returns
-    ///
-    /// Returns include paths or an empty list when omitted.
-    ///
-    /// # Examples
-    ///
-    /// ```no_run
-    /// let _ = ();
-    /// ```
-    fn include_paths(layer: &<Self as Config>::Layer) -> Vec<PathBuf> {
-        layer.include.clone().unwrap_or_default()
-    }
-}
-
-#[derive(Debug, Config, JsonSchema)]
+#[derive(Debug, Config, JsonSchema, ConfigSchema)]
 #[allow(dead_code)]
 struct RecorderConfig {
     #[config(default = [])]
     include: Vec<PathBuf>,
 }
 
-impl ConfigSchema for RecorderConfig {
-    fn include_paths(layer: &<Self as Config>::Layer) -> Vec<PathBuf> {
-        layer.include.clone().unwrap_or_default()
-    }
-}
-
-#[derive(Debug, Config, JsonSchema)]
+#[derive(Debug, Config, JsonSchema, ConfigSchema)]
 #[allow(dead_code)]
 struct EngineConfig {
     #[config(default = [])]
     include: Vec<PathBuf>,
 }
 
-impl ConfigSchema for EngineConfig {
-    fn include_paths(layer: &<Self as Config>::Layer) -> Vec<PathBuf> {
-        layer.include.clone().unwrap_or_default()
-    }
-}
-
-#[derive(Debug, Config, JsonSchema)]
+#[derive(Debug, Config, JsonSchema, ConfigSchema)]
 #[allow(dead_code)]
 struct RequiredConfig {
     #[config(default = [])]
     include: Vec<PathBuf>,
     required_value: String,
-}
-
-/// Exposes the fixture include list to validation command tests.
-impl ConfigSchema for RequiredConfig {
-    /// Returns include paths declared by the fixture layer.
-    ///
-    /// # Arguments
-    ///
-    /// - `layer`: Partially loaded fixture layer.
-    ///
-    /// # Returns
-    ///
-    /// Returns include paths or an empty list when omitted.
-    ///
-    /// # Examples
-    ///
-    /// ```no_run
-    /// let _ = ();
-    /// ```
-    fn include_paths(layer: &<Self as Config>::Layer) -> Vec<PathBuf> {
-        layer.include.clone().unwrap_or_default()
-    }
 }
 
 /// Verifies config commands can be flattened into a consumer CLI.

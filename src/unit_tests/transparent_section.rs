@@ -1,12 +1,11 @@
 //! Unit tests for transparent array section support.
 
-use confique::Config;
-use crate::{
-    config::{
-        load_config, template_targets_for_paths, write_config_schemas, ConfigSchema,
-    },
-    transparent_array_section,
+use crate::config::{
+    load_config, template_targets_for_paths, write_config_schemas,
 };
+use crate::transparent_array_section;
+use crate::ConfigSchema;
+use confique::Config;
 use schemars::JsonSchema;
 use std::{fs, path::PathBuf};
 
@@ -26,7 +25,7 @@ pub struct ChildDeclaration {
 }
 
 /// Root config used by transparent section tests.
-#[derive(Debug, Clone, PartialEq, Config, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Config, JsonSchema, ConfigSchema)]
 pub struct TestConfig {
     /// Included child files.
     #[config(default = [])]
@@ -38,12 +37,6 @@ pub struct TestConfig {
     #[config(nested)]
     #[schemars(extend("x-tree-split" = true, "x-tree-transparent-array" = true))]
     pub children: ChildrenSection,
-}
-
-impl ConfigSchema for TestConfig {
-    fn include_paths(layer: &<Self as Config>::Layer) -> Vec<PathBuf> {
-        layer.include.clone().unwrap_or_default()
-    }
 }
 
 fn temp_dir(name: &str) -> PathBuf {

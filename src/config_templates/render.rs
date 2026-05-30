@@ -39,21 +39,15 @@ use crate::{
 ///
 /// ```
 /// use confique::Config;
-/// use rust_config_tree::config::{ConfigSchema, template_for_path};
+/// use rust_config_tree::config::template_for_path;
 /// use schemars::JsonSchema;
 ///
-/// #[derive(Config, JsonSchema)]
+/// #[derive(Config, JsonSchema, rust_config_tree::ConfigSchema)]
 /// struct AppConfig {
 ///     #[config(default = [])]
 ///     include: Vec<std::path::PathBuf>,
 ///     #[config(default = "demo")]
 ///     mode: String,
-/// }
-///
-/// impl ConfigSchema for AppConfig {
-///     fn include_paths(layer: &<Self as Config>::Layer) -> Vec<std::path::PathBuf> {
-///         layer.include.clone().unwrap_or_default()
-///     }
 /// }
 ///
 /// let template = template_for_path::<AppConfig>("config.yaml")?;

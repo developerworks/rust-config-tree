@@ -56,22 +56,18 @@ pub trait ConfigSchema: Config + Sized {
     ///
     /// # Examples
     ///
-    /// ```
-    /// use confique::Config;
-    /// use rust_config_tree::config::ConfigSchema;
+    /// The simplest way to implement `ConfigSchema` is with the derive macro:
     ///
-    /// #[derive(Config)]
+    /// ```ignore
+    /// #[derive(confique::Config, rust_config_tree::ConfigSchema)]
     /// struct AppConfig {
     ///     #[config(default = [])]
     ///     include: Vec<std::path::PathBuf>,
     /// }
-    ///
-    /// impl ConfigSchema for AppConfig {
-    ///     fn include_paths(layer: &<Self as Config>::Layer) -> Vec<std::path::PathBuf> {
-    ///         layer.include.clone().unwrap_or_default()
-    ///     }
-    /// }
     /// ```
+    ///
+    /// See the crate-level [`ConfigSchema`](crate::config::ConfigSchema) documentation for the
+    /// manual implementation pattern.
     fn include_paths(layer: &<Self as Config>::Layer) -> Vec<PathBuf>;
 
     /// Overrides the generated template file path for a split nested section.

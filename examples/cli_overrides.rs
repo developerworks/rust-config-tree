@@ -9,25 +9,29 @@ use std::{
 
 use clap::Parser;
 use confique::Config;
-use figment::providers::Serialized;
-use rust_config_tree::config::{ConfigSchema, build_config_figment, load_config_from_figment};
+use rust_config_tree::{
+    ConfigSchema,
+    cli::ConfigOverrides,
+    config::{build_config_figment, load_config_from_figment},
+};
 use schemars::JsonSchema;
-use serde::Serialize;
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Parser, ConfigOverrides)]
 #[command(name = "cli-overrides")]
 struct Cli {
     #[arg(long)]
     config: Option<PathBuf>,
 
     #[arg(long)]
+    #[config_override(path = "server.port")]
     server_port: Option<u16>,
 
     #[arg(long)]
+    #[config_override(path = "log.level")]
     log_level: Option<String>,
 }
 
-#[derive(Debug, Config, JsonSchema)]
+#[derive(Debug, Config, JsonSchema, ConfigSchema)]
 struct AppConfig {
     #[config(default = [])]
     include: Vec<PathBuf>,
@@ -54,50 +58,6 @@ struct LogConfig {
     level: String,
 }
 
-/// Exposes the example's include list to the config tree loader.
-impl ConfigSchema for AppConfig {
-    fn include_paths(layer: &<Self as Config>::Layer) -> Vec<PathBuf> {
-        layer.include.clone().unwrap_or_default()
-    }
-}
-
-#[derive(Debug, Serialize)]
-struct CliOverrides {
-    #[serde(skip_serializing_if = "Option::is_none")]
-    server: Option<CliServerOverrides>,
-
-    #[serde(skip_serializing_if = "Option::is_none")]
-    log: Option<CliLogOverrides>,
-}
-
-#[derive(Debug, Serialize)]
-struct CliServerOverrides {
-    #[serde(skip_serializing_if = "Option::is_none")]
-    port: Option<u16>,
-}
-
-#[derive(Debug, Serialize)]
-struct CliLogOverrides {
-    #[serde(skip_serializing_if = "Option::is_none")]
-    level: Option<String>,
-}
-
-/// Converts parsed CLI flags into a sparse Figment override provider.
-impl CliOverrides {
-    /// Builds only the override branches selected by CLI arguments.
-    fn from_cli(cli: &Cli) -> Self {
-        Self {
-            server: cli
-                .server_port
-                .map(|port| CliServerOverrides { port: Some(port) }),
-            log: cli
-                .log_level
-                .clone()
-                .map(|level| CliLogOverrides { level: Some(level) }),
-        }
-    }
-}
-
 /// Loads config files, merges CLI overrides, and prints the final config.
 fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let cli = Cli::parse();
@@ -107,9 +67,9 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     };
 
     let figment = build_config_figment::<AppConfig>(&config_path)?
-        // Serialized defaults are merged last, so provided CLI flags override
-        // file and environment values while omitted flags disappear.
-        .merge(Serialized::defaults(CliOverrides::from_cli(&cli)));
+        // CLI overrides are merged last, so provided flags override file and
+        // environment values while omitted flags disappear.
+        .merge(cli.config_overrides()?);
     let config = load_config_from_figment::<AppConfig>(&figment)?;
 
     println!("config path: {}", config_path.display());

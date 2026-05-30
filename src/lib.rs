@@ -16,6 +16,8 @@
 //! [`cli::install_shell_completion`] and [`cli::uninstall_shell_completion`] for reusable
 //! shell completion lifecycle commands.
 
+extern crate self as rust_config_tree;
+
 pub mod cli;
 pub mod config;
 pub mod config_schema;
@@ -25,6 +27,7 @@ pub mod template_tree;
 pub mod transparent_section;
 pub mod tree;
 
+mod cli_overrides;
 mod config_env;
 mod config_format;
 mod config_load;
@@ -33,6 +36,8 @@ mod config_output;
 mod config_templates;
 mod config_trace;
 mod config_util;
+
+pub use rust_config_tree_macros::{ConfigOverrides, ConfigSchema};
 
 #[cfg(test)]
 #[path = "unit_tests/transparent_section.rs"]

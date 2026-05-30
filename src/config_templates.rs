@@ -70,21 +70,15 @@ pub use target::ConfigTemplateTarget;
 ///
 /// ```
 /// use confique::Config;
-/// use rust_config_tree::config::{ConfigSchema, template_targets_for_paths};
+/// use rust_config_tree::config::template_targets_for_paths;
 /// use schemars::JsonSchema;
 ///
-/// #[derive(Config, JsonSchema)]
+/// #[derive(Config, JsonSchema, rust_config_tree::ConfigSchema)]
 /// struct AppConfig {
 ///     #[config(default = [])]
 ///     include: Vec<std::path::PathBuf>,
 ///     #[config(default = "demo")]
 ///     mode: String,
-/// }
-///
-/// impl ConfigSchema for AppConfig {
-///     fn include_paths(layer: &<Self as Config>::Layer) -> Vec<std::path::PathBuf> {
-///         layer.include.clone().unwrap_or_default()
-///     }
 /// }
 ///
 /// let targets =
@@ -206,21 +200,15 @@ where
 ///
 /// ```
 /// use confique::Config;
-/// use rust_config_tree::config::{ConfigSchema, template_targets_for_paths_with_schema};
+/// use rust_config_tree::config::template_targets_for_paths_with_schema;
 /// use schemars::JsonSchema;
 ///
-/// #[derive(Config, JsonSchema)]
+/// #[derive(Config, JsonSchema, rust_config_tree::ConfigSchema)]
 /// struct AppConfig {
 ///     #[config(default = [])]
 ///     include: Vec<std::path::PathBuf>,
 ///     #[config(default = "demo")]
 ///     mode: String,
-/// }
-///
-/// impl ConfigSchema for AppConfig {
-///     fn include_paths(layer: &<Self as Config>::Layer) -> Vec<std::path::PathBuf> {
-///         layer.include.clone().unwrap_or_default()
-///     }
 /// }
 ///
 /// let targets = template_targets_for_paths_with_schema::<AppConfig>(
@@ -284,21 +272,15 @@ where
 ///
 /// ```
 /// use confique::Config;
-/// use rust_config_tree::config::{ConfigSchema, write_config_templates};
+/// use rust_config_tree::config::write_config_templates;
 /// use schemars::JsonSchema;
 ///
-/// #[derive(Config, JsonSchema)]
+/// #[derive(Config, JsonSchema, rust_config_tree::ConfigSchema)]
 /// struct AppConfig {
 ///     #[config(default = [])]
 ///     include: Vec<std::path::PathBuf>,
 ///     #[config(default = "demo")]
 ///     mode: String,
-/// }
-///
-/// impl ConfigSchema for AppConfig {
-///     fn include_paths(layer: &<Self as Config>::Layer) -> Vec<std::path::PathBuf> {
-///         layer.include.clone().unwrap_or_default()
-///     }
 /// }
 ///
 /// let output = std::env::temp_dir().join("rust-config-tree-template-doctest.yaml");
@@ -349,21 +331,15 @@ where
 ///
 /// ```
 /// use confique::Config;
-/// use rust_config_tree::config::{ConfigSchema, write_config_templates_with_schema};
+/// use rust_config_tree::config::write_config_templates_with_schema;
 /// use schemars::JsonSchema;
 ///
-/// #[derive(Config, JsonSchema)]
+/// #[derive(Config, JsonSchema, rust_config_tree::ConfigSchema)]
 /// struct AppConfig {
 ///     #[config(default = [])]
 ///     include: Vec<std::path::PathBuf>,
 ///     #[config(default = "demo")]
 ///     mode: String,
-/// }
-///
-/// impl ConfigSchema for AppConfig {
-///     fn include_paths(layer: &<Self as Config>::Layer) -> Vec<std::path::PathBuf> {
-///         layer.include.clone().unwrap_or_default()
-///     }
 /// }
 ///
 /// let output = std::env::temp_dir().join("rust-config-tree-template-schema-doctest.yaml");

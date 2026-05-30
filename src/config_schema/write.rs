@@ -44,21 +44,15 @@ use super::{
 ///
 /// ```
 /// use confique::Config;
-/// use rust_config_tree::config::{ConfigSchema, write_config_schema};
+/// use rust_config_tree::config::write_config_schema;
 /// use schemars::JsonSchema;
 ///
-/// #[derive(Config, JsonSchema)]
+/// #[derive(Config, JsonSchema, rust_config_tree::ConfigSchema)]
 /// struct AppConfig {
 ///     #[config(default = [])]
 ///     include: Vec<std::path::PathBuf>,
 ///     #[config(default = "demo")]
 ///     mode: String,
-/// }
-///
-/// impl ConfigSchema for AppConfig {
-///     fn include_paths(layer: &<Self as Config>::Layer) -> Vec<std::path::PathBuf> {
-///         layer.include.clone().unwrap_or_default()
-///     }
 /// }
 ///
 /// let path = std::env::temp_dir().join("rust-config-tree-write-schema-doctest.json");
@@ -108,21 +102,15 @@ where
 ///
 /// ```
 /// use confique::Config;
-/// use rust_config_tree::config::{ConfigSchema, config_schema_targets_for_path};
+/// use rust_config_tree::config::config_schema_targets_for_path;
 /// use schemars::JsonSchema;
 ///
-/// #[derive(Config, JsonSchema)]
+/// #[derive(Config, JsonSchema, rust_config_tree::ConfigSchema)]
 /// struct AppConfig {
 ///     #[config(default = [])]
 ///     include: Vec<std::path::PathBuf>,
 ///     #[config(default = "demo")]
 ///     mode: String,
-/// }
-///
-/// impl ConfigSchema for AppConfig {
-///     fn include_paths(layer: &<Self as Config>::Layer) -> Vec<std::path::PathBuf> {
-///         layer.include.clone().unwrap_or_default()
-///     }
 /// }
 ///
 /// let targets = config_schema_targets_for_path::<AppConfig>("schemas/config.schema.json")?;
@@ -183,21 +171,15 @@ where
 ///
 /// ```
 /// use confique::Config;
-/// use rust_config_tree::config::{ConfigSchema, write_config_schemas};
+/// use rust_config_tree::config::write_config_schemas;
 /// use schemars::JsonSchema;
 ///
-/// #[derive(Config, JsonSchema)]
+/// #[derive(Config, JsonSchema, rust_config_tree::ConfigSchema)]
 /// struct AppConfig {
 ///     #[config(default = [])]
 ///     include: Vec<std::path::PathBuf>,
 ///     #[config(default = "demo")]
 ///     mode: String,
-/// }
-///
-/// impl ConfigSchema for AppConfig {
-///     fn include_paths(layer: &<Self as Config>::Layer) -> Vec<std::path::PathBuf> {
-///         layer.include.clone().unwrap_or_default()
-///     }
 /// }
 ///
 /// let path = std::env::temp_dir()
