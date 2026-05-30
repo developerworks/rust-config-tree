@@ -2,6 +2,15 @@
 
 All notable changes to `rust-config-tree` are documented in this file.
 
+## 0.2.5 - 2026-05-31
+
+### Added
+
+- Added `#[derive(ConfigSchema)]` derive macro that automatically generates
+  `ConfigSchema::include_paths` for types with a standard
+  `include: Vec<PathBuf>` field. Supports `#[config_schema(include)]` to mark
+  an arbitrary field as the include source.
+
 ## 0.1.5 - 2026-05-03
 
 ### Fixed
