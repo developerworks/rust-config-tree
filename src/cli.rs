@@ -18,10 +18,9 @@ use clap_complete::{
 use schemars::JsonSchema;
 
 use crate::{
-    ConfigResult, ConfigSchema,
     config::{
-        default_config_schema_output, load_config, write_config_schemas,
-        write_config_templates_with_schema,
+        ConfigResult, ConfigSchema, default_config_schema_output, load_config,
+        write_config_schemas, write_config_templates_with_schema,
     },
     config_output,
 };
@@ -102,7 +101,8 @@ pub enum ConfigCommand {
 /// ```no_run
 /// use clap::{Parser, Subcommand};
 /// use confique::Config;
-/// use rust_config_tree::{ConfigCommand, ConfigSchema, handle_config_command};
+/// use rust_config_tree::cli::{ConfigCommand, handle_config_command};
+/// use rust_config_tree::config::ConfigSchema;
 /// use schemars::JsonSchema;
 ///
 /// #[derive(Parser)]
@@ -133,7 +133,7 @@ pub enum ConfigCommand {
 ///     ConfigCommand::ValidateConfig,
 ///     std::path::Path::new("config.yaml"),
 /// )?;
-/// # Ok::<(), rust_config_tree::ConfigError>(())
+/// # Ok::<(), rust_config_tree::error::ConfigError>(())
 /// ```
 pub fn handle_config_command<C, S>(command: ConfigCommand, config_path: &Path) -> ConfigResult<()>
 where
@@ -183,7 +183,7 @@ where
 /// ```no_run
 /// use clap::Parser;
 /// use clap_complete::aot::Shell;
-/// use rust_config_tree::print_shell_completion;
+/// use rust_config_tree::cli::print_shell_completion;
 ///
 /// #[derive(Parser)]
 /// #[command(name = "myapp")]
@@ -220,14 +220,14 @@ where
 /// ```no_run
 /// use clap::Parser;
 /// use clap_complete::aot::Shell;
-/// use rust_config_tree::install_shell_completion;
+/// use rust_config_tree::cli::install_shell_completion;
 ///
 /// #[derive(Parser)]
 /// #[command(name = "myapp")]
 /// struct Cli {}
 ///
 /// install_shell_completion::<Cli>(Shell::Zsh)?;
-/// # Ok::<(), rust_config_tree::ConfigError>(())
+/// # Ok::<(), rust_config_tree::error::ConfigError>(())
 /// ```
 pub fn install_shell_completion<C>(shell: Shell) -> ConfigResult<()>
 where
@@ -289,14 +289,14 @@ where
 /// ```no_run
 /// use clap::Parser;
 /// use clap_complete::aot::Shell;
-/// use rust_config_tree::uninstall_shell_completion;
+/// use rust_config_tree::cli::uninstall_shell_completion;
 ///
 /// #[derive(Parser)]
 /// #[command(name = "myapp")]
 /// struct Cli {}
 ///
 /// uninstall_shell_completion::<Cli>(Shell::Zsh)?;
-/// # Ok::<(), rust_config_tree::ConfigError>(())
+/// # Ok::<(), rust_config_tree::error::ConfigError>(())
 /// ```
 pub fn uninstall_shell_completion<C>(shell: Shell) -> ConfigResult<()>
 where
@@ -522,7 +522,7 @@ impl ShellInstallTarget {
 /// ```
 /// use std::fs;
 /// use clap_complete::aot::Shell;
-/// use rust_config_tree::upsert_managed_block;
+/// use rust_config_tree::cli::upsert_managed_block;
 ///
 /// let path = std::env::temp_dir().join("rust-config-tree-upsert-doctest.rc");
 /// upsert_managed_block("myapp", Shell::Bash, &path, "body\n")?;

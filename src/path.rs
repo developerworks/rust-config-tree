@@ -5,7 +5,7 @@
 
 use std::path::{Component, Path, PathBuf};
 
-use crate::{ConfigTreeError, Result};
+use crate::error::{ConfigTreeError, Result};
 
 /// Converts a path to an absolute path and normalizes it lexically.
 ///
@@ -24,13 +24,13 @@ use crate::{ConfigTreeError, Result};
 ///
 /// ```
 /// use std::path::Path;
-/// use rust_config_tree::absolutize_lexical;
+/// use rust_config_tree::path::absolutize_lexical;
 ///
 /// let path = absolutize_lexical("config/../config.yaml")?;
 ///
 /// assert!(path.is_absolute());
 /// assert!(path.ends_with(Path::new("config.yaml")));
-/// # Ok::<(), rust_config_tree::ConfigTreeError>(())
+/// # Ok::<(), rust_config_tree::error::ConfigTreeError>(())
 /// ```
 pub fn absolutize_lexical(path: impl AsRef<Path>) -> Result<PathBuf> {
     let path = path.as_ref();
@@ -63,7 +63,7 @@ pub fn absolutize_lexical(path: impl AsRef<Path>) -> Result<PathBuf> {
 ///
 /// ```
 /// use std::path::PathBuf;
-/// use rust_config_tree::resolve_include_path;
+/// use rust_config_tree::path::resolve_include_path;
 ///
 /// let path = resolve_include_path("/app/config/root.yaml", "child/server.yaml");
 ///
@@ -102,7 +102,7 @@ pub fn resolve_include_path(
 ///
 /// ```
 /// use std::path::PathBuf;
-/// use rust_config_tree::normalize_lexical;
+/// use rust_config_tree::path::normalize_lexical;
 ///
 /// let path = normalize_lexical("config/./server/../app.yaml");
 ///

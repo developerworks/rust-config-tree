@@ -9,7 +9,7 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use crate::normalize_lexical;
+use crate::path::normalize_lexical;
 
 use crate::config::ConfigResult;
 

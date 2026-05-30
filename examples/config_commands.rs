@@ -8,7 +8,10 @@ use std::{
 
 use clap::{Parser, Subcommand};
 use confique::Config;
-use rust_config_tree::{ConfigCommand, ConfigSchema, handle_config_command, load_config};
+use rust_config_tree::{
+    cli::{ConfigCommand, handle_config_command},
+    config::{ConfigSchema, load_config},
+};
 use schemars::JsonSchema;
 
 #[derive(Debug, Parser)]

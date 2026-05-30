@@ -33,7 +33,7 @@ use crate::config::ConfigSchema;
 /// ```
 /// use confique::Config;
 /// use figment::Figment;
-/// use rust_config_tree::{ConfigSchema, trace_config_sources};
+/// use rust_config_tree::config::{ConfigSchema, trace_config_sources};
 ///
 /// #[derive(Config)]
 /// struct AppConfig {

@@ -50,7 +50,7 @@ impl ConfiqueEnvProvider {
     ///
     /// ```
     /// use confique::Config;
-    /// use rust_config_tree::ConfiqueEnvProvider;
+    /// use rust_config_tree::config::ConfiqueEnvProvider;
     ///
     /// #[derive(Config)]
     /// struct AppConfig {

@@ -1,3 +1,5 @@
+//! Public schema write APIs.
+
 use std::path::Path;
 
 use schemars::JsonSchema;
@@ -42,7 +44,7 @@ use super::{
 ///
 /// ```
 /// use confique::Config;
-/// use rust_config_tree::{ConfigSchema, write_config_schema};
+/// use rust_config_tree::config::{ConfigSchema, write_config_schema};
 /// use schemars::JsonSchema;
 ///
 /// #[derive(Config, JsonSchema)]
@@ -64,7 +66,7 @@ use super::{
 ///
 /// assert!(path.exists());
 /// # let _ = std::fs::remove_file(path);
-/// # Ok::<(), rust_config_tree::ConfigError>(())
+/// # Ok::<(), rust_config_tree::error::ConfigError>(())
 /// ```
 pub fn write_config_schema<S>(output_path: impl AsRef<Path>) -> ConfigResult<()>
 where
@@ -106,7 +108,7 @@ where
 ///
 /// ```
 /// use confique::Config;
-/// use rust_config_tree::{ConfigSchema, config_schema_targets_for_path};
+/// use rust_config_tree::config::{ConfigSchema, config_schema_targets_for_path};
 /// use schemars::JsonSchema;
 ///
 /// #[derive(Config, JsonSchema)]
@@ -127,7 +129,7 @@ where
 ///
 /// assert_eq!(targets.len(), 1);
 /// assert!(targets[0].content.contains("\"mode\""));
-/// # Ok::<(), rust_config_tree::ConfigError>(())
+/// # Ok::<(), rust_config_tree::error::ConfigError>(())
 /// ```
 pub fn config_schema_targets_for_path<S>(
     output_path: impl AsRef<Path>,
@@ -181,7 +183,7 @@ where
 ///
 /// ```
 /// use confique::Config;
-/// use rust_config_tree::{ConfigSchema, write_config_schemas};
+/// use rust_config_tree::config::{ConfigSchema, write_config_schemas};
 /// use schemars::JsonSchema;
 ///
 /// #[derive(Config, JsonSchema)]
@@ -206,7 +208,7 @@ where
 /// assert!(path.exists());
 /// # let _ = std::fs::remove_file(&path);
 /// # if let Some(parent) = path.parent() { let _ = std::fs::remove_dir_all(parent); }
-/// # Ok::<(), rust_config_tree::ConfigError>(())
+/// # Ok::<(), rust_config_tree::error::ConfigError>(())
 /// ```
 pub fn write_config_schemas<S>(output_path: impl AsRef<Path>) -> ConfigResult<()>
 where

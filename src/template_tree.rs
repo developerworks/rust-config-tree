@@ -7,7 +7,8 @@
 use std::path::{Path, PathBuf};
 
 use crate::{
-    BoxError, Result, absolutize_lexical, resolve_include_path,
+    error::{BoxError, Result},
+    path::{absolutize_lexical, resolve_include_path},
     tree::{TraversalState, validate_include_paths},
 };
 
@@ -38,7 +39,7 @@ impl TemplateTarget {
     ///
     /// ```
     /// use std::{io, path::{Path, PathBuf}};
-    /// use rust_config_tree::collect_template_targets;
+    /// use rust_config_tree::template_tree::collect_template_targets;
     ///
     /// let targets = collect_template_targets(
     ///     "config.yaml",
@@ -47,7 +48,7 @@ impl TemplateTarget {
     /// )?;
     ///
     /// assert!(targets[0].source_path().ends_with("config.example.yaml"));
-    /// # Ok::<(), rust_config_tree::ConfigTreeError>(())
+    /// # Ok::<(), rust_config_tree::error::ConfigTreeError>(())
     /// ```
     pub fn source_path(&self) -> &Path {
         &self.source_path
@@ -67,7 +68,7 @@ impl TemplateTarget {
     ///
     /// ```
     /// use std::{io, path::{Path, PathBuf}};
-    /// use rust_config_tree::collect_template_targets;
+    /// use rust_config_tree::template_tree::collect_template_targets;
     ///
     /// let targets = collect_template_targets(
     ///     "config.yaml",
@@ -76,7 +77,7 @@ impl TemplateTarget {
     /// )?;
     ///
     /// assert_eq!(targets[0].target_path(), Path::new("config.example.yaml"));
-    /// # Ok::<(), rust_config_tree::ConfigTreeError>(())
+    /// # Ok::<(), rust_config_tree::error::ConfigTreeError>(())
     /// ```
     pub fn target_path(&self) -> &Path {
         &self.target_path
@@ -96,7 +97,7 @@ impl TemplateTarget {
     ///
     /// ```
     /// use std::{io, path::{Path, PathBuf}};
-    /// use rust_config_tree::collect_template_targets;
+    /// use rust_config_tree::template_tree::collect_template_targets;
     ///
     /// let targets = collect_template_targets(
     ///     "config.yaml",
@@ -111,7 +112,7 @@ impl TemplateTarget {
     /// )?;
     ///
     /// assert_eq!(targets[0].include_paths(), &[PathBuf::from("child.yaml")]);
-    /// # Ok::<(), rust_config_tree::ConfigTreeError>(())
+    /// # Ok::<(), rust_config_tree::error::ConfigTreeError>(())
     /// ```
     pub fn include_paths(&self) -> &[PathBuf] {
         &self.include_paths
@@ -131,7 +132,7 @@ impl TemplateTarget {
     ///
     /// ```
     /// use std::{io, path::{Path, PathBuf}};
-    /// use rust_config_tree::collect_template_targets;
+    /// use rust_config_tree::template_tree::collect_template_targets;
     ///
     /// let mut targets = collect_template_targets(
     ///     "config.yaml",
@@ -142,7 +143,7 @@ impl TemplateTarget {
     /// let (_source_path, target_path, include_paths) = targets.remove(0).into_parts();
     /// assert_eq!(target_path, PathBuf::from("config.example.yaml"));
     /// assert!(include_paths.is_empty());
-    /// # Ok::<(), rust_config_tree::ConfigTreeError>(())
+    /// # Ok::<(), rust_config_tree::error::ConfigTreeError>(())
     /// ```
     pub fn into_parts(self) -> (PathBuf, PathBuf, Vec<PathBuf>) {
         (self.source_path, self.target_path, self.include_paths)
@@ -168,7 +169,7 @@ impl TemplateTarget {
 ///
 /// ```
 /// use std::path::PathBuf;
-/// use rust_config_tree::select_template_source;
+/// use rust_config_tree::template_tree::select_template_source;
 ///
 /// let source = select_template_source("missing-config.yaml", "config.example.yaml");
 ///
@@ -221,7 +222,7 @@ pub fn select_template_source(
 ///
 /// ```
 /// use std::{io, path::{Path, PathBuf}};
-/// use rust_config_tree::collect_template_targets;
+/// use rust_config_tree::template_tree::collect_template_targets;
 ///
 /// let targets = collect_template_targets(
 ///     "config.yaml",
@@ -237,7 +238,7 @@ pub fn select_template_source(
 ///
 /// assert_eq!(targets.len(), 2);
 /// assert_eq!(targets[1].target_path(), Path::new("examples/child.yaml"));
-/// # Ok::<(), rust_config_tree::ConfigTreeError>(())
+/// # Ok::<(), rust_config_tree::error::ConfigTreeError>(())
 /// ```
 pub fn collect_template_targets<E, F>(
     config_path: impl AsRef<Path>,
@@ -302,7 +303,7 @@ where
     }
 
     let include_paths = read_includes(&source_path)
-        .map_err(|source| crate::ConfigTreeError::load(&source_path, source))?;
+        .map_err(|source| crate::error::ConfigTreeError::load(&source_path, source))?;
     validate_include_paths(&source_path, &include_paths)?;
 
     targets.push(TemplateTarget {

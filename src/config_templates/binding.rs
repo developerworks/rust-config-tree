@@ -5,7 +5,7 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use crate::absolutize_lexical;
+use crate::path::absolutize_lexical;
 
 use super::section::section_path_for_target;
 use crate::{

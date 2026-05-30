@@ -8,7 +8,7 @@ use std::{
 };
 
 use confique::Config;
-use rust_config_tree::{ConfigSchema, load_config};
+use rust_config_tree::config::{ConfigSchema, load_config};
 
 #[derive(Debug, Config)]
 struct AppConfig {

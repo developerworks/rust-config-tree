@@ -1,3 +1,5 @@
+//! Section and field path discovery from `confique` metadata and schema markers.
+
 use std::path::{Path, PathBuf};
 
 use confique::meta::{FieldKind, Meta};

@@ -10,14 +10,14 @@ use std::path::{Path, PathBuf};
 use schemars::JsonSchema;
 
 use crate::{
-    absolutize_lexical, collect_template_targets,
     config::{ConfigResult, ConfigSchema},
     config_output::write_template,
     config_schema::{
         generate::root_config_schema,
         paths::{env_only_field_paths, nested_section_paths, split_section_paths},
     },
-    select_template_source,
+    path::absolutize_lexical,
+    template_tree::{collect_template_targets, select_template_source},
 };
 
 mod binding;
@@ -67,7 +67,7 @@ pub use target::ConfigTemplateTarget;
 ///
 /// ```
 /// use confique::Config;
-/// use rust_config_tree::{ConfigSchema, template_targets_for_paths};
+/// use rust_config_tree::config::{ConfigSchema, template_targets_for_paths};
 /// use schemars::JsonSchema;
 ///
 /// #[derive(Config, JsonSchema)]
@@ -89,7 +89,7 @@ pub use target::ConfigTemplateTarget;
 ///
 /// assert_eq!(targets.len(), 1);
 /// assert!(targets[0].content.contains("mode"));
-/// # Ok::<(), rust_config_tree::ConfigError>(())
+/// # Ok::<(), rust_config_tree::error::ConfigError>(())
 /// ```
 pub fn template_targets_for_paths<S>(
     config_path: impl AsRef<Path>,
@@ -189,7 +189,7 @@ where
 ///
 /// ```
 /// use confique::Config;
-/// use rust_config_tree::{ConfigSchema, template_targets_for_paths_with_schema};
+/// use rust_config_tree::config::{ConfigSchema, template_targets_for_paths_with_schema};
 /// use schemars::JsonSchema;
 ///
 /// #[derive(Config, JsonSchema)]
@@ -213,7 +213,7 @@ where
 /// )?;
 ///
 /// assert!(targets[0].content.starts_with("# yaml-language-server: $schema="));
-/// # Ok::<(), rust_config_tree::ConfigError>(())
+/// # Ok::<(), rust_config_tree::error::ConfigError>(())
 /// ```
 pub fn template_targets_for_paths_with_schema<S>(
     config_path: impl AsRef<Path>,
@@ -267,7 +267,7 @@ where
 ///
 /// ```
 /// use confique::Config;
-/// use rust_config_tree::{ConfigSchema, write_config_templates};
+/// use rust_config_tree::config::{ConfigSchema, write_config_templates};
 /// use schemars::JsonSchema;
 ///
 /// #[derive(Config, JsonSchema)]
@@ -289,7 +289,7 @@ where
 ///
 /// assert!(output.exists());
 /// # let _ = std::fs::remove_file(output);
-/// # Ok::<(), rust_config_tree::ConfigError>(())
+/// # Ok::<(), rust_config_tree::error::ConfigError>(())
 /// ```
 pub fn write_config_templates<S>(
     config_path: impl AsRef<Path>,
@@ -332,7 +332,7 @@ where
 ///
 /// ```
 /// use confique::Config;
-/// use rust_config_tree::{ConfigSchema, write_config_templates_with_schema};
+/// use rust_config_tree::config::{ConfigSchema, write_config_templates_with_schema};
 /// use schemars::JsonSchema;
 ///
 /// #[derive(Config, JsonSchema)]

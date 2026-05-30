@@ -1,3 +1,5 @@
+//! Generated JSON Schema output descriptors.
+
 use std::path::PathBuf;
 
 /// Generated JSON Schema content for one output path.

@@ -1,3 +1,5 @@
+//! Local `$ref` resolution and schema-map reference collection.
+
 use std::collections::BTreeSet;
 
 use serde_json::Value;
@@ -52,6 +54,24 @@ fn resolve_json_pointer_ref<'a>(root_schema: &'a Value, reference: &str) -> Opti
     let pointer = reference.strip_prefix('#')?;
     root_schema.pointer(pointer)
 }
+
+/// Expands the reference set with references used by already retained schemas.
+///
+/// # Arguments
+///
+/// - `schema`: Root schema containing schema maps to inspect.
+/// - `definitions`: Referenced `definitions` names to expand in place.
+/// - `defs`: Referenced `$defs` names to expand in place.
+///
+/// # Returns
+///
+/// Returns no value; `definitions` and `defs` are updated directly.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
 pub fn collect_transitive_schema_refs(
     schema: &Value,
     definitions: &mut BTreeSet<String>,

@@ -39,7 +39,7 @@ use crate::{
 ///
 /// ```
 /// use confique::Config;
-/// use rust_config_tree::{ConfigSchema, template_for_path};
+/// use rust_config_tree::config::{ConfigSchema, template_for_path};
 /// use schemars::JsonSchema;
 ///
 /// #[derive(Config, JsonSchema)]
@@ -59,7 +59,7 @@ use crate::{
 /// let template = template_for_path::<AppConfig>("config.yaml")?;
 ///
 /// assert!(template.contains("mode"));
-/// # Ok::<(), rust_config_tree::ConfigError>(())
+/// # Ok::<(), rust_config_tree::error::ConfigError>(())
 /// ```
 pub fn template_for_path<S>(path: impl AsRef<Path>) -> ConfigResult<String>
 where

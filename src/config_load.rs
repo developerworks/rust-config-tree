@@ -14,11 +14,12 @@ use figment::{
 };
 
 use crate::{
-    ConfigSource, ConfigTree, ConfigTreeOptions, IncludeOrder, absolutize_lexical,
     config::{ConfigResult, ConfigSchema},
     config_env::ConfiqueEnvProvider,
     config_format::ConfigFormat,
     config_trace::trace_config_sources,
+    path::absolutize_lexical,
+    tree::{ConfigSource, ConfigTree, ConfigTreeOptions, IncludeOrder},
 };
 
 /// Loads a complete `confique` schema from a root config path.
@@ -50,7 +51,7 @@ use crate::{
 /// ```
 /// use std::fs;
 /// use confique::Config;
-/// use rust_config_tree::{ConfigSchema, load_config};
+/// use rust_config_tree::config::{ConfigSchema, load_config};
 ///
 /// #[derive(Debug, Config)]
 /// struct AppConfig {
@@ -109,7 +110,7 @@ where
 /// ```
 /// use std::fs;
 /// use confique::Config;
-/// use rust_config_tree::{ConfigSchema, load_config_with_figment};
+/// use rust_config_tree::config::{ConfigSchema, load_config_with_figment};
 ///
 /// #[derive(Debug, Config)]
 /// struct AppConfig {
@@ -170,7 +171,7 @@ where
 /// ```
 /// use std::fs;
 /// use confique::Config;
-/// use rust_config_tree::{ConfigSchema, build_config_figment};
+/// use rust_config_tree::config::{ConfigSchema, build_config_figment};
 ///
 /// #[derive(Debug, Config)]
 /// struct AppConfig {
@@ -236,7 +237,7 @@ where
 /// ```
 /// use std::fs;
 /// use confique::Config;
-/// use rust_config_tree::{ConfigSchema, build_config_figment, load_config_from_figment};
+/// use rust_config_tree::config::{ConfigSchema, build_config_figment, load_config_from_figment};
 ///
 /// #[derive(Debug, Config)]
 /// struct AppConfig {

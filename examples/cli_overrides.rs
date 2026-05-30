@@ -10,7 +10,7 @@ use std::{
 use clap::Parser;
 use confique::Config;
 use figment::providers::Serialized;
-use rust_config_tree::{ConfigSchema, build_config_figment, load_config_from_figment};
+use rust_config_tree::config::{ConfigSchema, build_config_figment, load_config_from_figment};
 use serde::Serialize;
 
 #[derive(Debug, Parser)]

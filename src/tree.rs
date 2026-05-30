@@ -9,7 +9,10 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use crate::{BoxError, ConfigTreeError, Result, absolutize_lexical, resolve_include_path};
+use crate::{
+    error::{BoxError, ConfigTreeError, Result},
+    path::{absolutize_lexical, resolve_include_path},
+};
 
 /// Controls the order in which sibling include paths are traversed.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
@@ -45,7 +48,7 @@ impl ConfigTreeOptions {
     /// # Examples
     ///
     /// ```
-    /// use rust_config_tree::{ConfigTreeOptions, IncludeOrder};
+    /// use rust_config_tree::tree::{ConfigTreeOptions, IncludeOrder};
     ///
     /// let options = ConfigTreeOptions::default().include_order(IncludeOrder::Reverse);
     /// # let _ = options;
@@ -80,7 +83,7 @@ impl ConfigTreeOptions {
     ///
     /// ```
     /// use std::{io, path::{Path, PathBuf}};
-    /// use rust_config_tree::{ConfigSource, ConfigTreeOptions};
+    /// use rust_config_tree::tree::{ConfigSource, ConfigTreeOptions};
     ///
     /// let tree = ConfigTreeOptions::default().load(
     ///     "root.yaml",
@@ -94,7 +97,7 @@ impl ConfigTreeOptions {
     /// )?;
     ///
     /// assert_eq!(tree.into_values(), vec!["root", "child"]);
-    /// # Ok::<(), rust_config_tree::ConfigTreeError>(())
+    /// # Ok::<(), rust_config_tree::error::ConfigTreeError>(())
     /// ```
     pub fn load<T, E, F>(&self, root_path: impl AsRef<Path>, mut load: F) -> Result<ConfigTree<T>>
     where
@@ -206,7 +209,7 @@ impl<T> ConfigSource<T> {
     ///
     /// ```
     /// use std::path::PathBuf;
-    /// use rust_config_tree::ConfigSource;
+    /// use rust_config_tree::tree::ConfigSource;
     ///
     /// let source = ConfigSource::new("value", vec![PathBuf::from("child.yaml")]);
     ///
@@ -230,7 +233,7 @@ impl<T> ConfigSource<T> {
     /// # Examples
     ///
     /// ```
-    /// use rust_config_tree::ConfigSource;
+    /// use rust_config_tree::tree::ConfigSource;
     ///
     /// let source = ConfigSource::new("value", Vec::new());
     ///
@@ -254,7 +257,7 @@ impl<T> ConfigSource<T> {
     ///
     /// ```
     /// use std::path::PathBuf;
-    /// use rust_config_tree::ConfigSource;
+    /// use rust_config_tree::tree::ConfigSource;
     ///
     /// let source = ConfigSource::new("value", vec![PathBuf::from("child.yaml")]);
     ///
@@ -278,7 +281,7 @@ impl<T> ConfigSource<T> {
     ///
     /// ```
     /// use std::path::PathBuf;
-    /// use rust_config_tree::ConfigSource;
+    /// use rust_config_tree::tree::ConfigSource;
     ///
     /// let source = ConfigSource::new("value", vec![PathBuf::from("child.yaml")]);
     ///
@@ -337,7 +340,7 @@ impl<T> ConfigTree<T> {
     ///
     /// ```
     /// use std::{io, path::Path};
-    /// use rust_config_tree::{ConfigSource, load_config_tree};
+    /// use rust_config_tree::tree::{ConfigSource, load_config_tree};
     ///
     /// let tree = load_config_tree(
     ///     "root.yaml",
@@ -347,7 +350,7 @@ impl<T> ConfigTree<T> {
     /// )?;
     ///
     /// assert_eq!(tree.nodes().len(), 1);
-    /// # Ok::<(), rust_config_tree::ConfigTreeError>(())
+    /// # Ok::<(), rust_config_tree::error::ConfigTreeError>(())
     /// ```
     pub fn nodes(&self) -> &[ConfigNode<T>] {
         &self.nodes
@@ -367,7 +370,7 @@ impl<T> ConfigTree<T> {
     ///
     /// ```
     /// use std::{io, path::Path};
-    /// use rust_config_tree::{ConfigSource, load_config_tree};
+    /// use rust_config_tree::tree::{ConfigSource, load_config_tree};
     ///
     /// let tree = load_config_tree(
     ///     "root.yaml",
@@ -377,7 +380,7 @@ impl<T> ConfigTree<T> {
     /// )?;
     ///
     /// assert_eq!(tree.into_nodes().len(), 1);
-    /// # Ok::<(), rust_config_tree::ConfigTreeError>(())
+    /// # Ok::<(), rust_config_tree::error::ConfigTreeError>(())
     /// ```
     pub fn into_nodes(self) -> Vec<ConfigNode<T>> {
         self.nodes
@@ -397,7 +400,7 @@ impl<T> ConfigTree<T> {
     ///
     /// ```
     /// use std::{io, path::Path};
-    /// use rust_config_tree::{ConfigSource, load_config_tree};
+    /// use rust_config_tree::tree::{ConfigSource, load_config_tree};
     ///
     /// let tree = load_config_tree(
     ///     "root.yaml",
@@ -407,7 +410,7 @@ impl<T> ConfigTree<T> {
     /// )?;
     ///
     /// assert_eq!(tree.into_values(), vec!["root"]);
-    /// # Ok::<(), rust_config_tree::ConfigTreeError>(())
+    /// # Ok::<(), rust_config_tree::error::ConfigTreeError>(())
     /// ```
     pub fn into_values(self) -> Vec<T> {
         self.nodes.into_iter().map(|node| node.value).collect()
@@ -442,7 +445,7 @@ impl<T> ConfigNode<T> {
     ///
     /// ```
     /// use std::{io, path::Path};
-    /// use rust_config_tree::{ConfigSource, load_config_tree};
+    /// use rust_config_tree::tree::{ConfigSource, load_config_tree};
     ///
     /// let tree = load_config_tree(
     ///     "root.yaml",
@@ -452,7 +455,7 @@ impl<T> ConfigNode<T> {
     /// )?;
     ///
     /// assert!(tree.nodes()[0].path().ends_with("root.yaml"));
-    /// # Ok::<(), rust_config_tree::ConfigTreeError>(())
+    /// # Ok::<(), rust_config_tree::error::ConfigTreeError>(())
     /// ```
     pub fn path(&self) -> &Path {
         &self.path
@@ -472,7 +475,7 @@ impl<T> ConfigNode<T> {
     ///
     /// ```
     /// use std::{io, path::Path};
-    /// use rust_config_tree::{ConfigSource, load_config_tree};
+    /// use rust_config_tree::tree::{ConfigSource, load_config_tree};
     ///
     /// let tree = load_config_tree(
     ///     "root.yaml",
@@ -482,7 +485,7 @@ impl<T> ConfigNode<T> {
     /// )?;
     ///
     /// assert_eq!(tree.nodes()[0].value(), &"root");
-    /// # Ok::<(), rust_config_tree::ConfigTreeError>(())
+    /// # Ok::<(), rust_config_tree::error::ConfigTreeError>(())
     /// ```
     pub fn value(&self) -> &T {
         &self.value
@@ -502,7 +505,7 @@ impl<T> ConfigNode<T> {
     ///
     /// ```
     /// use std::{io, path::{Path, PathBuf}};
-    /// use rust_config_tree::{ConfigSource, load_config_tree};
+    /// use rust_config_tree::tree::{ConfigSource, load_config_tree};
     ///
     /// let tree = load_config_tree(
     ///     "root.yaml",
@@ -516,7 +519,7 @@ impl<T> ConfigNode<T> {
     /// )?;
     ///
     /// assert_eq!(tree.nodes()[0].includes(), &[PathBuf::from("child.yaml")]);
-    /// # Ok::<(), rust_config_tree::ConfigTreeError>(())
+    /// # Ok::<(), rust_config_tree::error::ConfigTreeError>(())
     /// ```
     pub fn includes(&self) -> &[PathBuf] {
         &self.includes
@@ -536,7 +539,7 @@ impl<T> ConfigNode<T> {
     ///
     /// ```
     /// use std::{io, path::Path};
-    /// use rust_config_tree::{ConfigSource, load_config_tree};
+    /// use rust_config_tree::tree::{ConfigSource, load_config_tree};
     ///
     /// let tree = load_config_tree(
     ///     "root.yaml",
@@ -547,7 +550,7 @@ impl<T> ConfigNode<T> {
     ///
     /// let mut nodes = tree.into_nodes();
     /// assert_eq!(nodes.remove(0).into_value(), "root");
-    /// # Ok::<(), rust_config_tree::ConfigTreeError>(())
+    /// # Ok::<(), rust_config_tree::error::ConfigTreeError>(())
     /// ```
     pub fn into_value(self) -> T {
         self.value
@@ -576,7 +579,7 @@ impl<T> ConfigNode<T> {
 ///
 /// ```
 /// use std::{io, path::{Path, PathBuf}};
-/// use rust_config_tree::{ConfigSource, load_config_tree};
+/// use rust_config_tree::tree::{ConfigSource, load_config_tree};
 ///
 /// let tree = load_config_tree(
 ///     "root.yaml",
@@ -590,7 +593,7 @@ impl<T> ConfigNode<T> {
 /// )?;
 ///
 /// assert_eq!(tree.into_values(), vec!["root", "child"]);
-/// # Ok::<(), rust_config_tree::ConfigTreeError>(())
+/// # Ok::<(), rust_config_tree::error::ConfigTreeError>(())
 /// ```
 pub fn load_config_tree<T, E, F>(root_path: impl AsRef<Path>, load: F) -> Result<ConfigTree<T>>
 where

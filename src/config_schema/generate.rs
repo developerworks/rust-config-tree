@@ -1,3 +1,5 @@
+//! Root schema generation and JSON serialization.
+
 use schemars::{JsonSchema, generate::SchemaSettings};
 use serde_json::Value;
 

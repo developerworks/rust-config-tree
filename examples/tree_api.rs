@@ -6,7 +6,9 @@ use std::{
     time::{SystemTime, UNIX_EPOCH},
 };
 
-use rust_config_tree::{ConfigSource, ConfigTreeOptions, IncludeOrder, load_config_tree};
+use rust_config_tree::tree::{
+    ConfigSource, ConfigTreeOptions, IncludeOrder, load_config_tree,
+};
 
 /// Builds a demo include tree and prints traversal results.
 fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {

@@ -1,3 +1,5 @@
+//! Schema adaptation for split sections, env-only fields, and public output.
+
 use std::collections::BTreeSet;
 
 use serde_json::Value;
@@ -347,6 +349,22 @@ pub fn prune_unused_schema_maps(schema: &mut Value) {
     retain_schema_map(schema, "definitions", &definitions);
     retain_schema_map(schema, "$defs", &defs);
 }
+
+/// Removes internal extension markers before writing public schemas.
+///
+/// # Arguments
+///
+/// - `value`: Schema subtree to sanitize.
+///
+/// # Returns
+///
+/// Returns no value; `value` is updated directly.
+///
+/// # Examples
+///
+/// ```no_run
+/// let _ = ();
+/// ```
 pub fn remove_schema_extensions(value: &mut Value) {
     match value {
         Value::Object(object) => {

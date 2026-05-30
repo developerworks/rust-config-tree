@@ -8,7 +8,9 @@ use std::{
 };
 
 use confique::Config;
-use rust_config_tree::{ConfigSchema, write_config_schemas, write_config_templates_with_schema};
+use rust_config_tree::config::{
+    ConfigSchema, write_config_schemas, write_config_templates_with_schema,
+};
 use schemars::JsonSchema;
 
 #[derive(Debug, Config, JsonSchema)]

@@ -12,7 +12,7 @@ use schemars::JsonSchema;
 
 use super::*;
 use crate::{
-    ConfigSchema,
+    config::ConfigSchema,
     config_output::{default_config_template_output, resolve_config_template_output},
 };
 

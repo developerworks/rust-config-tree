@@ -2,7 +2,7 @@
 
 use std::path::{Path, PathBuf};
 
-use crate::normalize_lexical;
+use crate::path::normalize_lexical;
 
 use super::section::{
     path_relative_to, section_path_for_target, section_path_for_target_candidates,

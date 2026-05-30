@@ -29,8 +29,8 @@ pub use crate::config_trace::trace_config_sources;
 
 /// Result type used by the high-level configuration API.
 ///
-/// The error type is [`ConfigError`](crate::ConfigError).
-pub type ConfigResult<T> = std::result::Result<T, crate::ConfigError>;
+/// The error type is [`ConfigError`](crate::error::ConfigError).
+pub type ConfigResult<T> = std::result::Result<T, crate::error::ConfigError>;
 
 /// A `confique` schema that can expose recursive include paths and template
 /// section layout.
@@ -56,7 +56,7 @@ pub trait ConfigSchema: Config + Sized {
     ///
     /// ```
     /// use confique::Config;
-    /// use rust_config_tree::ConfigSchema;
+    /// use rust_config_tree::config::ConfigSchema;
     ///
     /// #[derive(Config)]
     /// struct AppConfig {
@@ -95,7 +95,7 @@ pub trait ConfigSchema: Config + Sized {
     ///
     /// ```
     /// use confique::Config;
-    /// use rust_config_tree::ConfigSchema;
+    /// use rust_config_tree::config::ConfigSchema;
     ///
     /// #[derive(Config)]
     /// struct AppConfig {

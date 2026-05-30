@@ -31,7 +31,7 @@ impl ConfigFormat {
     /// # Examples
     ///
     /// ```
-    /// use rust_config_tree::ConfigFormat;
+    /// use rust_config_tree::config::ConfigFormat;
     ///
     /// assert_eq!(ConfigFormat::from_path("config.toml"), ConfigFormat::Toml);
     /// assert_eq!(ConfigFormat::from_path("config.json5"), ConfigFormat::Json);
