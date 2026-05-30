@@ -11,7 +11,7 @@ use super::section::{
 use crate::{
     config::{ConfigResult, ConfigSchema},
     config_load::{figment_for_file, load_layer},
-    config_schema::direct_child_split_section_paths,
+    config_schema::paths::direct_child_split_section_paths,
 };
 
 /// Reads include paths from an existing template source when possible.

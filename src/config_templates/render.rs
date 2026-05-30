@@ -13,7 +13,10 @@ use super::{
 use crate::{
     config::{ConfigResult, ConfigSchema},
     config_format::ConfigFormat,
-    config_schema::{env_only_field_paths, root_config_schema},
+    config_schema::{
+        generate::root_config_schema,
+        paths::env_only_field_paths,
+    },
 };
 
 /// Renders the default template for one path.

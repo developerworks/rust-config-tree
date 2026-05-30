@@ -11,7 +11,7 @@ use super::section::section_path_for_target;
 use crate::{
     config::{ConfigResult, ConfigSchema},
     config_format::ConfigFormat,
-    config_schema::schema_path_for_section,
+    config_schema::paths::schema_path_for_section,
 };
 
 /// Chooses the schema path that should be bound to one template target.

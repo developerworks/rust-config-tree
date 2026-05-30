@@ -14,7 +14,8 @@ use crate::{
     config::{ConfigResult, ConfigSchema},
     config_output::write_template,
     config_schema::{
-        env_only_field_paths, nested_section_paths, root_config_schema, split_section_paths,
+        generate::root_config_schema,
+        paths::{env_only_field_paths, nested_section_paths, split_section_paths},
     },
     select_template_source,
 };
