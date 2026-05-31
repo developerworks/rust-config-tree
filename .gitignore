@@ -2,3 +2,4 @@
 /Cargo.lock
 /manual/*/book
 /manual/*/theme
+/macros/target
