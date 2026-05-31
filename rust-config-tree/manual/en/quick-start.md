@@ -6,7 +6,7 @@ Add the crate and the schema/runtime libraries used by your application:
 
 ```toml
 [dependencies]
-rust-config-tree = "0.1"
+rust-config-tree = "0.2"
 confique = { version = "0.4", features = ["yaml", "toml", "json5"] }
 figment = { version = "0.10", features = ["yaml", "toml", "json", "env"] }
 schemars = { version = "1", features = ["derive"] }
@@ -87,48 +87,46 @@ file priority. Included files provide lower-priority values and can be used for
 defaults or section-specific files.
 
 Command-line arguments are application-specific, so `load_config` does not read
-them automatically. Merge CLI overrides after `build_config_figment` when the
-application has config override flags:
-
-CLI flag names are chosen by the application. They are not automatically
-`a.b.c` config paths. Prefer normal clap flags such as `--server-port`, then
-map them into a nested override structure. The nested serialized shape controls
-the config key that is overridden.
-
-Only values represented in the application's `CliOverrides` provider override
-configuration. This is useful for parameters that are changed frequently for one
-run without editing the config file. Stable values should stay in config files.
+them automatically. Use the `ConfigOverrides` derive macro to build an override
+provider from parsed CLI flags:
 
 ```rust
-use figment::providers::Serialized;
-use serde::Serialize;
-use rust_config_tree::{build_config_figment, load_config_from_figment};
-
-#[derive(Debug, Serialize)]
-struct CliOverrides {
-    #[serde(skip_serializing_if = "Option::is_none")]
-    server: Option<CliServerOverrides>,
-}
-
-#[derive(Debug, Serialize)]
-struct CliServerOverrides {
-    #[serde(skip_serializing_if = "Option::is_none")]
-    port: Option<u16>,
-}
-
-let cli_overrides = CliOverrides {
-    server: Some(CliServerOverrides { port: Some(9000) }),
+use clap::Parser;
+use rust_config_tree::{
+    ConfigSchema,
+    cli::ConfigOverrides,
+    config::{build_config_figment, load_config_from_figment},
 };
 
-let figment = build_config_figment::<AppConfig>("config.yaml")?
-    .merge(Serialized::defaults(cli_overrides));
+#[derive(Debug, Parser, ConfigOverrides)]
+struct Cli {
+    /// Config file path
+    #[arg(long)]
+    config: Option<std::path::PathBuf>,
 
+    /// Override server port
+    #[arg(long)]
+    #[config_override(path = "server.port")]
+    server_port: Option<u16>,
+
+    /// Override log level
+    #[arg(long)]
+    #[config_override(path = "log.level")]
+    log_level: Option<String>,
+}
+
+let cli = Cli::parse();
+let figment = build_config_figment::<AppConfig>("config.yaml")?
+    .merge(cli.config_overrides()?);
 let config = load_config_from_figment::<AppConfig>(&figment)?;
 # let _ = config;
 # Ok::<(), Box<dyn std::error::Error + Send + Sync>>(())
 ```
 
-With CLI overrides merged this way, the full precedence is:
+The `#[config_override(path = "...")]` attribute maps each CLI flag to a dotted
+config path. Only provided flags produce override values; omitted flags
+disappear. The override provider is merged last, so provided flags override file
+and environment values:
 
 ```text
 command-line overrides

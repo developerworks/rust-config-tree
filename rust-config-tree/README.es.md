@@ -38,7 +38,7 @@ implementando `ConfigSchema` para exponer el campo de includes del esquema.
 
 ```toml
 [dependencies]
-rust-config-tree = "0.1"
+rust-config-tree = "0.2"
 confique = { version = "0.4", features = ["yaml", "toml", "json5"] }
 figment = { version = "0.10", features = ["yaml", "toml", "json", "env"] }
 schemars = { version = "1", features = ["derive"] }
@@ -48,9 +48,37 @@ clap = { version = "4", features = ["derive"] }
 
 ## Esquema de configuración
 
-El esquema de la aplicación es dueño del campo de includes. `rust-config-tree`
-solo necesita un pequeño adaptador que extrae los includes de la capa
-intermedia de `confique`.
+La forma mas sencilla de conectar el esquema es derivar `ConfigSchema` junto
+con `confique::Config`. La macro derivada espera un campo llamado `include` de
+tipo `Vec<PathBuf>` con un atributo `#[config(default = [])]`:
+
+```rust
+use confique::Config;
+use schemars::JsonSchema;
+use rust_config_tree::ConfigSchema;
+
+#[derive(Debug, Config, JsonSchema, ConfigSchema)]
+struct AppConfig {
+    #[config(default = [])]
+    include: Vec<std::path::PathBuf>,
+
+    #[config(default = "paper")]
+    mode: String,
+
+    #[config(nested)]
+    #[schemars(extend("x-tree-split" = true))]
+    server: ServerConfig,
+}
+
+#[derive(Debug, Config, JsonSchema)]
+struct ServerConfig {
+    #[config(default = 8080)]
+    port: u16,
+}
+```
+
+Para esquemas que usan un nombre de campo include diferente o logica de
+include personalizada, implemente el trait manualmente:
 
 ```rust
 use std::path::PathBuf;

@@ -32,7 +32,7 @@ Sovellukset tarjoavat skeemansa johtamalla `confique::Config`-traitin ja toteutt
 
 ```toml
 [dependencies]
-rust-config-tree = "0.1"
+rust-config-tree = "0.2"
 confique = { version = "0.4", features = ["yaml", "toml", "json5"] }
 figment = { version = "0.10", features = ["yaml", "toml", "json", "env"] }
 schemars = { version = "1", features = ["derive"] }
@@ -42,7 +42,34 @@ clap = { version = "4", features = ["derive"] }
 
 ## Konfiguraatioskeema
 
-Sovelluksen skeema omistaa include-kentan. `rust-config-tree` tarvitsee vain pienen sovittimen, joka poimii includet valiaikaisesta `confique`-kerroksesta.
+Yksinkertaisin tapa kytkea skeema on johtaa `ConfigSchema` `confique::Config`-rinnalla. Johdannainen makro odottaa kenttaa nimelta `include`, tyypilta `Vec<PathBuf>`, jossa on `#[config(default = [])]`-attribuutti:
+
+```rust
+use confique::Config;
+use schemars::JsonSchema;
+use rust_config_tree::ConfigSchema;
+
+#[derive(Debug, Config, JsonSchema, ConfigSchema)]
+struct AppConfig {
+    #[config(default = [])]
+    include: Vec<std::path::PathBuf>,
+
+    #[config(default = "paper")]
+    mode: String,
+
+    #[config(nested)]
+    #[schemars(extend("x-tree-split" = true))]
+    server: ServerConfig,
+}
+
+#[derive(Debug, Config, JsonSchema)]
+struct ServerConfig {
+    #[config(default = 8080)]
+    port: u16,
+}
+```
+
+Skeemoille, jotka kayttavat eri include-kentan nimea tai omaa include-logiikkaa, toteuta trait manuaalisesti:
 
 ```rust
 use std::path::PathBuf;

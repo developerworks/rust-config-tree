@@ -7,7 +7,7 @@ aplicacao:
 
 ```toml
 [dependencies]
-rust-config-tree = "0.1"
+rust-config-tree = "0.2"
 confique = { version = "0.4", features = ["yaml", "toml", "json5"] }
 figment = { version = "0.10", features = ["yaml", "toml", "json", "env"] }
 schemars = { version = "1", features = ["derive"] }
@@ -92,47 +92,44 @@ Argumentos de linha de comando sao especificos da aplicacao, entao
 `build_config_figment` quando a aplicacao tiver flags de sobrescrita de
 configuracao:
 
-Nomes de flags de CLI sao escolhidos pela aplicacao. Eles nao sao
-automaticamente caminhos de configuracao `a.b.c`. Prefira flags clap normais,
-como `--server-port`, e depois mapeie-as para uma estrutura aninhada de
-sobrescrita. O formato serializado aninhado controla a chave de configuracao que
-sera sobrescrita.
-
-Somente valores representados no provedor `CliOverrides` da aplicacao
-sobrescrevem a configuracao. Isso e util para parametros alterados com
-frequencia em uma unica execucao sem editar o arquivo de configuracao. Valores
-estaveis devem permanecer em arquivos de configuracao.
+Nomes de flags de CLI sao escolhidos pela aplicacao. Use a macro derivada
+`ConfigOverrides` para construir um provedor de sobrescrita a partir de flags
+CLI analisadas:
 
 ```rust
-use figment::providers::Serialized;
-use serde::Serialize;
-use rust_config_tree::{build_config_figment, load_config_from_figment};
-
-#[derive(Debug, Serialize)]
-struct CliOverrides {
-    #[serde(skip_serializing_if = "Option::is_none")]
-    server: Option<CliServerOverrides>,
-}
-
-#[derive(Debug, Serialize)]
-struct CliServerOverrides {
-    #[serde(skip_serializing_if = "Option::is_none")]
-    port: Option<u16>,
-}
-
-let cli_overrides = CliOverrides {
-    server: Some(CliServerOverrides { port: Some(9000) }),
+use clap::Parser;
+use rust_config_tree::{
+    ConfigSchema,
+    cli::ConfigOverrides,
+    config::{build_config_figment, load_config_from_figment},
 };
 
-let figment = build_config_figment::<AppConfig>("config.yaml")?
-    .merge(Serialized::defaults(cli_overrides));
+#[derive(Debug, Parser, ConfigOverrides)]
+struct Cli {
+    #[arg(long)]
+    config: Option<std::path::PathBuf>,
 
+    #[arg(long)]
+    #[config_override(path = "server.port")]
+    server_port: Option<u16>,
+
+    #[arg(long)]
+    #[config_override(path = "log.level")]
+    log_level: Option<String>,
+}
+
+let cli = Cli::parse();
+let figment = build_config_figment::<AppConfig>("config.yaml")?
+    .merge(cli.config_overrides()?);
 let config = load_config_from_figment::<AppConfig>(&figment)?;
 # let _ = config;
 # Ok::<(), Box<dyn std::error::Error + Send + Sync>>(())
 ```
 
-Com sobrescritas de CLI mescladas dessa forma, a precedencia completa e:
+O atributo `#[config_override(path = "...")]` mapeia cada flag CLI para um
+caminho de configuracao pontilhado. Apenas flags fornecidas produzem valores de
+sobrescrita; flags omitidas desaparecem. O provedor de sobrescrita e mesclado
+por ultimo, entao as flags fornecidas substituem valores de arquivos e ambiente:
 
 ```text
 command-line overrides
@@ -140,4 +137,3 @@ command-line overrides
     > config files
       > confique code defaults
 ```
-

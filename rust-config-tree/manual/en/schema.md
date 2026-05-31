@@ -6,6 +6,39 @@ Application schemas are normal `confique` config types. The root schema must
 implement `ConfigSchema` so `rust-config-tree` can discover recursive includes
 from the intermediate `confique` layer.
 
+The simplest way is to derive `ConfigSchema`:
+
+```rust
+use confique::Config;
+use schemars::JsonSchema;
+use rust_config_tree::ConfigSchema;
+
+#[derive(Debug, Config, JsonSchema, ConfigSchema)]
+struct AppConfig {
+    #[config(default = [])]
+    include: Vec<std::path::PathBuf>,
+
+    #[config(nested)]
+    #[schemars(extend("x-tree-split" = true))]
+    database: DatabaseConfig,
+}
+
+#[derive(Debug, Config, JsonSchema)]
+struct DatabaseConfig {
+    #[config(env = "APP_DATABASE_URL")]
+    url: String,
+
+    #[config(default = 16)]
+    #[config(env = "APP_DATABASE_POOL_SIZE")]
+    pool_size: u32,
+}
+```
+
+`#[derive(ConfigSchema)]` expects a field named `include` of type
+`Vec<PathBuf>` with a `#[config(default = [])]` attribute. For schemas that
+use a different field name or custom include logic, implement the trait
+manually:
+
 ```rust
 use std::path::PathBuf;
 
@@ -21,16 +54,6 @@ struct AppConfig {
     #[config(nested)]
     #[schemars(extend("x-tree-split" = true))]
     database: DatabaseConfig,
-}
-
-#[derive(Debug, Config, JsonSchema)]
-struct DatabaseConfig {
-    #[config(env = "APP_DATABASE_URL")]
-    url: String,
-
-    #[config(default = 16)]
-    #[config(env = "APP_DATABASE_POOL_SIZE")]
-    pool_size: u32,
 }
 
 impl ConfigSchema for AppConfig {

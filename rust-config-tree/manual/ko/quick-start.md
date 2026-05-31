@@ -6,7 +6,7 @@
 
 ```toml
 [dependencies]
-rust-config-tree = "0.1"
+rust-config-tree = "0.2"
 confique = { version = "0.4", features = ["yaml", "toml", "json5"] }
 figment = { version = "0.10", features = ["yaml", "toml", "json", "env"] }
 schemars = { version = "1", features = ["derive"] }
@@ -90,44 +90,43 @@ environment variables
 애플리케이션에 설정 override 플래그가 있다면 `build_config_figment` 뒤에 CLI
 override를 병합하세요.
 
-CLI 플래그 이름은 애플리케이션이 선택합니다. 자동으로 `a.b.c` 설정 경로가 되지
-않습니다. `--server-port` 같은 일반 clap 플래그를 선호하고, 이를 중첩 override
-구조에 매핑하세요. 중첩 직렬화 형태가 override되는 설정 키를 제어합니다.
-
-애플리케이션의 `CliOverrides` 프로바이더에 표현된 값만 설정을 override합니다.
-이는 설정 파일을 편집하지 않고 한 번의 실행에서 자주 바꾸는 파라미터에
-유용합니다. 안정적인 값은 설정 파일에 두어야 합니다.
+CLI 플래그 이름은 애플리케이션이 선택합니다. `ConfigOverrides` derive 매크로를
+사용하여 파싱된 CLI 플래그로부터 override 프로바이더를 구축하세요:
 
 ```rust
-use figment::providers::Serialized;
-use serde::Serialize;
-use rust_config_tree::{build_config_figment, load_config_from_figment};
-
-#[derive(Debug, Serialize)]
-struct CliOverrides {
-    #[serde(skip_serializing_if = "Option::is_none")]
-    server: Option<CliServerOverrides>,
-}
-
-#[derive(Debug, Serialize)]
-struct CliServerOverrides {
-    #[serde(skip_serializing_if = "Option::is_none")]
-    port: Option<u16>,
-}
-
-let cli_overrides = CliOverrides {
-    server: Some(CliServerOverrides { port: Some(9000) }),
+use clap::Parser;
+use rust_config_tree::{
+    ConfigSchema,
+    cli::ConfigOverrides,
+    config::{build_config_figment, load_config_from_figment},
 };
 
-let figment = build_config_figment::<AppConfig>("config.yaml")?
-    .merge(Serialized::defaults(cli_overrides));
+#[derive(Debug, Parser, ConfigOverrides)]
+struct Cli {
+    #[arg(long)]
+    config: Option<std::path::PathBuf>,
 
+    #[arg(long)]
+    #[config_override(path = "server.port")]
+    server_port: Option<u16>,
+
+    #[arg(long)]
+    #[config_override(path = "log.level")]
+    log_level: Option<String>,
+}
+
+let cli = Cli::parse();
+let figment = build_config_figment::<AppConfig>("config.yaml")?
+    .merge(cli.config_overrides()?);
 let config = load_config_from_figment::<AppConfig>(&figment)?;
 # let _ = config;
 # Ok::<(), Box<dyn std::error::Error + Send + Sync>>(())
 ```
 
-이 방식으로 CLI override를 병합하면 전체 우선순위는 다음과 같습니다.
+`#[config_override(path = "...")]` 속성은 각 CLI 플래그를 점으로 구분된 설정
+경로에 매핑합니다. 제공된 플래그만 override 값을 생성하고, 생략된 플래그는
+사라집니다. override 프로바이더는 마지막에 병합되므로 제공된 플래그가 파일 및
+환경 변수 값을 재정의합니다:
 
 ```text
 command-line overrides

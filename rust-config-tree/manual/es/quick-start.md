@@ -7,7 +7,7 @@ aplicación:
 
 ```toml
 [dependencies]
-rust-config-tree = "0.1"
+rust-config-tree = "0.2"
 confique = { version = "0.4", features = ["yaml", "toml", "json5"] }
 figment = { version = "0.10", features = ["yaml", "toml", "json", "env"] }
 schemars = { version = "1", features = ["derive"] }
@@ -93,46 +93,45 @@ Los argumentos de línea de comandos son específicos de la aplicación, así qu
 `build_config_figment` cuando la aplicación tenga flags de override de
 configuración:
 
-Los nombres de flags de CLI los elige la aplicación. No son automáticamente
-rutas de configuración `a.b.c`. Prefiere flags clap normales como
-`--server-port`, luego mapéalas a una estructura de override anidada. La forma
-serializada anidada controla la clave de configuración que se sobrescribe.
-
-Solo los valores representados en el proveedor `CliOverrides` de la aplicación
-sobrescriben la configuración. Esto es útil para parámetros que se cambian con
-frecuencia para una ejecución sin editar el archivo de configuración. Los
-valores estables deberían permanecer en archivos de configuración.
+Los nombres de flags de CLI los elige la aplicación. Usa la macro derivada
+`ConfigOverrides` para construir un proveedor de sobreescritura desde flags
+CLI analizados:
 
 ```rust
-use figment::providers::Serialized;
-use serde::Serialize;
-use rust_config_tree::{build_config_figment, load_config_from_figment};
-
-#[derive(Debug, Serialize)]
-struct CliOverrides {
-    #[serde(skip_serializing_if = "Option::is_none")]
-    server: Option<CliServerOverrides>,
-}
-
-#[derive(Debug, Serialize)]
-struct CliServerOverrides {
-    #[serde(skip_serializing_if = "Option::is_none")]
-    port: Option<u16>,
-}
-
-let cli_overrides = CliOverrides {
-    server: Some(CliServerOverrides { port: Some(9000) }),
+use clap::Parser;
+use rust_config_tree::{
+    ConfigSchema,
+    cli::ConfigOverrides,
+    config::{build_config_figment, load_config_from_figment},
 };
 
-let figment = build_config_figment::<AppConfig>("config.yaml")?
-    .merge(Serialized::defaults(cli_overrides));
+#[derive(Debug, Parser, ConfigOverrides)]
+struct Cli {
+    #[arg(long)]
+    config: Option<std::path::PathBuf>,
 
+    #[arg(long)]
+    #[config_override(path = "server.port")]
+    server_port: Option<u16>,
+
+    #[arg(long)]
+    #[config_override(path = "log.level")]
+    log_level: Option<String>,
+}
+
+let cli = Cli::parse();
+let figment = build_config_figment::<AppConfig>("config.yaml")?
+    .merge(cli.config_overrides()?);
 let config = load_config_from_figment::<AppConfig>(&figment)?;
 # let _ = config;
 # Ok::<(), Box<dyn std::error::Error + Send + Sync>>(())
 ```
 
-Con overrides de CLI fusionados de esta forma, la precedencia completa es:
+El atributo `#[config_override(path = "...")]` asigna cada flag CLI a una ruta
+de configuración punteada. Solo los flags proporcionados producen valores de
+sobreescritura; los flags omitidos desaparecen. El proveedor de sobreescritura
+se fusiona al final, por lo que los flags proporcionados anulan los valores
+de archivos y entorno:
 
 ```text
 command-line overrides

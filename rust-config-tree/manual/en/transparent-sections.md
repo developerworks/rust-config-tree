@@ -53,8 +53,7 @@ struct AppConfig {
 
 ### `transparent_array_section!` macro
 
-The macro generates `len`, `is_empty`, `as_slice`, `into_vec`, and
-`Deref`/`DerefMut` to `Vec<T>`. Each section struct can declare its own
+The macro generates `len`, `is_empty`, `as_slice`, and `From<SectionName> for Vec<T>`. Each section struct can declare its own
 `#[config(default = ...)]` template sample.
 
 ### Generic `ArraySection<T>`
@@ -150,7 +149,7 @@ The root template `config.example.yaml` includes `include: [children.yaml]`.
 config.children.len();
 config.children.is_empty();
 config.children.as_slice();
-let vec: Vec<ChildDeclaration> = config.children.into_vec();
+let vec: Vec<ChildDeclaration> = config.children.into();
 ```
 
 Both the macro and `ArraySection` expose this API surface.

@@ -38,7 +38,7 @@ und `ConfigSchema` implementieren, um das Include-Feld des Schemas offenzulegen.
 
 ```toml
 [dependencies]
-rust-config-tree = "0.1"
+rust-config-tree = "0.2"
 confique = { version = "0.4", features = ["yaml", "toml", "json5"] }
 figment = { version = "0.10", features = ["yaml", "toml", "json", "env"] }
 schemars = { version = "1", features = ["derive"] }
@@ -48,9 +48,37 @@ clap = { version = "4", features = ["derive"] }
 
 ## Konfigurationsschema
 
-Das Anwendungsschema besitzt das Include-Feld. `rust-config-tree` benoetigt nur
-einen kleinen Adapter, der Includes aus der zwischengeschalteten
-`confique`-Schicht extrahiert.
+Der einfachste Weg, das Schema anzubinden, ist die `ConfigSchema`-Ableitung
+neben `confique::Config`. Das Ableitungsmakro erwartet ein Feld namens
+`include` vom Typ `Vec<PathBuf>` mit einem `#[config(default = [])]`-Attribut:
+
+```rust
+use confique::Config;
+use schemars::JsonSchema;
+use rust_config_tree::ConfigSchema;
+
+#[derive(Debug, Config, JsonSchema, ConfigSchema)]
+struct AppConfig {
+    #[config(default = [])]
+    include: Vec<std::path::PathBuf>,
+
+    #[config(default = "paper")]
+    mode: String,
+
+    #[config(nested)]
+    #[schemars(extend("x-tree-split" = true))]
+    server: ServerConfig,
+}
+
+#[derive(Debug, Config, JsonSchema)]
+struct ServerConfig {
+    #[config(default = 8080)]
+    port: u16,
+}
+```
+
+Fuer Schemata mit einem anderen Include-Feldnamen oder einer benutzerdefinierten
+Include-Logik implementieren Sie das Trait manuell:
 
 ```rust
 use std::path::PathBuf;
@@ -58,6 +86,9 @@ use std::path::PathBuf;
 use confique::Config;
 use schemars::JsonSchema;
 use rust_config_tree::ConfigSchema;
+
+#[derive(Debug, Config, JsonSchema)]
+struct AppConfig {
 
 #[derive(Debug, Config, JsonSchema)]
 struct AppConfig {

@@ -41,7 +41,7 @@ implementant `ConfigSchema` pour exposer le champ d'inclusion du schema.
 
 ```toml
 [dependencies]
-rust-config-tree = "0.1"
+rust-config-tree = "0.2"
 confique = { version = "0.4", features = ["yaml", "toml", "json5"] }
 figment = { version = "0.10", features = ["yaml", "toml", "json", "env"] }
 schemars = { version = "1", features = ["derive"] }
@@ -51,9 +51,37 @@ clap = { version = "4", features = ["derive"] }
 
 ## Schema de configuration
 
-Le schema de votre application possede le champ d'inclusion. `rust-config-tree`
-n'a besoin que d'un petit adaptateur qui extrait les inclusions depuis la couche
-intermediaire `confique`.
+La facon la plus simple de brancher le schema est de deriver `ConfigSchema` en
+plus de `confique::Config`. La macro derivee attend un champ nomme `include` de
+type `Vec<PathBuf>` avec un attribut `#[config(default = [])]`:
+
+```rust
+use confique::Config;
+use schemars::JsonSchema;
+use rust_config_tree::ConfigSchema;
+
+#[derive(Debug, Config, JsonSchema, ConfigSchema)]
+struct AppConfig {
+    #[config(default = [])]
+    include: Vec<std::path::PathBuf>,
+
+    #[config(default = "paper")]
+    mode: String,
+
+    #[config(nested)]
+    #[schemars(extend("x-tree-split" = true))]
+    server: ServerConfig,
+}
+
+#[derive(Debug, Config, JsonSchema)]
+struct ServerConfig {
+    #[config(default = 8080)]
+    port: u16,
+}
+```
+
+Pour les schemas qui utilisent un nom de champ d'inclusion different ou une
+logique d'inclusion personnalisee, implementez le trait manuellement:
 
 ```rust
 use std::path::PathBuf;

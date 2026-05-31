@@ -36,7 +36,7 @@ include field を公開します。
 
 ```toml
 [dependencies]
-rust-config-tree = "0.1"
+rust-config-tree = "0.2"
 confique = { version = "0.4", features = ["yaml", "toml", "json5"] }
 figment = { version = "0.10", features = ["yaml", "toml", "json", "env"] }
 schemars = { version = "1", features = ["derive"] }
@@ -46,12 +46,44 @@ clap = { version = "4", features = ["derive"] }
 
 ## Configuration Schema
 
-include field はアプリケーション側の schema が所有します。
-`rust-config-tree` は、中間の `confique` layer から include を取り出す小さな
-adapter だけを必要とします。
+schema を結び付ける最も簡単な方法は、`confique::Config` と一緒に
+`ConfigSchema` を derive することです。derive マクロは `#[config(default = [])]`
+属性を持つ `Vec<PathBuf>` 型の `include` フィールドを期待します。
+
+```rust
+use confique::Config;
+use schemars::JsonSchema;
+use rust_config_tree::ConfigSchema;
+
+#[derive(Debug, Config, JsonSchema, ConfigSchema)]
+struct AppConfig {
+    #[config(default = [])]
+    include: Vec<std::path::PathBuf>,
+
+    #[config(default = "paper")]
+    mode: String,
+
+    #[config(nested)]
+    #[schemars(extend("x-tree-split" = true))]
+    server: ServerConfig,
+}
+
+#[derive(Debug, Config, JsonSchema)]
+struct ServerConfig {
+    #[config(default = 8080)]
+    port: u16,
+}
+```
+
+異なる include フィールド名やカスタム include ロジックを使用する schema の
+場合は、手動で trait を実装してください：
 
 ```rust
 use std::path::PathBuf;
+
+use confique::Config;
+use schemars::JsonSchema;
+use rust_config_tree::ConfigSchema;
 
 use confique::Config;
 use schemars::JsonSchema;

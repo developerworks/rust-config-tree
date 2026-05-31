@@ -35,7 +35,7 @@ implementera `ConfigSchema` for att exponera schemats include-falt.
 
 ```toml
 [dependencies]
-rust-config-tree = "0.1"
+rust-config-tree = "0.2"
 confique = { version = "0.4", features = ["yaml", "toml", "json5"] }
 figment = { version = "0.10", features = ["yaml", "toml", "json", "env"] }
 schemars = { version = "1", features = ["derive"] }
@@ -45,8 +45,34 @@ clap = { version = "4", features = ["derive"] }
 
 ## Konfigurationsschema
 
-Ditt programschema ager include-faltet. `rust-config-tree` behover bara en
-liten adapter som hamtar includes fran det mellanliggande `confique`-lagret.
+Det enklaste sattet att koppla in schemat ar att derivera `ConfigSchema` tillsammans med `confique::Config`. Derive-makrot forvantar ett falt som heter `include` av typen `Vec<PathBuf>` med ett `#[config(default = [])]`-attribut:
+
+```rust
+use confique::Config;
+use schemars::JsonSchema;
+use rust_config_tree::ConfigSchema;
+
+#[derive(Debug, Config, JsonSchema, ConfigSchema)]
+struct AppConfig {
+    #[config(default = [])]
+    include: Vec<std::path::PathBuf>,
+
+    #[config(default = "paper")]
+    mode: String,
+
+    #[config(nested)]
+    #[schemars(extend("x-tree-split" = true))]
+    server: ServerConfig,
+}
+
+#[derive(Debug, Config, JsonSchema)]
+struct ServerConfig {
+    #[config(default = 8080)]
+    port: u16,
+}
+```
+
+For scheman som anvander ett annat include-faltsnamn eller anpassad include-logik, implementera traitet manuellt:
 
 ```rust
 use std::path::PathBuf;

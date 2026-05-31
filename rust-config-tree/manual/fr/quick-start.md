@@ -7,7 +7,7 @@ application :
 
 ```toml
 [dependencies]
-rust-config-tree = "0.1"
+rust-config-tree = "0.2"
 confique = { version = "0.4", features = ["yaml", "toml", "json5"] }
 figment = { version = "0.10", features = ["yaml", "toml", "json", "env"] }
 schemars = { version = "1", features = ["derive"] }
@@ -94,48 +94,46 @@ Les arguments de ligne de commande sont propres a chaque application, donc
 apres `build_config_figment` lorsque l'application possede des drapeaux de
 remplacement de configuration :
 
-Les noms de drapeaux CLI sont choisis par l'application. Ils ne sont pas
-automatiquement des chemins de configuration `a.b.c`. Preferez des drapeaux
-clap normaux comme `--server-port`, puis mappez-les dans une structure de
-remplacement imbriquee. La forme serialisee imbriquee controle la cle de
-configuration remplacee.
-
-Seules les valeurs representees dans le fournisseur `CliOverrides` de
-l'application remplacent la configuration. C'est utile pour les parametres
-modifies frequemment pour une seule execution sans modifier le fichier de
-configuration. Les valeurs stables doivent rester dans les fichiers de
-configuration.
+Les arguments de ligne de commande sont propres a chaque application, donc
+`load_config` ne les lit pas automatiquement. Utilisez la macro derivee
+`ConfigOverrides` pour construire un fournisseur de remplacement a partir des
+drapeaux CLI analyses :
 
 ```rust
-use figment::providers::Serialized;
-use serde::Serialize;
-use rust_config_tree::{build_config_figment, load_config_from_figment};
-
-#[derive(Debug, Serialize)]
-struct CliOverrides {
-    #[serde(skip_serializing_if = "Option::is_none")]
-    server: Option<CliServerOverrides>,
-}
-
-#[derive(Debug, Serialize)]
-struct CliServerOverrides {
-    #[serde(skip_serializing_if = "Option::is_none")]
-    port: Option<u16>,
-}
-
-let cli_overrides = CliOverrides {
-    server: Some(CliServerOverrides { port: Some(9000) }),
+use clap::Parser;
+use rust_config_tree::{
+    ConfigSchema,
+    cli::ConfigOverrides,
+    config::{build_config_figment, load_config_from_figment},
 };
 
-let figment = build_config_figment::<AppConfig>("config.yaml")?
-    .merge(Serialized::defaults(cli_overrides));
+#[derive(Debug, Parser, ConfigOverrides)]
+struct Cli {
+    #[arg(long)]
+    config: Option<std::path::PathBuf>,
 
+    #[arg(long)]
+    #[config_override(path = "server.port")]
+    server_port: Option<u16>,
+
+    #[arg(long)]
+    #[config_override(path = "log.level")]
+    log_level: Option<String>,
+}
+
+let cli = Cli::parse();
+let figment = build_config_figment::<AppConfig>("config.yaml")?
+    .merge(cli.config_overrides()?);
 let config = load_config_from_figment::<AppConfig>(&figment)?;
 # let _ = config;
 # Ok::<(), Box<dyn std::error::Error + Send + Sync>>(())
 ```
 
-Avec des remplacements CLI fusionnes ainsi, la priorite complete est :
+L'attribut `#[config_override(path = "...")]` mappe chaque drapeau CLI vers un
+chemin de configuration pointille. Seuls les drapeaux fournis produisent des
+valeurs de remplacement ; les drapeaux omis disparaissent. Le fournisseur de
+remplacement est fusionne en dernier, donc les drapeaux fournis remplacent les
+valeurs des fichiers et de l'environnement :
 
 ```text
 command-line overrides
@@ -143,4 +141,3 @@ command-line overrides
     > config files
       > confique code defaults
 ```
-

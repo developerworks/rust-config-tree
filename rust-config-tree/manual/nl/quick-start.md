@@ -6,7 +6,7 @@ Voeg de crate en de schema/runtime-bibliotheken toe die je toepassing gebruikt:
 
 ```toml
 [dependencies]
-rust-config-tree = "0.1"
+rust-config-tree = "0.2"
 confique = { version = "0.4", features = ["yaml", "toml", "json5"] }
 figment = { version = "0.10", features = ["yaml", "toml", "json", "env"] }
 schemars = { version = "1", features = ["derive"] }
@@ -91,46 +91,44 @@ Commandoregelargumenten zijn toepassingsspecifiek, dus `load_config` leest ze
 niet automatisch. Voeg CLI-overrides samen na `build_config_figment` wanneer de
 toepassing configuratie-overridevlaggen heeft:
 
-CLI-vlagnamen worden door de toepassing gekozen. Ze zijn niet automatisch
-`a.b.c`-configuratiepaden. Geef de voorkeur aan normale clap-vlaggen zoals
-`--server-port` en map ze daarna naar een geneste overridestructuur. De geneste
-geserialiseerde vorm bepaalt welke configuratiesleutel wordt overschreven.
-
-Alleen waarden die in de `CliOverrides`-provider van de toepassing zijn
-opgenomen, overschrijven configuratie. Dit is nuttig voor parameters die vaak
-voor een enkele run worden gewijzigd zonder het configuratiebestand aan te
-passen. Stabiele waarden horen in configuratiebestanden.
+CLI-vlagnamen worden door de toepassing gekozen. Gebruik de `ConfigOverrides`\
+derive-macro om een override-provider te bouwen van geparseerde CLI-vlaggen:
 
 ```rust
-use figment::providers::Serialized;
-use serde::Serialize;
-use rust_config_tree::{build_config_figment, load_config_from_figment};
-
-#[derive(Debug, Serialize)]
-struct CliOverrides {
-    #[serde(skip_serializing_if = "Option::is_none")]
-    server: Option<CliServerOverrides>,
-}
-
-#[derive(Debug, Serialize)]
-struct CliServerOverrides {
-    #[serde(skip_serializing_if = "Option::is_none")]
-    port: Option<u16>,
-}
-
-let cli_overrides = CliOverrides {
-    server: Some(CliServerOverrides { port: Some(9000) }),
+use clap::Parser;
+use rust_config_tree::{
+    ConfigSchema,
+    cli::ConfigOverrides,
+    config::{build_config_figment, load_config_from_figment},
 };
 
-let figment = build_config_figment::<AppConfig>("config.yaml")?
-    .merge(Serialized::defaults(cli_overrides));
+#[derive(Debug, Parser, ConfigOverrides)]
+struct Cli {
+    #[arg(long)]
+    config: Option<std::path::PathBuf>,
 
+    #[arg(long)]
+    #[config_override(path = "server.port")]
+    server_port: Option<u16>,
+
+    #[arg(long)]
+    #[config_override(path = "log.level")]
+    log_level: Option<String>,
+}
+
+let cli = Cli::parse();
+let figment = build_config_figment::<AppConfig>("config.yaml")?
+    .merge(cli.config_overrides()?);
 let config = load_config_from_figment::<AppConfig>(&figment)?;
 # let _ = config;
 # Ok::<(), Box<dyn std::error::Error + Send + Sync>>(())
 ```
 
-Met CLI-overrides die zo worden samengevoegd, is de volledige prioriteit:
+Het `#[config_override(path = "...")]`-attribuut wijst elke CLI-vlag toe aan een
+puntgescheiden configuratiepad. Alleen opgegeven vlaggen produceren
+override-waarden; weggelaten vlaggen verdwijnen. De override-provider wordt
+als laatste samengevoegd, dus opgegeven vlaggen overschrijven bestands- en
+omgevingsvariabelen:
 
 ```text
 command-line overrides

@@ -6,7 +6,7 @@ Lisaa crate ja sovelluksen kayttamat skeema/runtime-kirjastot:
 
 ```toml
 [dependencies]
-rust-config-tree = "0.1"
+rust-config-tree = "0.2"
 confique = { version = "0.4", features = ["yaml", "toml", "json5"] }
 figment = { version = "0.10", features = ["yaml", "toml", "json", "env"] }
 schemars = { version = "1", features = ["derive"] }
@@ -84,42 +84,43 @@ environment variables
 
 Kun includet ladataan korkean tason APIlla, juuritiedostolla on korkein tiedostoprioriteetti. Sisallytetyt tiedostot antavat matalamman prioriteetin arvoja ja voivat toimia oletuksina tai osiokohtaisina tiedostoina.
 
-Komentoriviargumentit ovat sovelluskohtaisia, joten `load_config` ei lue niita automaattisesti. Yhdista CLI-ohitukset `build_config_figment`-funktion jalkeen, kun sovelluksella on konfiguraation ohituslippuja:
-
-CLI-lippujen nimet valitsee sovellus. Ne eivat ole automaattisesti `a.b.c`-konfiguraatiopolkuja. Suosi tavallisia clap-lippuja, kuten `--server-port`, ja mapita ne sisakkaiseen ohitusrakenteeseen. Sisakkainen serialisoitu muoto maarittaa ohitettavan konfiguraatioavaimen.
-
-Vain sovelluksen `CliOverrides`-providerissa esitetyt arvot ohittavat konfiguraation. Tama sopii parametreille, joita muutetaan usein yhden ajon ajaksi ilman konfiguraatiotiedoston muokkausta. Pysyvien arvojen tulisi pysya konfiguraatiotiedostoissa.
+Komentoriviargumentit ovat sovelluskohtaisia, joten `load_config` ei lue niita automaattisesti. Kayta `ConfigOverrides`-johdannais makroa ohitusproviderin rakentamiseen jasetetyista CLI-lipuista:
 
 ```rust
-use figment::providers::Serialized;
-use serde::Serialize;
-use rust_config_tree::{build_config_figment, load_config_from_figment};
-
-#[derive(Debug, Serialize)]
-struct CliOverrides {
-    #[serde(skip_serializing_if = "Option::is_none")]
-    server: Option<CliServerOverrides>,
-}
-
-#[derive(Debug, Serialize)]
-struct CliServerOverrides {
-    #[serde(skip_serializing_if = "Option::is_none")]
-    port: Option<u16>,
-}
-
-let cli_overrides = CliOverrides {
-    server: Some(CliServerOverrides { port: Some(9000) }),
+use clap::Parser;
+use rust_config_tree::{
+    ConfigSchema,
+    cli::ConfigOverrides,
+    config::{build_config_figment, load_config_from_figment},
 };
 
-let figment = build_config_figment::<AppConfig>("config.yaml")?
-    .merge(Serialized::defaults(cli_overrides));
+#[derive(Debug, Parser, ConfigOverrides)]
+struct Cli {
+    #[arg(long)]
+    config: Option<std::path::PathBuf>,
 
+    #[arg(long)]
+    #[config_override(path = "server.port")]
+    server_port: Option<u16>,
+
+    #[arg(long)]
+    #[config_override(path = "log.level")]
+    log_level: Option<String>,
+}
+
+let cli = Cli::parse();
+let figment = build_config_figment::<AppConfig>("config.yaml")?
+    .merge(cli.config_overrides()?);
 let config = load_config_from_figment::<AppConfig>(&figment)?;
 # let _ = config;
 # Ok::<(), Box<dyn std::error::Error + Send + Sync>>(())
 ```
 
-Kun CLI-ohitukset yhdistetaan talla tavalla, koko etusijajarjestys on:
+`#[config_override(path = "...")]`-attribuutti yhdistaa jokaisen CLI-lipun
+pisteelliseen konfiguraatiopolkuun. Vain annetut liput tuottavat
+ohitusarvoja; pois jaetetyt liput katoavat. Ohitusprovider yhdistetaan
+viimeiseksi, joten annetut liput ohittavat tiedosto- ja
+ymparistomuuttuja-arvot:
 
 ```text
 command-line overrides

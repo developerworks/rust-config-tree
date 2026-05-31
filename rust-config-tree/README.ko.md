@@ -34,7 +34,7 @@
 
 ```toml
 [dependencies]
-rust-config-tree = "0.1"
+rust-config-tree = "0.2"
 confique = { version = "0.4", features = ["yaml", "toml", "json5"] }
 figment = { version = "0.10", features = ["yaml", "toml", "json", "env"] }
 schemars = { version = "1", features = ["derive"] }
@@ -44,8 +44,37 @@ clap = { version = "4", features = ["derive"] }
 
 ## Configuration Schema
 
-애플리케이션 스키마가 include 필드를 소유합니다. `rust-config-tree`에는 중간
-`confique` 레이어에서 include를 추출하는 작은 어댑터만 필요합니다.
+스키마를 연결하는 가장 간단한 방법은 `confique::Config`와 함께 `ConfigSchema`를
+derive하는 것입니다. derive 매크로는 `#[config(default = [])]` 속성을 가진
+`Vec<PathBuf>` 타입의 `include` 필드를 기대합니다.
+
+```rust
+use confique::Config;
+use schemars::JsonSchema;
+use rust_config_tree::ConfigSchema;
+
+#[derive(Debug, Config, JsonSchema, ConfigSchema)]
+struct AppConfig {
+    #[config(default = [])]
+    include: Vec<std::path::PathBuf>,
+
+    #[config(default = "paper")]
+    mode: String,
+
+    #[config(nested)]
+    #[schemars(extend("x-tree-split" = true))]
+    server: ServerConfig,
+}
+
+#[derive(Debug, Config, JsonSchema)]
+struct ServerConfig {
+    #[config(default = 8080)]
+    port: u16,
+}
+```
+
+다른 include 필드 이름이나 사용자 정의 include 로직을 사용하는 스키마의 경우,
+trait을 수동으로 구현하세요:
 
 ```rust
 use std::path::PathBuf;

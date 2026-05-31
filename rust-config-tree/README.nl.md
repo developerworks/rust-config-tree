@@ -38,7 +38,7 @@ maken.
 
 ```toml
 [dependencies]
-rust-config-tree = "0.1"
+rust-config-tree = "0.2"
 confique = { version = "0.4", features = ["yaml", "toml", "json5"] }
 figment = { version = "0.10", features = ["yaml", "toml", "json", "env"] }
 schemars = { version = "1", features = ["derive"] }
@@ -48,9 +48,37 @@ clap = { version = "4", features = ["derive"] }
 
 ## Configuratieschema
 
-Het toepassingsschema bezit het include-veld. `rust-config-tree` heeft alleen
-een kleine adapter nodig die includes uit de tussenliggende `confique`-laag
-haalt.
+De eenvoudigste manier om het schema aan te sluiten is door `ConfigSchema` af te
+leiden naast `confique::Config`. De derive-macro verwacht een veld genaamd
+`include` van het type `Vec<PathBuf>` met een `#[config(default = [])]`-attribuut:
+
+```rust
+use confique::Config;
+use schemars::JsonSchema;
+use rust_config_tree::ConfigSchema;
+
+#[derive(Debug, Config, JsonSchema, ConfigSchema)]
+struct AppConfig {
+    #[config(default = [])]
+    include: Vec<std::path::PathBuf>,
+
+    #[config(default = "paper")]
+    mode: String,
+
+    #[config(nested)]
+    #[schemars(extend("x-tree-split" = true))]
+    server: ServerConfig,
+}
+
+#[derive(Debug, Config, JsonSchema)]
+struct ServerConfig {
+    #[config(default = 8080)]
+    port: u16,
+}
+```
+
+Voor schema's die een andere include-veldnaam of aangepaste include-logica
+gebruiken, implementeer de trait handmatig:
 
 ```rust
 use std::path::PathBuf;

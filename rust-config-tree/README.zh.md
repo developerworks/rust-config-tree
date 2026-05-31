@@ -48,9 +48,37 @@ clap = { version = "4", features = ["derive"] }
 
 ## 配置结构
 
-应用自己的 schema(结构定义) 持有 include(包含) 字段。`rust-config-tree` 只需要
-一个很小的 adapter(适配器)，用来从中间 `confique` layer(层) 提取
-include(包含)。
+关联 schema(结构定义) 最简单的方式是在 `confique::Config` 的同时派生
+`ConfigSchema`。派生宏期望一个名为 `include`、类型为 `Vec<PathBuf>`、带有
+`#[config(default = [])]` 属性的字段：
+
+```rust
+use confique::Config;
+use schemars::JsonSchema;
+use rust_config_tree::ConfigSchema;
+
+#[derive(Debug, Config, JsonSchema, ConfigSchema)]
+struct AppConfig {
+    #[config(default = [])]
+    include: Vec<std::path::PathBuf>,
+
+    #[config(default = "paper")]
+    mode: String,
+
+    #[config(nested)]
+    #[schemars(extend("x-tree-split" = true))]
+    server: ServerConfig,
+}
+
+#[derive(Debug, Config, JsonSchema)]
+struct ServerConfig {
+    #[config(default = 8080)]
+    port: u16,
+}
+```
+
+对于使用不同 include 字段名或自定义 include 逻辑的 schema(结构定义)，
+请手动实现 trait：
 
 ```rust
 use std::path::PathBuf;

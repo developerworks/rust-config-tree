@@ -36,7 +36,7 @@ implementing `ConfigSchema` to expose the schema's include field.
 
 ```toml
 [dependencies]
-rust-config-tree = "0.1"
+rust-config-tree = "0.2"
 confique = { version = "0.4", features = ["yaml", "toml", "json5"] }
 figment = { version = "0.10", features = ["yaml", "toml", "json", "env"] }
 schemars = { version = "1", features = ["derive"] }
@@ -46,8 +46,37 @@ clap = { version = "4", features = ["derive"] }
 
 ## Configuration Schema
 
-Your application schema owns the include field. `rust-config-tree` only needs a
-small adapter that extracts includes from the intermediate `confique` layer.
+The simplest way to wire up the schema is to derive `ConfigSchema` alongside
+`confique::Config`. The derive macro expects a field named `include` of type
+`Vec<PathBuf>` with a `#[config(default = [])]` attribute:
+
+```rust
+use confique::Config;
+use schemars::JsonSchema;
+use rust_config_tree::ConfigSchema;
+
+#[derive(Debug, Config, JsonSchema, ConfigSchema)]
+struct AppConfig {
+    #[config(default = [])]
+    include: Vec<std::path::PathBuf>,
+
+    #[config(default = "paper")]
+    mode: String,
+
+    #[config(nested)]
+    #[schemars(extend("x-tree-split" = true))]
+    server: ServerConfig,
+}
+
+#[derive(Debug, Config, JsonSchema)]
+struct ServerConfig {
+    #[config(default = 8080)]
+    port: u16,
+}
+```
+
+For schemas that use a different include field name or custom include logic,
+implement the trait manually:
 
 ```rust
 use std::path::PathBuf;
