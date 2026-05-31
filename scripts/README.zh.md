@@ -4,7 +4,7 @@
 
 请在仓库根目录运行脚本。
 
-在仓库根目录直接执行 `mdbook build` 会构建默认英文手册。构建 GitHub Pages
+在仓库根目录直接执行 `mdbook build rust-config-tree` 会构建默认英文手册。构建 GitHub Pages
 使用的全部语言站点时，使用 `scripts/publish-pages.sh`。
 
 ## `publish-pages.sh`

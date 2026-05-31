@@ -4,7 +4,7 @@
 
 Voer scripts uit vanuit de repositoryroot.
 
-`mdbook build` vanuit de repositoryroot bouwt de standaard Engelse handleiding.
+`mdbook build rust-config-tree` vanuit de repositoryroot bouwt de standaard Engelse handleiding.
 Gebruik `scripts/publish-pages.sh` om alle talen voor GitHub Pages te bouwen.
 
 ## `publish-pages.sh`

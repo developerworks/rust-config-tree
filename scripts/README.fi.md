@@ -4,7 +4,7 @@
 
 Aja skriptit repositorion juuresta.
 
-`mdbook build` repositorion juuressa rakentaa oletuksena englanninkielisen
+`mdbook build rust-config-tree` repositorion juuressa rakentaa oletuksena englanninkielisen
 oppaan. Kayta `scripts/publish-pages.sh`, kun rakennat kaikki GitHub Pagesin
 kieliversiot.
 

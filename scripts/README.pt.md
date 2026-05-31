@@ -4,7 +4,7 @@
 
 Execute scripts a partir da raiz do repositorio.
 
-`mdbook build` a partir da raiz do repositorio constroi o manual padrao em
+`mdbook build rust-config-tree` a partir da raiz do repositorio constroi o manual padrao em
 ingles. Use `scripts/publish-pages.sh` para construir todos os idiomas do
 GitHub Pages.
 

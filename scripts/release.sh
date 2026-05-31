@@ -12,6 +12,7 @@ set -euo pipefail
 # crate version.
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+ROOT_MANIFEST="${ROOT_DIR}/rust-config-tree/Cargo.toml"
 DRY_RUN=1
 WAIT_PAGES=1
 COMMIT_MESSAGE=""
@@ -82,7 +83,7 @@ done
 
 cd "${ROOT_DIR}"
 
-VERSION="$(sed -n 's/^version = "\(.*\)"/\1/p' Cargo.toml | head -n 1)"
+VERSION="$(sed -n 's/^version = "\(.*\)"/\1/p' "${ROOT_MANIFEST}" | head -n 1)"
 BRANCH="$(git_cmd branch --show-current)"
 
 if [[ -z "${COMMIT_MESSAGE}" ]]; then
@@ -97,8 +98,8 @@ fi
 scripts/publish-pages.sh
 scripts/publish-crate.sh --prepare-only --allow-dirty
 cargo fmt --check
-cargo clippy --all-targets --all-features -- -D warnings
-cargo test
+cargo clippy --workspace --all-targets --all-features -- -D warnings
+cargo test --workspace
 git_cmd diff --check
 
 if ((DRY_RUN)); then

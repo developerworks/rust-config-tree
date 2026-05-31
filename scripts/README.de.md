@@ -4,7 +4,7 @@
 
 Fuehre Skripte aus dem Repository-Root aus.
 
-`mdbook build` aus dem Repository-Root baut das englische Standardhandbuch.
+`mdbook build rust-config-tree` aus dem Repository-Root baut das englische Standardhandbuch.
 Fuer alle Sprachen der GitHub-Pages-Site verwende `scripts/publish-pages.sh`.
 
 ## `publish-pages.sh`

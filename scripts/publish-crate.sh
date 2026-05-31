@@ -6,8 +6,8 @@ set -euo pipefail
 # workspace checks and commit.
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-ROOT_MANIFEST="${ROOT_DIR}/Cargo.toml"
-MACROS_MANIFEST="${ROOT_DIR}/macros/Cargo.toml"
+ROOT_MANIFEST="${ROOT_DIR}/rust-config-tree/Cargo.toml"
+MACROS_MANIFEST="${ROOT_DIR}/rust-config-tree-macros/Cargo.toml"
 DRY_RUN=1
 ALLOW_DIRTY=0
 AUTO_BUMP=1
@@ -206,7 +206,7 @@ ensure_release_version() {
   while crate_version_exists "${name}" "${version}"; do
     if (( ! AUTO_BUMP )); then
       echo "crate ${name}@${version} already exists on crates.io" >&2
-      echo "bump package.version in Cargo.toml before publishing" >&2
+      echo "bump package.version in rust-config-tree/Cargo.toml before publishing" >&2
       exit 1
     fi
 
@@ -336,15 +336,15 @@ if ((PREPARE_ONLY)); then
 fi
 
 cargo fmt --check
-cargo clippy --all-targets --all-features -- -D warnings
-cargo test
+cargo clippy --workspace --all-targets --all-features -- -D warnings
+cargo test --workspace
 
 if has_macros_crate; then
   cargo package --list --manifest-path "${MACROS_MANIFEST}" $(dirty_flag) >/dev/null
 fi
 
 if ! has_macros_crate || ((MACROS_PUBLISHED)); then
-  cargo package --list $(dirty_flag) >/dev/null
+  cargo package --list --manifest-path "${ROOT_MANIFEST}" $(dirty_flag) >/dev/null
 fi
 
 if ((DRY_RUN)); then
@@ -355,7 +355,7 @@ if ((DRY_RUN)); then
 
   if ! has_macros_crate || ((MACROS_PUBLISHED)); then
     run_with_retry "${PUBLISH_ATTEMPTS}" "${PUBLISH_RETRY_DELAY}" \
-      cargo publish --dry-run $(dirty_flag)
+      cargo publish --manifest-path "${ROOT_MANIFEST}" --dry-run $(dirty_flag)
     echo "crate publish dry-run passed"
   else
     echo "macro crate publish dry-run passed"
@@ -369,7 +369,7 @@ else
     wait_for_crate_version "${MACROS_NAME}" "${MACROS_VERSION}"
   fi
 
-  cargo package --list $(dirty_flag) >/dev/null
+  cargo package --list --manifest-path "${ROOT_MANIFEST}" $(dirty_flag) >/dev/null
   run_with_retry "${PUBLISH_ATTEMPTS}" "${PUBLISH_RETRY_DELAY}" \
-    cargo publish $(dirty_flag)
+    cargo publish --manifest-path "${ROOT_MANIFEST}" $(dirty_flag)
 fi

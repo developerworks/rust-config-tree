@@ -1,0 +1,29 @@
+[package]
+name = "rust-config-tree"
+version = "0.2.5"
+edition = "2024"
+rust-version = "1.85"
+description = "Recursive include tree utilities for layered configuration files."
+documentation = "https://docs.rs/rust-config-tree"
+repository = "https://github.com/developerworks/rust-config-tree"
+license = "MIT OR Apache-2.0"
+readme = "README.md"
+keywords = ["config", "include", "tree", "recursive"]
+categories = ["config"]
+exclude = ["Cargo.lock"]
+
+[dependencies]
+clap = { version = "4.6.1", features = ["derive"] }
+clap_complete = "4.6.3"
+confique = { version = "0.4.0", features = ["json5", "toml", "yaml"] }
+dotenvy = "0.15.7"
+figment = { version = "0.10.19", features = ["env", "json", "toml", "yaml"] }
+rust-config-tree-macros = { version = "0.2.5", path = "../rust-config-tree-macros" }
+schemars = { version = "1", features = ["derive"] }
+serde_json = "1.0.149"
+serde_yaml = "0.9.34"
+tracing = "0.1.44"
+
+serde = { version = "1", features = ["derive"] }
+
+[dev-dependencies]

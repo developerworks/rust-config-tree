@@ -1,5 +1,6 @@
 /target
 /Cargo.lock
-/manual/*/book
-/manual/*/theme
-/macros/target
+/rust-config-tree/target
+/rust-config-tree/manual/*/book
+/rust-config-tree/manual/*/theme
+/rust-config-tree-macros/target

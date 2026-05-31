@@ -4,7 +4,7 @@
 
 Executez les scripts depuis la racine du depot.
 
-`mdbook build` depuis la racine du depot construit le manuel anglais par defaut.
+`mdbook build rust-config-tree` depuis la racine du depot construit le manuel anglais par defaut.
 Utilisez `scripts/publish-pages.sh` pour construire toutes les langues de
 GitHub Pages.
 

@@ -4,7 +4,7 @@
 
 Kor skript fran repository-roten.
 
-`mdbook build` fran repository-roten bygger den engelska standardmanualen.
+`mdbook build rust-config-tree` fran repository-roten bygger den engelska standardmanualen.
 Anvand `scripts/publish-pages.sh` for att bygga alla sprak for GitHub Pages.
 
 ## `publish-pages.sh`

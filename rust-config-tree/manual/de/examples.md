@@ -1,0 +1,23 @@
+# Beispiele
+
+[English](../en/examples.html) | [中文](../zh/examples.html) | [日本語](../ja/examples.html) | [한국어](../ko/examples.html) | [Français](../fr/examples.html) | [Deutsch](examples.html) | [Español](../es/examples.html) | [Português](../pt/examples.html) | [Svenska](../sv/examples.html) | [Suomi](../fi/examples.html) | [Nederlands](../nl/examples.html)
+
+Das Repository enthaelt ausfuehrbare Beispiele fuer das Laden von
+Konfigurationsbaeumen, CLI-Ueberschreibungen, eingebaute Konfigurationsbefehle,
+Vorlagenerzeugung und die untergeordnete Tree-API.
+
+Lies den Beispielindex des Repositorys:
+
+- [examples/README.md](https://github.com/developerworks/rust-config-tree/blob/main/rust-config-tree/examples/README.md)
+
+Fuehre Beispiele aus dem Repository-Root aus:
+
+```bash
+cargo run --example basic_loading
+cargo run --example cli_overrides -- --server-port 9000
+cargo run --example config_commands -- generate-template
+cargo run --example config_commands -- generate-schema
+cargo run --example config_commands -- validate-config
+cargo run --example generate_templates
+cargo run --example tree_api
+```

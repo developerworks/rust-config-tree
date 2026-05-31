@@ -5,6 +5,7 @@ set -euo pipefail
 # `target/mdbook`, then writes a language selector as the artifact root.
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+MANUAL_DIR="${ROOT_DIR}/rust-config-tree/manual"
 OUT_DIR="${ROOT_DIR}/target/mdbook"
 
 command -v mdbook >/dev/null 2>&1 || {
@@ -15,17 +16,17 @@ command -v mdbook >/dev/null 2>&1 || {
 rm -rf "${OUT_DIR}"
 mkdir -p "${OUT_DIR}"
 
-mdbook build -d "${OUT_DIR}/en" "${ROOT_DIR}/manual/en"
-mdbook build -d "${OUT_DIR}/zh" "${ROOT_DIR}/manual/zh"
-mdbook build -d "${OUT_DIR}/ja" "${ROOT_DIR}/manual/ja"
-mdbook build -d "${OUT_DIR}/ko" "${ROOT_DIR}/manual/ko"
-mdbook build -d "${OUT_DIR}/fr" "${ROOT_DIR}/manual/fr"
-mdbook build -d "${OUT_DIR}/de" "${ROOT_DIR}/manual/de"
-mdbook build -d "${OUT_DIR}/es" "${ROOT_DIR}/manual/es"
-mdbook build -d "${OUT_DIR}/pt" "${ROOT_DIR}/manual/pt"
-mdbook build -d "${OUT_DIR}/sv" "${ROOT_DIR}/manual/sv"
-mdbook build -d "${OUT_DIR}/fi" "${ROOT_DIR}/manual/fi"
-mdbook build -d "${OUT_DIR}/nl" "${ROOT_DIR}/manual/nl"
+mdbook build -d "${OUT_DIR}/en" "${MANUAL_DIR}/en"
+mdbook build -d "${OUT_DIR}/zh" "${MANUAL_DIR}/zh"
+mdbook build -d "${OUT_DIR}/ja" "${MANUAL_DIR}/ja"
+mdbook build -d "${OUT_DIR}/ko" "${MANUAL_DIR}/ko"
+mdbook build -d "${OUT_DIR}/fr" "${MANUAL_DIR}/fr"
+mdbook build -d "${OUT_DIR}/de" "${MANUAL_DIR}/de"
+mdbook build -d "${OUT_DIR}/es" "${MANUAL_DIR}/es"
+mdbook build -d "${OUT_DIR}/pt" "${MANUAL_DIR}/pt"
+mdbook build -d "${OUT_DIR}/sv" "${MANUAL_DIR}/sv"
+mdbook build -d "${OUT_DIR}/fi" "${MANUAL_DIR}/fi"
+mdbook build -d "${OUT_DIR}/nl" "${MANUAL_DIR}/nl"
 
 cat >"${OUT_DIR}/index.html" <<'HTML'
 <!doctype html>
